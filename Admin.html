@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Admin Panel - Earning Live</title>
+    
+    <!-- Telegram WebApp Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-bg: #2c3e50;
+            --secondary-bg: #34495e;
+            --button-bg-action: #27ae60;
+            --button-bg-warn: #e67e22;
+            --text-color: #ecf0f1;
+            --input-bg: #2c3e50;
+            --border-color: #3498db;
+            --shadow-dark: rgba(0, 0, 0, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: var(--primary-bg);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .panel-card {
+            background-color: var(--secondary-bg);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow-dark);
+            border-left: 5px solid var(--border-color);
+        }
+
+        .panel-title {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1em;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+
+        .action-button {
+            width: 100%;
+            padding: 15px;
+            border-radius: 8px;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .action-button:active {
+            transform: scale(0.98);
+        }
+
+        #btn-update-balance {
+            background-color: var(--button-bg-action);
+        }
+
+        #btn-send-message {
+            background-color: var(--button-bg-warn);
+        }
+
+        #access-denied {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        #access-denied h1 {
+            color: #e74c3c;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="admin-panel" class="admin-container hidden">
+        <!-- Card 1: Update Balance -->
+        <div class="panel-card">
+            <h2 class="panel-title">Update User Balance (Log)</h2>
+            <form id="form-update-balance">
+                <div class="form-group">
+                    <label for="update-user-id">Target User ID</label>
+                    <input type="number" id="update-user-id" placeholder="e.g., 123456789" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-amount">Amount (Use +/-)</label>
+                    <input type="text" id="update-amount" placeholder="e.g., +500 or -500" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-reason">Reason (Optional)</label>
+                    <input type="text" id="update-reason" placeholder="e.g., Approved Deposit / Withdraw">
+                </div>
+                <button type="submit" id="btn-update-balance" class="action-button">Log Balance Update</button>
+            </form>
+        </div>
+
+        <!-- Card 2: Send Message -->
+        <div class="panel-card">
+            <h2 class="panel-title">Send Direct Message</h2>
+            <form id="form-send-message">
+                <div class="form-group">
+                    <label for="message-user-id">Target User ID</label>
+                    <input type="number" id="message-user-id" placeholder="e.g., 123456789" required>
+                </div>
+                <div class="form-group">
+                    <label for="message-text">Message</label>
+                    <textarea id="message-text" rows="4" placeholder="Write your message here..." required></textarea>
+                </div>
+                <button type="submit" id="btn-send-message" class="action-button">Send Message</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="access-denied" class="admin-container hidden">
+        <h1>🚫 Access Denied</h1>
+        <p>You do not have permission to view this page.</p>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- ADMIN CONFIGURATION ---
+    const config = {
+        // !!! IMPORTANT: Add your numeric Telegram User ID here
+        ADMIN_IDS: [5812860406], // Example: [11223344, 55667788]
+        BOT_TOKEN: '8030917316:AAE2gZ1ZF2i1EUbhUCyUytYXoWI9mCZ_mbk',
+        ADMIN_LOG_CHAT_ID: '@earninglive' // Channel/Group where logs will be sent
+    };
+
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const userInfo = tg.initDataUnsafe.user;
+    const adminPanel = document.getElementById('admin-panel');
+    const accessDenied = document.getElementById('access-denied');
+
+    // --- Security Check ---
+    if (!userInfo || !config.ADMIN_IDS.includes(userInfo.id)) {
+        accessDenied.classList.remove('hidden');
+        tg.BackButton.hide();
+        return; // Stop execution if not an admin
+    }
+    
+    // If admin, show the panel
+    adminPanel.classList.remove('hidden');
+    tg.BackButton.show();
+    tg.BackButton.onClick(() => {
+       tg.close();
+    });
+
+    // --- DOM Elements ---
+    const formUpdateBalance = document.getElementById('form-update-balance');
+    const formSendMessage = document.getElementById('form-send-message');
+    
+    // --- Telegram API Helper ---
+    const callTelegramApi = (method, params) => {
+        const url = `https://api.telegram.org/bot${config.BOT_TOKEN}/${method}`;
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(params)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.ok) {
+                throw new Error(data.description);
+            }
+            return data;
+        });
+    };
+
+    // --- Form Handlers ---
+    formUpdateBalance.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const targetUserId = document.getElementById('update-user-id').value;
+        const amount = document.getElementById('update-amount').value;
+        const reason = document.getElementById('update-reason').value || 'Not specified';
+        
+        if (!targetUserId || !amount) {
+            tg.showAlert('User ID and Amount are required.');
+            return;
+        }
+
+        const adminName = `${userInfo.first_name || ''} ${userInfo.last_name || ''}`.trim();
+        
+        const message = `
+🔧 *ADMIN ACTION: BALANCE UPDATE* 🔧
+
+*Admin:* \`${adminName}\` (ID: \`${userInfo.id}\`)
+*Target User ID:* \`${targetUserId}\`
+*Amount:* \`${amount}\` Taka
+*Reason:* ${reason}
+
+- - - - - - - - - - - - - - - -
+*Note:* This is a log entry. The user's balance is stored on their device and must be communicated or updated manually.
+        `;
+
+        callTelegramApi('sendMessage', {
+            chat_id: config.ADMIN_LOG_CHAT_ID,
+            text: message,
+            parse_mode: 'Markdown'
+        })
+        .then(() => {
+            tg.showPopup({
+                title: 'Success',
+                message: 'Balance update log has been sent to the admin channel.',
+                buttons: [{ type: 'ok' }]
+            });
+            formUpdateBalance.reset();
+        })
+        .catch(error => {
+            tg.showAlert(`Error: ${error.message}`);
+        });
+    });
+
+    formSendMessage.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const targetUserId = document.getElementById('message-user-id').value;
+        const messageText = document.getElementById('message-text').value;
+
+        if (!targetUserId || !messageText) {
+            tg.showAlert('User ID and Message are required.');
+            return;
+        }
+
+        callTelegramApi('sendMessage', {
+            chat_id: targetUserId,
+            text: messageText,
+            parse_mode: 'HTML' // Allows using <b>, <i>, <a> etc.
+        })
+        .then(() => {
+            tg.showPopup({
+                title: 'Success',
+                message: `Message sent successfully to User ID ${targetUserId}.`,
+                buttons: [{ type: 'ok' }]
+            });
+            formSendMessage.reset();
+        })
+        .catch(error => {
+            tg.showAlert(`Error sending message: ${error.message}`);
+        });
+    });
+});
+</script>
+
+</body>
+</html>
