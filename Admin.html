@@ -1,306 +1,1081 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - Earning Live</title>
-    
-    <!-- Telegram WebApp Script -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
         :root {
-            --primary-bg: #2c3e50;
-            --secondary-bg: #34495e;
-            --button-bg-action: #27ae60;
-            --button-bg-warn: #e67e22;
-            --text-color: #ecf0f1;
-            --input-bg: #2c3e50;
-            --border-color: #3498db;
-            --shadow-dark: rgba(0, 0, 0, 0.2);
+            --primary-bg: #1e293b;
+            --secondary-bg: #2c3e50;
+            --sidebar-bg: #111827;
+            --card-bg: #374151;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-blue: #3b82f6;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --border-color: #4b5563;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Hind Siliguri', sans-serif;
         }
 
         body {
-            background: var(--primary-bg);
-            color: var(--text-color);
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
             display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
         }
 
-        .admin-container {
-            width: 100%;
-            max-width: 500px;
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            padding: 20px 0;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            border-right: 1px solid var(--border-color);
         }
 
-        .hidden {
-            display: none !important;
-        }
-
-        .panel-card {
-            background-color: var(--secondary-bg);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px var(--shadow-dark);
-            border-left: 5px solid var(--border-color);
-        }
-
-        .panel-title {
-            font-size: 1.8em;
+        .sidebar-header {
+            padding: 0 20px 20px 20px;
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 20px;
             text-align: center;
-            color: var(--border-color);
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .form-group {
-            margin-bottom: 15px;
+        .sidebar-nav {
+            list-style: none;
+            flex-grow: 1;
+            margin-top: 20px;
         }
 
-        .form-group label {
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s, color 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-item a:hover {
+            background-color: var(--secondary-bg);
+            color: var(--text-primary);
+        }
+
+        .nav-item a.active {
+            background-color: var(--primary-bg);
+            color: var(--accent-blue);
+            border-left-color: var(--accent-blue);
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* --- Main Content --- */
+        .main-content {
+            margin-left: 260px;
+            flex-grow: 1;
+            padding: 30px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.9em;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 2px solid var(--border-color);
-            background-color: var(--input-bg);
-            color: var(--text-color);
-            font-size: 1em;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
-        }
-
-        .action-button {
-            width: 100%;
-            padding: 15px;
-            border-radius: 8px;
-            border: none;
-            color: var(--text-color);
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeIn 0.5s ease-in-out;
         }
         
-        .action-button:active {
-            transform: scale(0.98);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        #btn-update-balance {
-            background-color: var(--button-bg-action);
+        .page-header {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
         }
 
-        #btn-send-message {
-            background-color: var(--button-bg-warn);
+        /* --- Dashboard --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
 
-        #access-denied {
-            text-align: center;
-            padding: 40px 20px;
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid;
         }
+        .stat-card.blue { border-color: var(--accent-blue); }
+        .stat-card.green { border-color: var(--accent-green); }
+        .stat-card.red { border-color: var(--accent-red); }
+        .stat-card.yellow { border-color: var(--accent-yellow); }
 
-        #access-denied h1 {
-            color: #e74c3c;
-            font-size: 2em;
+        .stat-card-title {
+            font-size: 1rem;
+            color: var(--text-secondary);
             margin-bottom: 10px;
         }
+
+        .stat-card-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+
+        /* --- Tables and Lists --- */
+        .section-container {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .search-bar {
+            width: 300px;
+            padding: 10px;
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table thead {
+            background-color: var(--secondary-bg);
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: var(--secondary-bg);
+        }
+
+        .status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+        }
+        .status-pending { background-color: var(--accent-yellow); }
+        .status-completed { background-color: var(--accent-green); }
+        .status-rejected { background-color: var(--accent-red); }
+        .status-banned { background-color: var(--accent-red); color: white; }
+        .status-active { background-color: var(--accent-green); color: white; }
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.3s, background-color 0.3s;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .btn-primary { background-color: var(--accent-blue); color: white; }
+        .btn-success { background-color: var(--accent-green); color: white; }
+        .btn-danger { background-color: var(--accent-red); color: white; }
+        .btn-secondary { background-color: var(--text-secondary); color: var(--primary-bg); }
+        .btn-sm { padding: 5px 10px; font-size: 0.9rem; }
+        .action-buttons { display: flex; gap: 8px; }
+
+        /* --- Forms & Modals --- */
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--secondary-bg);
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title { font-size: 1.5rem; }
+        .close-btn {
+            color: var(--text-secondary);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
 
-    <div id="admin-panel" class="admin-container hidden">
-        <!-- Card 1: Update Balance -->
-        <div class="panel-card">
-            <h2 class="panel-title">Update User Balance (Log)</h2>
-            <form id="form-update-balance">
-                <div class="form-group">
-                    <label for="update-user-id">Target User ID</label>
-                    <input type="number" id="update-user-id" placeholder="e.g., 123456789" required>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <h1 class="sidebar-header">Admin Panel</h1>
+        <ul class="sidebar-nav">
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-target="dashboard">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                    <span>ড্যাশবোর্ড</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-target="user-management">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197m0 0A5.978 5.978 0 0112 13a5.979 5.979 0 012.121.303"></path></svg>
+                    <span>ব্যবহারকারী ম্যানেজমেন্ট</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-target="transaction-management">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <span>লেনদেন ম্যানেজমেন্ট</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-target="app-settings">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    <span>অ্যাপ সেটিংস</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-target="task-management">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <span>টাস্ক ম্যানেজমেন্ট</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-target="content-management">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <span>কনটেন্ট ম্যানেজমেন্ট</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-target="notifications">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                    <span>নোটিফিকেশন</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- Page 1: Dashboard -->
+        <div id="dashboard" class="page active">
+            <h2 class="page-header">ড্যাশবোর্ড</h2>
+            <div class="dashboard-grid">
+                <div class="stat-card blue">
+                    <p class="stat-card-title">মোট ব্যবহারকারী</p>
+                    <h3 class="stat-card-value" id="total-users">0</h3>
                 </div>
-                <div class="form-group">
-                    <label for="update-amount">Amount (Use +/-)</label>
-                    <input type="text" id="update-amount" placeholder="e.g., +500 or -500" required>
+                <div class="stat-card green">
+                    <p class="stat-card-title">মোট আয়</p>
+                    <h3 class="stat-card-value" id="total-earnings">৳0</h3>
                 </div>
-                <div class="form-group">
-                    <label for="update-reason">Reason (Optional)</label>
-                    <input type="text" id="update-reason" placeholder="e.g., Approved Deposit / Withdraw">
+                <div class="stat-card green">
+                    <p class="stat-card-title">মোট উইথড্র</p>
+                    <h3 class="stat-card-value" id="total-withdrawals">৳0</h3>
                 </div>
-                <button type="submit" id="btn-update-balance" class="action-button">Log Balance Update</button>
-            </form>
+                <div class="stat-card yellow">
+                    <p class="stat-card-title">পেন্ডিং উইথড্র</p>
+                    <h3 class="stat-card-value" id="pending-withdrawals">0 (৳0)</h3>
+                </div>
+                <div class="stat-card red">
+                    <p class="stat-card-title">পেন্ডিং ডিপোজিট</p>
+                    <h3 class="stat-card-value" id="pending-deposits">0</h3>
+                </div>
+                <div class="stat-card blue">
+                    <p class="stat-card-title">আজকের নতুন ব্যবহারকারী</p>
+                    <h3 class="stat-card-value" id="today-new-users">0</h3>
+                </div>
+            </div>
         </div>
 
-        <!-- Card 2: Send Message -->
-        <div class="panel-card">
-            <h2 class="panel-title">Send Direct Message</h2>
-            <form id="form-send-message">
+        <!-- Page 2: User Management -->
+        <div id="user-management" class="page">
+            <h2 class="page-header">ব্যবহারকারী ম্যানেজমেন্ট</h2>
+            <div class="section-container">
+                <div class="section-header">
+                    <h3 class="section-title">সকল ব্যবহারকারীর তালিকা</h3>
+                    <input type="text" id="user-search" class="search-bar" placeholder="নাম বা আইডি দিয়ে খুঁজুন...">
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>নাম</th>
+                            <th>ইউজার আইডি</th>
+                            <th>জয়েন তারিখ</th>
+                            <th>ব্যালেন্স</th>
+                            <th>স্ট্যাটাস</th>
+                            <th>অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list-table">
+                        <!-- User data will be inserted here by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Page 3: Transaction Management -->
+        <div id="transaction-management" class="page">
+            <h2 class="page-header">লেনদেন ম্যানেজমেন্ট</h2>
+
+            <div class="section-container">
+                <h3 class="section-title">পেন্ডিং উইথড্র রিকোয়েস্ট</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ব্যবহারকারী</th>
+                            <th>পরিমাণ</th>
+                            <th>মেথড</th>
+                            <th>নম্বর</th>
+                            <th>তারিখ</th>
+                            <th>অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawal-requests-table">
+                        <!-- Withdrawal requests will be inserted here by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-container">
+                <h3 class="section-title">পেন্ডিং ডিপোজিট ভেরিফিকেশন</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ব্যবহারকারী</th>
+                            <th>পরিমাণ</th>
+                            <th>মেথড</th>
+                            <th>TRX ID</th>
+                            <th>তারিখ</th>
+                            <th>অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deposit-verifications-table">
+                       <!-- Deposit verifications will be inserted here by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-container">
+                <h3 class="section-title">সকল লেনদেনের ইতিহাস</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ট্রান্সেকশন আইডি</th>
+                            <th>ব্যবহারকারী</th>
+                            <th>টাইপ</th>
+                            <th>পরিমাণ</th>
+                            <th>স্ট্যাটাস</th>
+                            <th>তারিখ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-transactions-table">
+                        <!-- All transactions will be inserted here by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Page 4: App Settings -->
+        <div id="app-settings" class="page">
+            <h2 class="page-header">অ্যাপ কনফিগারেশন / সেটিংস</h2>
+            <div class="section-container">
+                 <h3 class="section-title">সাধারণ সেটিংস</h3>
+                 <div class="form-group">
+                     <label for="admin-channel-link">অ্যাডমিন চ্যানেল লিঙ্ক</label>
+                     <input type="text" id="admin-channel-link">
+                 </div>
+                 <div class="form-group">
+                     <label for="live-stream-link">লাইভ স্ট্রিম লিঙ্ক</label>
+                     <input type="text" id="live-stream-link">
+                 </div>
+                 <div class="form-group">
+                    <label for="live-stream-status">লাইভ স্ট্রিম স্ট্যাটাস</label>
+                    <select id="live-stream-status">
+                        <option value="Live">Live</option>
+                        <option value="Offline">Offline</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-container">
+                <h3 class="section-title">আর্নিং সেটিংস</h3>
                 <div class="form-group">
-                    <label for="message-user-id">Target User ID</label>
-                    <input type="number" id="message-user-id" placeholder="e.g., 123456789" required>
+                    <label for="daily-task-reward">ডেইলি টাস্ক রিওয়ার্ড (৳)</label>
+                    <input type="number" id="daily-task-reward">
                 </div>
                 <div class="form-group">
-                    <label for="message-text">Message</label>
-                    <textarea id="message-text" rows="4" placeholder="Write your message here..." required></textarea>
+                    <label for="watch-ad-reward">অ্যাড দেখার রিওয়ার্ড (৳)</label>
+                    <input type="number" id="watch-ad-reward">
                 </div>
-                <button type="submit" id="btn-send-message" class="action-button">Send Message</button>
+                <div class="form-group">
+                    <label for="social-task-reward">সোশ্যাল টাস্ক রিওয়ার্ড (৳)</label>
+                    <input type="number" id="social-task-reward">
+                </div>
+            </div>
+
+            <div class="section-container">
+                <h3 class="section-title">স্পিন হুইল সেটিংস (পুরস্কারগুলো কমা দিয়ে লিখুন)</h3>
+                <div class="form-group">
+                    <label for="wheel-prizes">WHEEL_PRIZES</label>
+                    <input type="text" id="wheel-prizes">
+                </div>
+            </div>
+
+            <div class="section-container">
+                 <h3 class="section-title">উইথড্র/ডিপোজিট সেটিংস</h3>
+                 <div class="form-group">
+                     <label for="min-withdraw">ন্যূনতম উইথড্র পরিমাণ (৳)</label>
+                     <input type="number" id="min-withdraw">
+                 </div>
+                 <div class="form-group">
+                     <label for="deposit-number">ডিপোজিটের জন্য পেমেন্ট নম্বর</label>
+                     <input type="text" id="deposit-number">
+                 </div>
+            </div>
+
+            <button class="btn btn-primary" id="save-settings-btn">সেটিংস সেভ করুন</button>
+        </div>
+
+        <!-- Page 5: Task Management -->
+        <div id="task-management" class="page">
+            <h2 class="page-header">টাস্ক ম্যানেজমেন্ট</h2>
+            <div class="section-container">
+                <div class="section-header">
+                    <h3 class="section-title">সোশ্যাল টাস্কের তালিকা</h3>
+                    <button class="btn btn-primary" id="add-new-task-btn">নতুন টাস্ক যোগ করুন</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>আইকন</th>
+                            <th>টাস্কের নাম</th>
+                            <th>URL</th>
+                            <th>অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="social-tasks-table">
+                        <!-- Social tasks will be inserted here by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Page 6: Content Management -->
+        <div id="content-management" class="page">
+            <h2 class="page-header">কনটেন্ট ম্যানেজমেন্ট</h2>
+            <div class="section-container">
+                <div class="section-header">
+                    <h3 class="section-title">ডেইলি উইনার লিস্ট</h3>
+                     <button class="btn btn-primary" id="add-new-winner-btn">নতুন বিজয়ী যোগ করুন</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>বিজয়ীর নাম</th>
+                            <th>পুরস্কারের পরিমাণ (৳)</th>
+                            <th>অ্যাকশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="daily-winners-table">
+                        <!-- Daily winners will be inserted here by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Page 7: Notifications -->
+        <div id="notifications" class="page">
+            <h2 class="page-header">নোটিফিকেশন</h2>
+            <div class="section-container">
+                <h3 class="section-title">ব্রডকাস্ট মেসেজ</h3>
+                <p>এই বার্তাটি আপনার নির্ধারিত টেলিগ্রাম চ্যানেলে পাঠানো হবে।</p>
+                <div class="form-group">
+                    <label for="broadcast-message">আপনার বার্তা লিখুন:</label>
+                    <textarea id="broadcast-message" placeholder="সকল ব্যবহারকারীদের জন্য একটি গুরুত্বপূর্ণ নোটিশ..."></textarea>
+                </div>
+                <button class="btn btn-primary" id="send-broadcast-btn">বার্তা পাঠান</button>
+            </div>
+        </div>
+
+    </main>
+    
+    <!-- Modals -->
+    <div id="user-details-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">ব্যবহারকারীর বিবরণ</h3>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div id="user-modal-body">
+                <!-- User details will be populated here by JS -->
+            </div>
+        </div>
+    </div>
+    
+    <div id="task-form-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="task-modal-title">নতুন টাস্ক</h3>
+                <span class="close-btn">&times;</span>
+            </div>
+            <form id="task-form">
+                <input type="hidden" id="task-id">
+                <div class="form-group">
+                    <label for="task-name">টাস্কের নাম</label>
+                    <input type="text" id="task-name" placeholder="e.g., Follow on TikTok" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-url">URL</label>
+                    <input type="url" id="task-url" placeholder="https://tiktok.com/..." required>
+                </div>
+                <div class="form-group">
+                    <label for="task-icon">আইকন (SVG কোড বা Image URL)</label>
+                    <input type="text" id="task-icon" placeholder="<svg>...</svg> or https://.../icon.png">
+                </div>
+                <button type="submit" class="btn btn-primary">সেভ করুন</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="winner-form-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="winner-modal-title">নতুন বিজয়ী</h3>
+                <span class="close-btn">&times;</span>
+            </div>
+            <form id="winner-form">
+                <input type="hidden" id="winner-id">
+                <div class="form-group">
+                    <label for="winner-name">বিজয়ীর নাম</label>
+                    <input type="text" id="winner-name" placeholder="A****l H." required>
+                </div>
+                <div class="form-group">
+                    <label for="winner-prize">পুরস্কারের পরিমাণ (৳)</label>
+                    <input type="number" id="winner-prize" placeholder="500" required>
+                </div>
+                <button type="submit" class="btn btn-primary">সেভ করুন</button>
             </form>
         </div>
     </div>
 
-    <div id="access-denied" class="admin-container hidden">
-        <h1>🚫 Access Denied</h1>
-        <p>You do not have permission to view this page.</p>
-    </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // --- ADMIN CONFIGURATION ---
-    const config = {
-        // !!! IMPORTANT: Add your numeric Telegram User ID here
-        ADMIN_IDS: [5812860406], // Example: [11223344, 55667788]
-        BOT_TOKEN: '8030917316:AAE2gZ1ZF2i1EUbhUCyUytYXoWI9mCZ_mbk',
-        ADMIN_LOG_CHAT_ID: '@earninglive' // Channel/Group where logs will be sent
-    };
 
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
+    // --- START: TELEGRAM API CONFIGURATION ---
+    // সতর্কতা: এই টোকেনটি পাবলিকলি শেয়ার করবেন না। এটি ডেমোর জন্য ব্যবহার করা হচ্ছে।
+    // আপনার আসল টোকেন এখানে দিন।
+    const BOT_TOKEN = '8030917316:AAE2gZ1ZF2i1EUbhUCyUytYXoWI9mCZ_mbk';
+    const CHANNEL_ID = '@earninglive'; // আপনার চ্যানেল আইডি
 
-    const userInfo = tg.initDataUnsafe.user;
-    const adminPanel = document.getElementById('admin-panel');
-    const accessDenied = document.getElementById('access-denied');
+    /**
+     * টেলিগ্রাম চ্যানেলে মেসেজ পাঠানোর জন্য ফাংশন
+     * @param {string} chatId - টেলিগ্রাম চ্যানেল বা ইউজারের আইডি
+     * @param {string} message - পাঠানোর জন্য মেসেজ
+     * @returns {Promise<boolean>} - মেসেজ পাঠানো সফল হলে true, অন্যথায় false
+     */
+    async function sendTelegramMessage(chatId, message) {
+        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+        
+        // টেলিগ্রামের জন্য কিছু বেসিক HTML ট্যাগ সাপোর্ট করে (<b>, <i>, <a>, <code>, <pre>)
+        // আপনি চাইলে মেসেজে এগুলো ব্যবহার করতে পারেন।
+        const payload = {
+            chat_id: chatId,
+            text: message,
+            parse_mode: 'HTML' 
+        };
 
-    // --- Security Check ---
-    if (!userInfo || !config.ADMIN_IDS.includes(userInfo.id)) {
-        accessDenied.classList.remove('hidden');
-        tg.BackButton.hide();
-        return; // Stop execution if not an admin
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.ok) {
+                console.log('Message sent successfully:', data);
+                return true;
+            } else {
+                console.error('Telegram API Error:', data);
+                alert(`টেলিগ্রামে বার্তা পাঠাতে সমস্যা হয়েছে: ${data.description}`);
+                return false;
+            }
+        } catch (error) {
+            console.error('Fetch Error:', error);
+            alert('নেটওয়ার্ক সমস্যা। বার্তা পাঠানো যায়নি। অনুগ্রহ করে আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন।');
+            return false;
+        }
     }
+    // --- END: TELEGRAM API CONFIGURATION ---
+
+
+    // --- MOCK DATA (এগুলো আপনার ডাটাবেস থেকে আসবে) ---
+    let mockUsers = [
+        { id: 12345, name: 'আলমগীর হোসেন', joinDate: '2024-05-20', balance: 1250.50, totalEarnings: 2500, referrals: 15, referralCommission: 350, isBanned: false },
+        { id: 67890, name: 'সুমন আহমেদ', joinDate: '2024-05-21', balance: 350.00, totalEarnings: 500, referrals: 3, referralCommission: 50, isBanned: false },
+        { id: 11223, name: 'রিয়া ইসলাম', joinDate: '2024-05-18', balance: 5800.75, totalEarnings: 10000, referrals: 50, referralCommission: 1200, isBanned: true },
+        { id: 44556, name: 'নাসরিন সুলতানা', joinDate: '2024-05-22', balance: 25.00, totalEarnings: 150, referrals: 0, referralCommission: 0, isBanned: false },
+    ];
+
+    let mockTransactions = [
+        { id: 'txn_01', userId: 12345, type: 'withdraw', amount: 500, method: 'Bkash', details: '01700000000', date: '2024-05-22', status: 'pending' },
+        { id: 'txn_02', userId: 67890, type: 'withdraw', amount: 200, method: 'Nogod', details: '01800000000', date: '2024-05-21', status: 'completed' },
+        { id: 'txn_03', userId: 11223, type: 'deposit', amount: 1000, method: 'Bkash', details: 'TRX123ABC456', date: '2024-05-22', status: 'pending' },
+        { id: 'txn_04', userId: 67890, type: 'deposit', amount: 500, method: 'Nogod', details: 'TRX789XYZ123', date: '2024-05-20', status: 'completed' },
+        { id: 'txn_05', userId: 44556, type: 'withdraw', amount: 100, method: 'Bkash', details: '01900000000', date: '2024-05-22', status: 'rejected' },
+    ];
     
-    // If admin, show the panel
-    adminPanel.classList.remove('hidden');
-    tg.BackButton.show();
-    tg.BackButton.onClick(() => {
-       tg.close();
-    });
+    let mockSocialTasks = [
+        { id: 1, name: 'Follow on Facebook', url: 'https://facebook.com/...', icon: 'FB' },
+        { id: 2, name: 'Subscribe on YouTube', url: 'https://youtube.com/...', icon: 'YT' },
+        { id: 3, name: 'Join Telegram Channel', url: 'https://t.me/...', icon: 'TG' },
+    ];
+    
+    let mockDailyWinners = [
+        { id: 1, name: 'A****l H.', prize: 700 },
+        { id: 2, name: 'R****l H.', prize: 500 },
+    ];
+
+    let mockConfig = {
+        ADMIN_CHANNEL_LINK: 'https://t.me/LearnerAlom',
+        WINNERS_LIVE_STREAM: { url: 'https://otieu.com/4/9276685', status: 'Live' },
+        REWARDS: { daily: 1, ad: 0.5, social: 5 },
+        WHEEL_PRIZES: [0.5, 1, 5, 0.5, 10, 0.5, 1, 0.5, 2, 0.5, 20, 0.5],
+        WITHDRAW: { min: 500, depositNumber: '01749666991' }
+    };
 
     // --- DOM Elements ---
-    const formUpdateBalance = document.getElementById('form-update-balance');
-    const formSendMessage = document.getElementById('form-send-message');
+    const navLinks = document.querySelectorAll('.nav-link');
+    const pages = document.querySelectorAll('.page');
+
+    // --- Page Switching Logic ---
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.dataset.target;
+
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(targetId).classList.add('active');
+
+            navLinks.forEach(nav => nav.classList.remove('active'));
+            link.classList.add('active');
+        });
+    });
+
+    // --- Rendering Functions ---
+
+    function renderDashboard() {
+        document.getElementById('total-users').textContent = mockUsers.length;
+        document.getElementById('today-new-users').textContent = mockUsers.filter(u => u.joinDate === '2024-05-22').length;
+        const totalEarnings = mockUsers.reduce((sum, user) => sum + user.totalEarnings, 0);
+        document.getElementById('total-earnings').textContent = `৳${totalEarnings.toFixed(2)}`;
+        const completedWithdrawals = mockTransactions.filter(t => t.type === 'withdraw' && t.status === 'completed');
+        const totalWithdrawalsAmount = completedWithdrawals.reduce((sum, t) => sum + t.amount, 0);
+        document.getElementById('total-withdrawals').textContent = `৳${totalWithdrawalsAmount.toFixed(2)}`;
+        const pendingWithdrawals = mockTransactions.filter(t => t.type === 'withdraw' && t.status === 'pending');
+        const pendingWithdrawalsAmount = pendingWithdrawals.reduce((sum, t) => sum + t.amount, 0);
+        document.getElementById('pending-withdrawals').textContent = `${pendingWithdrawals.length} (৳${pendingWithdrawalsAmount.toFixed(2)})`;
+        const pendingDeposits = mockTransactions.filter(t => t.type === 'deposit' && t.status === 'pending');
+        document.getElementById('pending-deposits').textContent = pendingDeposits.length;
+    }
     
-    // --- Telegram API Helper ---
-    const callTelegramApi = (method, params) => {
-        const url = `https://api.telegram.org/bot${config.BOT_TOKEN}/${method}`;
-        return fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(params)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.ok) {
-                throw new Error(data.description);
+    function renderUserList(filteredUsers = mockUsers) {
+        const userTable = document.getElementById('user-list-table');
+        userTable.innerHTML = '';
+        filteredUsers.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${user.name}</td>
+                <td>${user.id}</td>
+                <td>${user.joinDate}</td>
+                <td>৳${user.balance.toFixed(2)}</td>
+                <td><span class="status ${user.isBanned ? 'status-banned' : 'status-active'}">${user.isBanned ? 'Banned' : 'Active'}</span></td>
+                <td class="action-buttons">
+                    <button class="btn btn-primary btn-sm view-user-btn" data-userid="${user.id}">View</button>
+                    <button class="btn ${user.isBanned ? 'btn-success' : 'btn-danger'} btn-sm ban-user-btn" data-userid="${user.id}">${user.isBanned ? 'Unban' : 'Ban'}</button>
+                </td>
+            `;
+            userTable.appendChild(row);
+        });
+    }
+
+    function renderTransactions() {
+        const withdrawalTable = document.getElementById('withdrawal-requests-table');
+        const depositTable = document.getElementById('deposit-verifications-table');
+        const allTransactionsTable = document.getElementById('all-transactions-table');
+
+        withdrawalTable.innerHTML = '';
+        depositTable.innerHTML = '';
+        allTransactionsTable.innerHTML = '';
+
+        mockTransactions.forEach(t => {
+            const user = mockUsers.find(u => u.id === t.userId);
+            if (!user) return;
+            
+            const allRow = document.createElement('tr');
+            allRow.innerHTML = `
+                <td>${t.id}</td>
+                <td>${user.name} (${user.id})</td>
+                <td>${t.type.charAt(0).toUpperCase() + t.type.slice(1)}</td>
+                <td>৳${t.amount.toFixed(2)}</td>
+                <td><span class="status status-${t.status}">${t.status}</span></td>
+                <td>${t.date}</td>
+            `;
+            allTransactionsTable.appendChild(allRow);
+
+            if (t.status !== 'pending') return;
+
+            if (t.type === 'withdraw') {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.name} (${user.id})</td>
+                    <td>৳${t.amount.toFixed(2)}</td>
+                    <td>${t.method}</td>
+                    <td>${t.details}</td>
+                    <td>${t.date}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-success btn-sm approve-withdraw-btn" data-txnid="${t.id}">Approve</button>
+                        <button class="btn btn-danger btn-sm reject-withdraw-btn" data-txnid="${t.id}">Reject</button>
+                    </td>
+                `;
+                withdrawalTable.appendChild(row);
+            } else if (t.type === 'deposit') {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.name} (${user.id})</td>
+                    <td>৳${t.amount.toFixed(2)}</td>
+                    <td>${t.method}</td>
+                    <td>${t.details}</td>
+                    <td>${t.date}</td>
+                    <td class="action-buttons">
+                        <button class="btn btn-success btn-sm confirm-deposit-btn" data-txnid="${t.id}">Confirm</button>
+                    </td>
+                `;
+                depositTable.appendChild(row);
             }
-            return data;
         });
-    };
+    }
 
-    // --- Form Handlers ---
-    formUpdateBalance.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const targetUserId = document.getElementById('update-user-id').value;
-        const amount = document.getElementById('update-amount').value;
-        const reason = document.getElementById('update-reason').value || 'Not specified';
+    function renderSettings() {
+        document.getElementById('admin-channel-link').value = mockConfig.ADMIN_CHANNEL_LINK;
+        document.getElementById('live-stream-link').value = mockConfig.WINNERS_LIVE_STREAM.url;
+        document.getElementById('live-stream-status').value = mockConfig.WINNERS_LIVE_STREAM.status;
+        document.getElementById('daily-task-reward').value = mockConfig.REWARDS.daily;
+        document.getElementById('watch-ad-reward').value = mockConfig.REWARDS.ad;
+        document.getElementById('social-task-reward').value = mockConfig.REWARDS.social;
+        document.getElementById('wheel-prizes').value = mockConfig.WHEEL_PRIZES.join(', ');
+        document.getElementById('min-withdraw').value = mockConfig.WITHDRAW.min;
+        document.getElementById('deposit-number').value = mockConfig.WITHDRAW.depositNumber;
+    }
+    
+    function renderSocialTasks() {
+        const table = document.getElementById('social-tasks-table');
+        table.innerHTML = '';
+        mockSocialTasks.forEach(task => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${task.icon}</td>
+                <td>${task.name}</td>
+                <td>${task.url}</td>
+                <td class="action-buttons">
+                    <button class="btn btn-primary btn-sm edit-task-btn" data-taskid="${task.id}">Edit</button>
+                    <button class="btn btn-danger btn-sm delete-task-btn" data-taskid="${task.id}">Delete</button>
+                </td>
+            `;
+            table.appendChild(row);
+        });
+    }
+    
+    function renderDailyWinners() {
+        const table = document.getElementById('daily-winners-table');
+        table.innerHTML = '';
+        mockDailyWinners.forEach(winner => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${winner.name}</td>
+                <td>৳${winner.prize}</td>
+                <td class="action-buttons">
+                    <button class="btn btn-danger btn-sm delete-winner-btn" data-winnerid="${winner.id}">Delete</button>
+                </td>
+            `;
+            table.appendChild(row);
+        });
+    }
+
+
+    // --- Event Handlers & Logic ---
+
+    document.getElementById('user-search').addEventListener('keyup', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filtered = mockUsers.filter(user => 
+            user.name.toLowerCase().includes(query) || 
+            user.id.toString().includes(query)
+        );
+        renderUserList(filtered);
+    });
+
+    document.body.addEventListener('click', (e) => {
+        if (e.target.classList.contains('ban-user-btn')) {
+            const userId = parseInt(e.target.dataset.userid);
+            const user = mockUsers.find(u => u.id === userId);
+            if (user) {
+                user.isBanned = !user.isBanned;
+                alert(`User ${user.name} has been ${user.isBanned ? 'banned' : 'unbanned'}.`);
+                renderUserList();
+            }
+        }
         
-        if (!targetUserId || !amount) {
-            tg.showAlert('User ID and Amount are required.');
-            return;
+        if (e.target.classList.contains('approve-withdraw-btn')) {
+            const txnId = e.target.dataset.txnid;
+            const transaction = mockTransactions.find(t => t.id === txnId);
+            if (transaction) {
+                transaction.status = 'completed';
+                alert('Withdrawal approved.');
+                rerenderAll();
+            }
         }
 
-        const adminName = `${userInfo.first_name || ''} ${userInfo.last_name || ''}`.trim();
+        if (e.target.classList.contains('reject-withdraw-btn')) {
+            const txnId = e.target.dataset.txnid;
+            const transaction = mockTransactions.find(t => t.id === txnId);
+            const user = mockUsers.find(u => u.id === transaction.userId);
+            if (transaction && user) {
+                transaction.status = 'rejected';
+                user.balance += transaction.amount;
+                alert('Withdrawal rejected. Money returned to user balance.');
+                rerenderAll();
+            }
+        }
         
-        const message = `
-🔧 *ADMIN ACTION: BALANCE UPDATE* 🔧
+        if (e.target.classList.contains('confirm-deposit-btn')) {
+            const txnId = e.target.dataset.txnid;
+            const transaction = mockTransactions.find(t => t.id === txnId);
+            const user = mockUsers.find(u => u.id === transaction.userId);
+            if (transaction && user) {
+                transaction.status = 'completed';
+                user.balance += transaction.amount;
+                alert('Deposit confirmed. Money added to user balance.');
+                rerenderAll();
+            }
+        }
+        
+        if (e.target.classList.contains('view-user-btn')) {
+            const userId = parseInt(e.target.dataset.userid);
+            openUserDetailsModal(userId);
+        }
+        
+        if (e.target.id === 'save-settings-btn') {
+            mockConfig.ADMIN_CHANNEL_LINK = document.getElementById('admin-channel-link').value;
+            alert('Settings saved successfully!');
+        }
+        
+        // --- MODIFIED: Notification Send Button Logic ---
+        if (e.target.id === 'send-broadcast-btn') {
+            const button = e.target;
+            const message = document.getElementById('broadcast-message').value;
 
-*Admin:* \`${adminName}\` (ID: \`${userInfo.id}\`)
-*Target User ID:* \`${targetUserId}\`
-*Amount:* \`${amount}\` Taka
-*Reason:* ${reason}
+            if (message.trim() === '') {
+                alert('অনুগ্রহ করে পাঠানোর জন্য একটি বার্তা লিখুন।');
+                return;
+            }
 
-- - - - - - - - - - - - - - - -
-*Note:* This is a log entry. The user's balance is stored on their device and must be communicated or updated manually.
+            // Disable button to prevent multiple clicks
+            button.disabled = true;
+            button.textContent = 'পাঠানো হচ্ছে...';
+
+            if (confirm(`আপনি কি এই বার্তাটি "${CHANNEL_ID}" চ্যানেলে পাঠাতে নিশ্চিত?\n\n"${message}"`)) {
+                // Call the function to send the message via Telegram API
+                sendTelegramMessage(CHANNEL_ID, message).then(success => {
+                    if (success) {
+                        alert('বার্তা সফলভাবে টেলিগ্রামে পাঠানো হয়েছে!');
+                        document.getElementById('broadcast-message').value = ''; // Clear textarea on success
+                    }
+                    // Re-enable the button regardless of success or failure
+                    button.disabled = false;
+                    button.textContent = 'বার্তা পাঠান';
+                });
+            } else {
+                // If user cancels, re-enable the button immediately
+                button.disabled = false;
+                button.textContent = 'বার্তা পাঠান';
+            }
+        }
+    });
+    
+    // --- Modals Logic ---
+    const userDetailsModal = document.getElementById('user-details-modal');
+    const taskFormModal = document.getElementById('task-form-modal');
+    const winnerFormModal = document.getElementById('winner-form-modal');
+
+    function closeModal(modal) {
+        modal.style.display = "none";
+    }
+
+    document.querySelectorAll('.modal .close-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => closeModal(e.target.closest('.modal')));
+    });
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            closeModal(e.target);
+        }
+    });
+
+    function openUserDetailsModal(userId) {
+        const user = mockUsers.find(u => u.id === userId);
+        if (!user) return;
+
+        const modalBody = document.getElementById('user-modal-body');
+        modalBody.innerHTML = `
+            <p><strong>নাম:</strong> ${user.name}</p>
+            <p><strong>ইউজার আইডি:</strong> ${user.id}</p>
+            <p><strong>বর্তমান ব্যালেন্স:</strong> ৳${user.balance.toFixed(2)}</p>
+            <p><strong>মোট আয়:</strong> ৳${user.totalEarnings.toFixed(2)}</p>
+            <p><strong>মোট রেফারেল:</strong> ${user.referrals}</p>
+            <p><strong>রেফারেল কমিশন:</strong> ৳${user.referralCommission.toFixed(2)}</p>
+            <hr style="margin: 15px 0; border-color: var(--border-color);">
+            <h4>ব্যালেন্স অ্যাডজাস্ট করুন</h4>
+            <div class="form-group">
+                <label>অ্যামাউন্ট (বিয়োগ করতে মাইনাস ব্যবহার করুন)</label>
+                <input type="number" id="adjust-balance-amount" placeholder="e.g., 50 or -20">
+            </div>
+            <button class="btn btn-primary" onclick="adjustUserBalance(${userId})">আপডেট ব্যালেন্স</button>
         `;
+        userDetailsModal.style.display = "flex";
+    }
 
-        callTelegramApi('sendMessage', {
-            chat_id: config.ADMIN_LOG_CHAT_ID,
-            text: message,
-            parse_mode: 'Markdown'
-        })
-        .then(() => {
-            tg.showPopup({
-                title: 'Success',
-                message: 'Balance update log has been sent to the admin channel.',
-                buttons: [{ type: 'ok' }]
-            });
-            formUpdateBalance.reset();
-        })
-        .catch(error => {
-            tg.showAlert(`Error: ${error.message}`);
-        });
-    });
-
-    formSendMessage.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const targetUserId = document.getElementById('message-user-id').value;
-        const messageText = document.getElementById('message-text').value;
-
-        if (!targetUserId || !messageText) {
-            tg.showAlert('User ID and Message are required.');
+    window.adjustUserBalance = function(userId) {
+        const amount = parseFloat(document.getElementById('adjust-balance-amount').value);
+        if (isNaN(amount)) {
+            alert('Please enter a valid amount.');
             return;
         }
-
-        callTelegramApi('sendMessage', {
-            chat_id: targetUserId,
-            text: messageText,
-            parse_mode: 'HTML' // Allows using <b>, <i>, <a> etc.
-        })
-        .then(() => {
-            tg.showPopup({
-                title: 'Success',
-                message: `Message sent successfully to User ID ${targetUserId}.`,
-                buttons: [{ type: 'ok' }]
-            });
-            formSendMessage.reset();
-        })
-        .catch(error => {
-            tg.showAlert(`Error sending message: ${error.message}`);
-        });
+        const user = mockUsers.find(u => u.id === userId);
+        if (user) {
+            user.balance += amount;
+            alert(`Balance updated for ${user.name}. New balance: ৳${user.balance.toFixed(2)}`);
+            closeModal(userDetailsModal);
+            rerenderAll();
+        }
+    }
+    
+    document.getElementById('add-new-task-btn').addEventListener('click', () => {
+        document.getElementById('task-form').reset();
+        document.getElementById('task-modal-title').textContent = 'নতুন টাস্ক';
+        taskFormModal.style.display = 'flex';
     });
+    
+    document.getElementById('add-new-winner-btn').addEventListener('click', () => {
+        document.getElementById('winner-form').reset();
+        document.getElementById('winner-modal-title').textContent = 'নতুন বিজয়ী';
+        winnerFormModal.style.display = 'flex';
+    });
+
+
+    // --- Initial Render ---
+    function rerenderAll() {
+        renderDashboard();
+        renderUserList();
+        renderTransactions();
+        renderSettings();
+        renderSocialTasks();
+        renderDailyWinners();
+    }
+
+    rerenderAll();
 });
 </script>
-
 </body>
 </html>
