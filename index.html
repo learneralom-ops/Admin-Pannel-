@@ -1,1081 +1,361 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Earning Live</title>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-bg: #1e293b;
-            --secondary-bg: #2c3e50;
-            --sidebar-bg: #111827;
-            --card-bg: #374151;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --accent-blue: #3b82f6;
-            --accent-green: #22c55e;
-            --accent-red: #ef4444;
-            --accent-yellow: #f59e0b;
-            --border-color: #4b5563;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Hind Siliguri', sans-serif;
-        }
-
-        body {
-            background-color: var(--primary-bg);
-            color: var(--text-primary);
-            display: flex;
-        }
-
-        /* --- Sidebar --- */
-        .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            height: 100vh;
-            position: fixed;
-            top: 0;
-            left: 0;
-            padding: 20px 0;
-            display: flex;
-            flex-direction: column;
-            border-right: 1px solid var(--border-color);
-        }
-
-        .sidebar-header {
-            padding: 0 20px 20px 20px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-align: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sidebar-nav {
-            list-style: none;
-            flex-grow: 1;
-            margin-top: 20px;
-        }
-
-        .nav-item a {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px 20px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: background-color 0.3s, color 0.3s;
-            border-left: 4px solid transparent;
-        }
-
-        .nav-item a:hover {
-            background-color: var(--secondary-bg);
-            color: var(--text-primary);
-        }
-
-        .nav-item a.active {
-            background-color: var(--primary-bg);
-            color: var(--accent-blue);
-            border-left-color: var(--accent-blue);
-        }
-
-        .nav-icon {
-            width: 24px;
-            height: 24px;
-        }
-
-        /* --- Main Content --- */
-        .main-content {
-            margin-left: 260px;
-            flex-grow: 1;
-            padding: 30px;
-        }
-
-        .page {
-            display: none;
-        }
-
-        .page.active {
-            display: block;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .page-header {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-
-        /* --- Dashboard --- */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-card {
-            background-color: var(--card-bg);
-            padding: 25px;
-            border-radius: 10px;
-            border-left: 5px solid;
-        }
-        .stat-card.blue { border-color: var(--accent-blue); }
-        .stat-card.green { border-color: var(--accent-green); }
-        .stat-card.red { border-color: var(--accent-red); }
-        .stat-card.yellow { border-color: var(--accent-yellow); }
-
-        .stat-card-title {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-        }
-
-        .stat-card-value {
-            font-size: 2.2rem;
-            font-weight: 700;
-        }
-
-        /* --- Tables and Lists --- */
-        .section-container {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 30px;
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .search-bar {
-            width: 300px;
-            padding: 10px;
-            background-color: var(--primary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-primary);
-            font-size: 1rem;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table th, .data-table td {
-            padding: 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .data-table thead {
-            background-color: var(--secondary-bg);
-        }
-        
-        .data-table tbody tr:hover {
-            background-color: var(--secondary-bg);
-        }
-
-        .status {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: white;
-        }
-        .status-pending { background-color: var(--accent-yellow); }
-        .status-completed { background-color: var(--accent-green); }
-        .status-rejected { background-color: var(--accent-red); }
-        .status-banned { background-color: var(--accent-red); color: white; }
-        .status-active { background-color: var(--accent-green); color: white; }
-
-        /* --- Buttons --- */
-        .btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: opacity 0.3s, background-color 0.3s;
-        }
-        .btn:hover { opacity: 0.85; }
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .btn-primary { background-color: var(--accent-blue); color: white; }
-        .btn-success { background-color: var(--accent-green); color: white; }
-        .btn-danger { background-color: var(--accent-red); color: white; }
-        .btn-secondary { background-color: var(--text-secondary); color: var(--primary-bg); }
-        .btn-sm { padding: 5px 10px; font-size: 0.9rem; }
-        .action-buttons { display: flex; gap: 8px; }
-
-        /* --- Forms & Modals --- */
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
-        .form-group input, .form-group textarea, .form-group select {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-primary);
-            font-size: 1rem;
-        }
-        .form-group textarea { resize: vertical; min-height: 100px; }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.7);
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background-color: var(--secondary-bg);
-            margin: auto;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-title { font-size: 1.5rem; }
-        .close-btn {
-            color: var(--text-secondary);
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Earning Live — Admin Panel (Full)</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#10b981;--muted:#94a3b8;--glass:rgba(255,255,255,0.03)}
+    *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Roboto,"Noto Sans Bengali",sans-serif;background:linear-gradient(180deg,#071129,#081428);color:#e6eef8}
+    .wrap{max-width:1100px;margin:18px auto;padding:16px}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    h1{font-size:20px;margin:0}
+    .brand{display:flex;gap:12px;align-items:center}
+    .card{background:var(--card);padding:14px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.03);margin-bottom:12px}
+    nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    nav button{background:var(--glass);color:var(--muted);border:1px solid rgba(255,255,255,.04);padding:10px 12px;border-radius:10px;cursor:pointer}
+    nav button.active{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#071129;font-weight:700}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:12px}
+    @media(max-width:980px){.grid{grid-template-columns:1fr}}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;color:#dbeafe}
+    th{color:var(--muted);text-align:left}
+    .btn{background:var(--accent);border:0;padding:8px 10px;border-radius:8px;cursor:pointer;color:#071129;font-weight:700}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,.06);color:var(--muted)}
+    input,textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.04);background:transparent;color:#e6eef8}
+    .muted{color:var(--muted);font-size:13px}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.03);font-weight:700}
+    .status.pending{color:#f59e0b}
+    .status.approved{color:#10b981}
+    footer{color:var(--muted);text-align:center;margin-top:18px;font-size:13px}
+    .small{font-size:12px;color:var(--muted)}
+  </style>
 </head>
 <body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="pill">Earning Live</div>
+        <h1>Admin Panel — Full</h1>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="small" id="statSummary">Loading…</div>
+        <button class="btn ghost" id="btnExportAll">Export Backup</button>
+      </div>
+    </header>
 
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
-        <h1 class="sidebar-header">Admin Panel</h1>
-        <ul class="sidebar-nav">
-            <li class="nav-item">
-                <a href="#" class="nav-link active" data-target="dashboard">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
-                    <span>ড্যাশবোর্ড</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-target="user-management">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21a6 6 0 00-9-5.197m0 0A5.978 5.978 0 0112 13a5.979 5.979 0 012.121.303"></path></svg>
-                    <span>ব্যবহারকারী ম্যানেজমেন্ট</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-target="transaction-management">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    <span>লেনদেন ম্যানেজমেন্ট</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-target="app-settings">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <span>অ্যাপ সেটিংস</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-target="task-management">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                    <span>টাস্ক ম্যানেজমেন্ট</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-target="content-management">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                    <span>কনটেন্ট ম্যানেজমেন্ট</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link" data-target="notifications">
-                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                    <span>নোটিফিকেশন</span>
-                </a>
-            </li>
-        </ul>
-    </aside>
+    <nav>
+      <button data-tab="dashboard" class="active">Dashboard</button>
+      <button data-tab="withdraws">Withdraws</button>
+      <button data-tab="users">Users</button>
+      <button data-tab="notice">Notice</button>
+      <button data-tab="settings">Settings</button>
+      <button data-tab="logs">Logs</button>
+    </nav>
 
-    <!-- Main Content Area -->
-    <main class="main-content">
+    <div class="grid">
+      <main>
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="card section active">
+          <h2>Dashboard</h2>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+            <div class="card" style="min-width:160px"><div class="muted">Total Users</div><div id="mUsers" style="font-weight:800;font-size:20px">0</div></div>
+            <div class="card" style="min-width:160px"><div class="muted">Pending Withdraws</div><div id="mPending" style="font-weight:800;font-size:20px">0</div></div>
+            <div class="card" style="min-width:160px"><div class="muted">Approved</div><div id="mApproved" style="font-weight:800;font-size:20px">0</div></div>
+            <div class="card" style="flex:1"><div class="muted">Version</div><div id="mVersion">1.0.0</div></div>
+          </div>
+        </section>
 
-        <!-- Page 1: Dashboard -->
-        <div id="dashboard" class="page active">
-            <h2 class="page-header">ড্যাশবোর্ড</h2>
-            <div class="dashboard-grid">
-                <div class="stat-card blue">
-                    <p class="stat-card-title">মোট ব্যবহারকারী</p>
-                    <h3 class="stat-card-value" id="total-users">0</h3>
-                </div>
-                <div class="stat-card green">
-                    <p class="stat-card-title">মোট আয়</p>
-                    <h3 class="stat-card-value" id="total-earnings">৳0</h3>
-                </div>
-                <div class="stat-card green">
-                    <p class="stat-card-title">মোট উইথড্র</p>
-                    <h3 class="stat-card-value" id="total-withdrawals">৳0</h3>
-                </div>
-                <div class="stat-card yellow">
-                    <p class="stat-card-title">পেন্ডিং উইথড্র</p>
-                    <h3 class="stat-card-value" id="pending-withdrawals">0 (৳0)</h3>
-                </div>
-                <div class="stat-card red">
-                    <p class="stat-card-title">পেন্ডিং ডিপোজিট</p>
-                    <h3 class="stat-card-value" id="pending-deposits">0</h3>
-                </div>
-                <div class="stat-card blue">
-                    <p class="stat-card-title">আজকের নতুন ব্যবহারকারী</p>
-                    <h3 class="stat-card-value" id="today-new-users">0</h3>
-                </div>
+        <!-- WITHDRAWS -->
+        <section id="withdraws" class="card section">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h2>Withdraw Requests</h2>
+            <div style="display:flex;gap:8px">
+              <button class="btn ghost" id="btnRefreshWithdraws">Reload</button>
+              <button class="btn ghost" id="btnExportWithdraws">Export JSON</button>
             </div>
+          </div>
+          <div style="margin-top:12px;overflow:auto">
+            <table id="tblWithdraws"><thead><tr><th>ID</th><th>User</th><th>Method</th><th>Amount</th><th>Status</th><th>Txn</th><th>Action</th></tr></thead><tbody><tr><td colspan="7">Loading…</td></tr></tbody></table>
+          </div>
+        </section>
+
+        <!-- USERS -->
+        <section id="users" class="card section">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h2>Users</h2>
+            <div style="display:flex;gap:8px">
+              <button class="btn ghost" id="btnRefreshUsers">Reload</button>
+              <button class="btn ghost" id="btnExportUsers">Export JSON</button>
+            </div>
+          </div>
+          <div style="margin-top:12px;overflow:auto">
+            <table id="tblUsers"><thead><tr><th>ID</th><th>Name</th><th>Balance</th><th>Status</th></tr></thead><tbody><tr><td colspan="4">Loading…</td></tr></tbody></table>
+          </div>
+        </section>
+
+        <!-- NOTICE -->
+        <section id="notice" class="card section">
+          <h2>Send Notice</h2>
+          <div style="margin-top:8px">
+            <textarea id="noticeText" rows="4" placeholder="Write notice here..."></textarea>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+              <button class="btn ghost" id="btnPreviewNotice">Preview to Owner</button>
+              <button class="btn" id="btnSendNotice">Send to All</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section id="settings" class="card section">
+          <h2>Settings • Daily Bonus & Security</h2>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+            <div>
+              <div class="small">Daily Bonus Enabled</div>
+              <label style="display:flex;gap:8px;align-items:center;margin-top:6px"><input type="checkbox" id="bonusEnabled"/> <span class="muted" style="margin-left:6px">Enable daily bonus</span></label>
+            </div>
+            <div>
+              <div class="small">Bonus Amount (৳)</div>
+              <input id="bonusAmount" type="number" min="0" />
+            </div>
+            <div>
+              <div class="small">Cooldown (hours)</div>
+              <input id="bonusCooldown" type="number" min="1" />
+            </div>
+            <div>
+              <div class="small">Admin PIN</div>
+              <input id="adminPIN" type="text" />
+            </div>
+            <div style="grid-column:span 2;display:flex;gap:8px;justify-content:flex-end">
+              <button class="btn ghost" id="btnResetDefaults">Reset Defaults</button>
+              <button class="btn" id="btnSaveSettings">Save Settings</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- LOGS -->
+        <section id="logs" class="card section">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <h2>Logs</h2>
+            <div><button class="btn ghost" id="btnRefreshLogs">Reload</button></div>
+          </div>
+          <div style="margin-top:12px;max-height:360px;overflow:auto">
+            <table id="tblLogs"><thead><tr><th>Time</th><th>Type</th><th>Info</th></tr></thead><tbody><tr><td colspan="3">Loading…</td></tr></tbody></table>
+          </div>
+        </section>
+      </main>
+
+      <aside>
+        <div class="card">
+          <div class="small">Bridge Info</div>
+          <div style="margin-top:8px"><div class="muted">API URL</div><div id="infoUrl" class="small muted"></div></div>
+          <div style="margin-top:8px"><div class="muted">Bridge Key</div><div id="infoKey" class="small muted"></div></div>
         </div>
 
-        <!-- Page 2: User Management -->
-        <div id="user-management" class="page">
-            <h2 class="page-header">ব্যবহারকারী ম্যানেজমেন্ট</h2>
-            <div class="section-container">
-                <div class="section-header">
-                    <h3 class="section-title">সকল ব্যবহারকারীর তালিকা</h3>
-                    <input type="text" id="user-search" class="search-bar" placeholder="নাম বা আইডি দিয়ে খুঁজুন...">
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>নাম</th>
-                            <th>ইউজার আইডি</th>
-                            <th>জয়েন তারিখ</th>
-                            <th>ব্যালেন্স</th>
-                            <th>স্ট্যাটাস</th>
-                            <th>অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-list-table">
-                        <!-- User data will be inserted here by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Page 3: Transaction Management -->
-        <div id="transaction-management" class="page">
-            <h2 class="page-header">লেনদেন ম্যানেজমেন্ট</h2>
-
-            <div class="section-container">
-                <h3 class="section-title">পেন্ডিং উইথড্র রিকোয়েস্ট</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ব্যবহারকারী</th>
-                            <th>পরিমাণ</th>
-                            <th>মেথড</th>
-                            <th>নম্বর</th>
-                            <th>তারিখ</th>
-                            <th>অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody id="withdrawal-requests-table">
-                        <!-- Withdrawal requests will be inserted here by JS -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="section-container">
-                <h3 class="section-title">পেন্ডিং ডিপোজিট ভেরিফিকেশন</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ব্যবহারকারী</th>
-                            <th>পরিমাণ</th>
-                            <th>মেথড</th>
-                            <th>TRX ID</th>
-                            <th>তারিখ</th>
-                            <th>অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deposit-verifications-table">
-                       <!-- Deposit verifications will be inserted here by JS -->
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="section-container">
-                <h3 class="section-title">সকল লেনদেনের ইতিহাস</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ট্রান্সেকশন আইডি</th>
-                            <th>ব্যবহারকারী</th>
-                            <th>টাইপ</th>
-                            <th>পরিমাণ</th>
-                            <th>স্ট্যাটাস</th>
-                            <th>তারিখ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="all-transactions-table">
-                        <!-- All transactions will be inserted here by JS -->
-                    </tbody>
-                </table>
-            </div>
+        <div class="card">
+          <div class="small">Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+            <button class="btn" id="btnReloadAll">Reload All</button>
+            <button class="btn ghost" id="btnExportCSV">Export Users CSV</button>
+            <button class="btn ghost" id="btnExportWithdrawCSV">Export Withdraws CSV</button>
+          </div>
         </div>
 
-        <!-- Page 4: App Settings -->
-        <div id="app-settings" class="page">
-            <h2 class="page-header">অ্যাপ কনফিগারেশন / সেটিংস</h2>
-            <div class="section-container">
-                 <h3 class="section-title">সাধারণ সেটিংস</h3>
-                 <div class="form-group">
-                     <label for="admin-channel-link">অ্যাডমিন চ্যানেল লিঙ্ক</label>
-                     <input type="text" id="admin-channel-link">
-                 </div>
-                 <div class="form-group">
-                     <label for="live-stream-link">লাইভ স্ট্রিম লিঙ্ক</label>
-                     <input type="text" id="live-stream-link">
-                 </div>
-                 <div class="form-group">
-                    <label for="live-stream-status">লাইভ স্ট্রিম স্ট্যাটাস</label>
-                    <select id="live-stream-status">
-                        <option value="Live">Live</option>
-                        <option value="Offline">Offline</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="section-container">
-                <h3 class="section-title">আর্নিং সেটিংস</h3>
-                <div class="form-group">
-                    <label for="daily-task-reward">ডেইলি টাস্ক রিওয়ার্ড (৳)</label>
-                    <input type="number" id="daily-task-reward">
-                </div>
-                <div class="form-group">
-                    <label for="watch-ad-reward">অ্যাড দেখার রিওয়ার্ড (৳)</label>
-                    <input type="number" id="watch-ad-reward">
-                </div>
-                <div class="form-group">
-                    <label for="social-task-reward">সোশ্যাল টাস্ক রিওয়ার্ড (৳)</label>
-                    <input type="number" id="social-task-reward">
-                </div>
-            </div>
-
-            <div class="section-container">
-                <h3 class="section-title">স্পিন হুইল সেটিংস (পুরস্কারগুলো কমা দিয়ে লিখুন)</h3>
-                <div class="form-group">
-                    <label for="wheel-prizes">WHEEL_PRIZES</label>
-                    <input type="text" id="wheel-prizes">
-                </div>
-            </div>
-
-            <div class="section-container">
-                 <h3 class="section-title">উইথড্র/ডিপোজিট সেটিংস</h3>
-                 <div class="form-group">
-                     <label for="min-withdraw">ন্যূনতম উইথড্র পরিমাণ (৳)</label>
-                     <input type="number" id="min-withdraw">
-                 </div>
-                 <div class="form-group">
-                     <label for="deposit-number">ডিপোজিটের জন্য পেমেন্ট নম্বর</label>
-                     <input type="text" id="deposit-number">
-                 </div>
-            </div>
-
-            <button class="btn btn-primary" id="save-settings-btn">সেটিংস সেভ করুন</button>
+        <div class="card">
+          <div class="small">Owner</div>
+          <div style="margin-top:8px"><input id="ownerIds" placeholder="comma separated owner IDs"/></div>
+          <div style="display:flex;gap:8px;margin-top:8px;justify-content:flex-end"><button class="btn ghost" id="btnSaveOwners">Save Owners</button></div>
         </div>
-
-        <!-- Page 5: Task Management -->
-        <div id="task-management" class="page">
-            <h2 class="page-header">টাস্ক ম্যানেজমেন্ট</h2>
-            <div class="section-container">
-                <div class="section-header">
-                    <h3 class="section-title">সোশ্যাল টাস্কের তালিকা</h3>
-                    <button class="btn btn-primary" id="add-new-task-btn">নতুন টাস্ক যোগ করুন</button>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>আইকন</th>
-                            <th>টাস্কের নাম</th>
-                            <th>URL</th>
-                            <th>অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody id="social-tasks-table">
-                        <!-- Social tasks will be inserted here by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Page 6: Content Management -->
-        <div id="content-management" class="page">
-            <h2 class="page-header">কনটেন্ট ম্যানেজমেন্ট</h2>
-            <div class="section-container">
-                <div class="section-header">
-                    <h3 class="section-title">ডেইলি উইনার লিস্ট</h3>
-                     <button class="btn btn-primary" id="add-new-winner-btn">নতুন বিজয়ী যোগ করুন</button>
-                </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>বিজয়ীর নাম</th>
-                            <th>পুরস্কারের পরিমাণ (৳)</th>
-                            <th>অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody id="daily-winners-table">
-                        <!-- Daily winners will be inserted here by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Page 7: Notifications -->
-        <div id="notifications" class="page">
-            <h2 class="page-header">নোটিফিকেশন</h2>
-            <div class="section-container">
-                <h3 class="section-title">ব্রডকাস্ট মেসেজ</h3>
-                <p>এই বার্তাটি আপনার নির্ধারিত টেলিগ্রাম চ্যানেলে পাঠানো হবে।</p>
-                <div class="form-group">
-                    <label for="broadcast-message">আপনার বার্তা লিখুন:</label>
-                    <textarea id="broadcast-message" placeholder="সকল ব্যবহারকারীদের জন্য একটি গুরুত্বপূর্ণ নোটিশ..."></textarea>
-                </div>
-                <button class="btn btn-primary" id="send-broadcast-btn">বার্তা পাঠান</button>
-            </div>
-        </div>
-
-    </main>
-    
-    <!-- Modals -->
-    <div id="user-details-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">ব্যবহারকারীর বিবরণ</h3>
-                <span class="close-btn">&times;</span>
-            </div>
-            <div id="user-modal-body">
-                <!-- User details will be populated here by JS -->
-            </div>
-        </div>
-    </div>
-    
-    <div id="task-form-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="task-modal-title">নতুন টাস্ক</h3>
-                <span class="close-btn">&times;</span>
-            </div>
-            <form id="task-form">
-                <input type="hidden" id="task-id">
-                <div class="form-group">
-                    <label for="task-name">টাস্কের নাম</label>
-                    <input type="text" id="task-name" placeholder="e.g., Follow on TikTok" required>
-                </div>
-                <div class="form-group">
-                    <label for="task-url">URL</label>
-                    <input type="url" id="task-url" placeholder="https://tiktok.com/..." required>
-                </div>
-                <div class="form-group">
-                    <label for="task-icon">আইকন (SVG কোড বা Image URL)</label>
-                    <input type="text" id="task-icon" placeholder="<svg>...</svg> or https://.../icon.png">
-                </div>
-                <button type="submit" class="btn btn-primary">সেভ করুন</button>
-            </form>
-        </div>
-    </div>
-    
-    <div id="winner-form-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="winner-modal-title">নতুন বিজয়ী</h3>
-                <span class="close-btn">&times;</span>
-            </div>
-            <form id="winner-form">
-                <input type="hidden" id="winner-id">
-                <div class="form-group">
-                    <label for="winner-name">বিজয়ীর নাম</label>
-                    <input type="text" id="winner-name" placeholder="A****l H." required>
-                </div>
-                <div class="form-group">
-                    <label for="winner-prize">পুরস্কারের পরিমাণ (৳)</label>
-                    <input type="number" id="winner-prize" placeholder="500" required>
-                </div>
-                <button type="submit" class="btn btn-primary">সেভ করুন</button>
-            </form>
-        </div>
+      </aside>
     </div>
 
+    <footer>© <span id="year"></span> Earning Live — Admin Panel</footer>
+  </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+/* ===== CONFIG - PUT YOURS HERE ===== */
+const BOT_ID = "5812860406";
+const API_KEY = "8030917316:AAE2gZ1ZF2i1EUbhUCyUytYXoWI9mCZ_mbk";
+const BRIDGE_KEY = "8030917316:AAE2gZ1ZF2i1EUbhUCyUytYXoWI9mCZ_mbk"; // must match Bridge script secret
+const API_URL = `https://api.bots.business/v1/bot/${BOT_ID}/bridge`;
 
-    // --- START: TELEGRAM API CONFIGURATION ---
-    // সতর্কতা: এই টোকেনটি পাবলিকলি শেয়ার করবেন না। এটি ডেমোর জন্য ব্যবহার করা হচ্ছে।
-    // আপনার আসল টোকেন এখানে দিন।
-    const BOT_TOKEN = '8030917316:AAE2gZ1ZF2i1EUbhUCyUytYXoWI9mCZ_mbk';
-    const CHANNEL_ID = '@earninglive'; // আপনার চ্যানেল আইডি
+/* ====== Helpers ====== */
+const HDRS = { "Content-Type":"application/json" };
+function bridgePayload(action, data={}) {
+  return { action, data, key: BRIDGE_KEY };
+}
+async function callBridge(action, data={}) {
+  const res = await fetch(API_URL, {
+    method:'POST',
+    headers: HDRS,
+    body: JSON.stringify(bridgePayload(action, data))
+  });
+  if(!res.ok) throw new Error('Bridge HTTP '+res.status);
+  return await res.json();
+}
+function showToast(msg){ alert(msg) }
 
-    /**
-     * টেলিগ্রাম চ্যানেলে মেসেজ পাঠানোর জন্য ফাংশন
-     * @param {string} chatId - টেলিগ্রাম চ্যানেল বা ইউজারের আইডি
-     * @param {string} message - পাঠানোর জন্য মেসেজ
-     * @returns {Promise<boolean>} - মেসেজ পাঠানো সফল হলে true, অন্যথায় false
-     */
-    async function sendTelegramMessage(chatId, message) {
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-        
-        // টেলিগ্রামের জন্য কিছু বেসিক HTML ট্যাগ সাপোর্ট করে (<b>, <i>, <a>, <code>, <pre>)
-        // আপনি চাইলে মেসেজে এগুলো ব্যবহার করতে পারেন।
-        const payload = {
-            chat_id: chatId,
-            text: message,
-            parse_mode: 'HTML' 
-        };
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await response.json();
-
-            if (data.ok) {
-                console.log('Message sent successfully:', data);
-                return true;
-            } else {
-                console.error('Telegram API Error:', data);
-                alert(`টেলিগ্রামে বার্তা পাঠাতে সমস্যা হয়েছে: ${data.description}`);
-                return false;
-            }
-        } catch (error) {
-            console.error('Fetch Error:', error);
-            alert('নেটওয়ার্ক সমস্যা। বার্তা পাঠানো যায়নি। অনুগ্রহ করে আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন।');
-            return false;
-        }
-    }
-    // --- END: TELEGRAM API CONFIGURATION ---
-
-
-    // --- MOCK DATA (এগুলো আপনার ডাটাবেস থেকে আসবে) ---
-    let mockUsers = [
-        { id: 12345, name: 'আলমগীর হোসেন', joinDate: '2024-05-20', balance: 1250.50, totalEarnings: 2500, referrals: 15, referralCommission: 350, isBanned: false },
-        { id: 67890, name: 'সুমন আহমেদ', joinDate: '2024-05-21', balance: 350.00, totalEarnings: 500, referrals: 3, referralCommission: 50, isBanned: false },
-        { id: 11223, name: 'রিয়া ইসলাম', joinDate: '2024-05-18', balance: 5800.75, totalEarnings: 10000, referrals: 50, referralCommission: 1200, isBanned: true },
-        { id: 44556, name: 'নাসরিন সুলতানা', joinDate: '2024-05-22', balance: 25.00, totalEarnings: 150, referrals: 0, referralCommission: 0, isBanned: false },
-    ];
-
-    let mockTransactions = [
-        { id: 'txn_01', userId: 12345, type: 'withdraw', amount: 500, method: 'Bkash', details: '01700000000', date: '2024-05-22', status: 'pending' },
-        { id: 'txn_02', userId: 67890, type: 'withdraw', amount: 200, method: 'Nogod', details: '01800000000', date: '2024-05-21', status: 'completed' },
-        { id: 'txn_03', userId: 11223, type: 'deposit', amount: 1000, method: 'Bkash', details: 'TRX123ABC456', date: '2024-05-22', status: 'pending' },
-        { id: 'txn_04', userId: 67890, type: 'deposit', amount: 500, method: 'Nogod', details: 'TRX789XYZ123', date: '2024-05-20', status: 'completed' },
-        { id: 'txn_05', userId: 44556, type: 'withdraw', amount: 100, method: 'Bkash', details: '01900000000', date: '2024-05-22', status: 'rejected' },
-    ];
-    
-    let mockSocialTasks = [
-        { id: 1, name: 'Follow on Facebook', url: 'https://facebook.com/...', icon: 'FB' },
-        { id: 2, name: 'Subscribe on YouTube', url: 'https://youtube.com/...', icon: 'YT' },
-        { id: 3, name: 'Join Telegram Channel', url: 'https://t.me/...', icon: 'TG' },
-    ];
-    
-    let mockDailyWinners = [
-        { id: 1, name: 'A****l H.', prize: 700 },
-        { id: 2, name: 'R****l H.', prize: 500 },
-    ];
-
-    let mockConfig = {
-        ADMIN_CHANNEL_LINK: 'https://t.me/LearnerAlom',
-        WINNERS_LIVE_STREAM: { url: 'https://otieu.com/4/9276685', status: 'Live' },
-        REWARDS: { daily: 1, ad: 0.5, social: 5 },
-        WHEEL_PRIZES: [0.5, 1, 5, 0.5, 10, 0.5, 1, 0.5, 2, 0.5, 20, 0.5],
-        WITHDRAW: { min: 500, depositNumber: '01749666991' }
-    };
-
-    // --- DOM Elements ---
-    const navLinks = document.querySelectorAll('.nav-link');
-    const pages = document.querySelectorAll('.page');
-
-    // --- Page Switching Logic ---
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = link.dataset.target;
-
-            pages.forEach(page => page.classList.remove('active'));
-            document.getElementById(targetId).classList.add('active');
-
-            navLinks.forEach(nav => nav.classList.remove('active'));
-            link.classList.add('active');
-        });
-    });
-
-    // --- Rendering Functions ---
-
-    function renderDashboard() {
-        document.getElementById('total-users').textContent = mockUsers.length;
-        document.getElementById('today-new-users').textContent = mockUsers.filter(u => u.joinDate === '2024-05-22').length;
-        const totalEarnings = mockUsers.reduce((sum, user) => sum + user.totalEarnings, 0);
-        document.getElementById('total-earnings').textContent = `৳${totalEarnings.toFixed(2)}`;
-        const completedWithdrawals = mockTransactions.filter(t => t.type === 'withdraw' && t.status === 'completed');
-        const totalWithdrawalsAmount = completedWithdrawals.reduce((sum, t) => sum + t.amount, 0);
-        document.getElementById('total-withdrawals').textContent = `৳${totalWithdrawalsAmount.toFixed(2)}`;
-        const pendingWithdrawals = mockTransactions.filter(t => t.type === 'withdraw' && t.status === 'pending');
-        const pendingWithdrawalsAmount = pendingWithdrawals.reduce((sum, t) => sum + t.amount, 0);
-        document.getElementById('pending-withdrawals').textContent = `${pendingWithdrawals.length} (৳${pendingWithdrawalsAmount.toFixed(2)})`;
-        const pendingDeposits = mockTransactions.filter(t => t.type === 'deposit' && t.status === 'pending');
-        document.getElementById('pending-deposits').textContent = pendingDeposits.length;
-    }
-    
-    function renderUserList(filteredUsers = mockUsers) {
-        const userTable = document.getElementById('user-list-table');
-        userTable.innerHTML = '';
-        filteredUsers.forEach(user => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${user.name}</td>
-                <td>${user.id}</td>
-                <td>${user.joinDate}</td>
-                <td>৳${user.balance.toFixed(2)}</td>
-                <td><span class="status ${user.isBanned ? 'status-banned' : 'status-active'}">${user.isBanned ? 'Banned' : 'Active'}</span></td>
-                <td class="action-buttons">
-                    <button class="btn btn-primary btn-sm view-user-btn" data-userid="${user.id}">View</button>
-                    <button class="btn ${user.isBanned ? 'btn-success' : 'btn-danger'} btn-sm ban-user-btn" data-userid="${user.id}">${user.isBanned ? 'Unban' : 'Ban'}</button>
-                </td>
-            `;
-            userTable.appendChild(row);
-        });
-    }
-
-    function renderTransactions() {
-        const withdrawalTable = document.getElementById('withdrawal-requests-table');
-        const depositTable = document.getElementById('deposit-verifications-table');
-        const allTransactionsTable = document.getElementById('all-transactions-table');
-
-        withdrawalTable.innerHTML = '';
-        depositTable.innerHTML = '';
-        allTransactionsTable.innerHTML = '';
-
-        mockTransactions.forEach(t => {
-            const user = mockUsers.find(u => u.id === t.userId);
-            if (!user) return;
-            
-            const allRow = document.createElement('tr');
-            allRow.innerHTML = `
-                <td>${t.id}</td>
-                <td>${user.name} (${user.id})</td>
-                <td>${t.type.charAt(0).toUpperCase() + t.type.slice(1)}</td>
-                <td>৳${t.amount.toFixed(2)}</td>
-                <td><span class="status status-${t.status}">${t.status}</span></td>
-                <td>${t.date}</td>
-            `;
-            allTransactionsTable.appendChild(allRow);
-
-            if (t.status !== 'pending') return;
-
-            if (t.type === 'withdraw') {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${user.name} (${user.id})</td>
-                    <td>৳${t.amount.toFixed(2)}</td>
-                    <td>${t.method}</td>
-                    <td>${t.details}</td>
-                    <td>${t.date}</td>
-                    <td class="action-buttons">
-                        <button class="btn btn-success btn-sm approve-withdraw-btn" data-txnid="${t.id}">Approve</button>
-                        <button class="btn btn-danger btn-sm reject-withdraw-btn" data-txnid="${t.id}">Reject</button>
-                    </td>
-                `;
-                withdrawalTable.appendChild(row);
-            } else if (t.type === 'deposit') {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${user.name} (${user.id})</td>
-                    <td>৳${t.amount.toFixed(2)}</td>
-                    <td>${t.method}</td>
-                    <td>${t.details}</td>
-                    <td>${t.date}</td>
-                    <td class="action-buttons">
-                        <button class="btn btn-success btn-sm confirm-deposit-btn" data-txnid="${t.id}">Confirm</button>
-                    </td>
-                `;
-                depositTable.appendChild(row);
-            }
-        });
-    }
-
-    function renderSettings() {
-        document.getElementById('admin-channel-link').value = mockConfig.ADMIN_CHANNEL_LINK;
-        document.getElementById('live-stream-link').value = mockConfig.WINNERS_LIVE_STREAM.url;
-        document.getElementById('live-stream-status').value = mockConfig.WINNERS_LIVE_STREAM.status;
-        document.getElementById('daily-task-reward').value = mockConfig.REWARDS.daily;
-        document.getElementById('watch-ad-reward').value = mockConfig.REWARDS.ad;
-        document.getElementById('social-task-reward').value = mockConfig.REWARDS.social;
-        document.getElementById('wheel-prizes').value = mockConfig.WHEEL_PRIZES.join(', ');
-        document.getElementById('min-withdraw').value = mockConfig.WITHDRAW.min;
-        document.getElementById('deposit-number').value = mockConfig.WITHDRAW.depositNumber;
-    }
-    
-    function renderSocialTasks() {
-        const table = document.getElementById('social-tasks-table');
-        table.innerHTML = '';
-        mockSocialTasks.forEach(task => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${task.icon}</td>
-                <td>${task.name}</td>
-                <td>${task.url}</td>
-                <td class="action-buttons">
-                    <button class="btn btn-primary btn-sm edit-task-btn" data-taskid="${task.id}">Edit</button>
-                    <button class="btn btn-danger btn-sm delete-task-btn" data-taskid="${task.id}">Delete</button>
-                </td>
-            `;
-            table.appendChild(row);
-        });
-    }
-    
-    function renderDailyWinners() {
-        const table = document.getElementById('daily-winners-table');
-        table.innerHTML = '';
-        mockDailyWinners.forEach(winner => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${winner.name}</td>
-                <td>৳${winner.prize}</td>
-                <td class="action-buttons">
-                    <button class="btn btn-danger btn-sm delete-winner-btn" data-winnerid="${winner.id}">Delete</button>
-                </td>
-            `;
-            table.appendChild(row);
-        });
-    }
-
-
-    // --- Event Handlers & Logic ---
-
-    document.getElementById('user-search').addEventListener('keyup', (e) => {
-        const query = e.target.value.toLowerCase();
-        const filtered = mockUsers.filter(user => 
-            user.name.toLowerCase().includes(query) || 
-            user.id.toString().includes(query)
-        );
-        renderUserList(filtered);
-    });
-
-    document.body.addEventListener('click', (e) => {
-        if (e.target.classList.contains('ban-user-btn')) {
-            const userId = parseInt(e.target.dataset.userid);
-            const user = mockUsers.find(u => u.id === userId);
-            if (user) {
-                user.isBanned = !user.isBanned;
-                alert(`User ${user.name} has been ${user.isBanned ? 'banned' : 'unbanned'}.`);
-                renderUserList();
-            }
-        }
-        
-        if (e.target.classList.contains('approve-withdraw-btn')) {
-            const txnId = e.target.dataset.txnid;
-            const transaction = mockTransactions.find(t => t.id === txnId);
-            if (transaction) {
-                transaction.status = 'completed';
-                alert('Withdrawal approved.');
-                rerenderAll();
-            }
-        }
-
-        if (e.target.classList.contains('reject-withdraw-btn')) {
-            const txnId = e.target.dataset.txnid;
-            const transaction = mockTransactions.find(t => t.id === txnId);
-            const user = mockUsers.find(u => u.id === transaction.userId);
-            if (transaction && user) {
-                transaction.status = 'rejected';
-                user.balance += transaction.amount;
-                alert('Withdrawal rejected. Money returned to user balance.');
-                rerenderAll();
-            }
-        }
-        
-        if (e.target.classList.contains('confirm-deposit-btn')) {
-            const txnId = e.target.dataset.txnid;
-            const transaction = mockTransactions.find(t => t.id === txnId);
-            const user = mockUsers.find(u => u.id === transaction.userId);
-            if (transaction && user) {
-                transaction.status = 'completed';
-                user.balance += transaction.amount;
-                alert('Deposit confirmed. Money added to user balance.');
-                rerenderAll();
-            }
-        }
-        
-        if (e.target.classList.contains('view-user-btn')) {
-            const userId = parseInt(e.target.dataset.userid);
-            openUserDetailsModal(userId);
-        }
-        
-        if (e.target.id === 'save-settings-btn') {
-            mockConfig.ADMIN_CHANNEL_LINK = document.getElementById('admin-channel-link').value;
-            alert('Settings saved successfully!');
-        }
-        
-        // --- MODIFIED: Notification Send Button Logic ---
-        if (e.target.id === 'send-broadcast-btn') {
-            const button = e.target;
-            const message = document.getElementById('broadcast-message').value;
-
-            if (message.trim() === '') {
-                alert('অনুগ্রহ করে পাঠানোর জন্য একটি বার্তা লিখুন।');
-                return;
-            }
-
-            // Disable button to prevent multiple clicks
-            button.disabled = true;
-            button.textContent = 'পাঠানো হচ্ছে...';
-
-            if (confirm(`আপনি কি এই বার্তাটি "${CHANNEL_ID}" চ্যানেলে পাঠাতে নিশ্চিত?\n\n"${message}"`)) {
-                // Call the function to send the message via Telegram API
-                sendTelegramMessage(CHANNEL_ID, message).then(success => {
-                    if (success) {
-                        alert('বার্তা সফলভাবে টেলিগ্রামে পাঠানো হয়েছে!');
-                        document.getElementById('broadcast-message').value = ''; // Clear textarea on success
-                    }
-                    // Re-enable the button regardless of success or failure
-                    button.disabled = false;
-                    button.textContent = 'বার্তা পাঠান';
-                });
-            } else {
-                // If user cancels, re-enable the button immediately
-                button.disabled = false;
-                button.textContent = 'বার্তা পাঠান';
-            }
-        }
-    });
-    
-    // --- Modals Logic ---
-    const userDetailsModal = document.getElementById('user-details-modal');
-    const taskFormModal = document.getElementById('task-form-modal');
-    const winnerFormModal = document.getElementById('winner-form-modal');
-
-    function closeModal(modal) {
-        modal.style.display = "none";
-    }
-
-    document.querySelectorAll('.modal .close-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => closeModal(e.target.closest('.modal')));
-    });
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            closeModal(e.target);
-        }
-    });
-
-    function openUserDetailsModal(userId) {
-        const user = mockUsers.find(u => u.id === userId);
-        if (!user) return;
-
-        const modalBody = document.getElementById('user-modal-body');
-        modalBody.innerHTML = `
-            <p><strong>নাম:</strong> ${user.name}</p>
-            <p><strong>ইউজার আইডি:</strong> ${user.id}</p>
-            <p><strong>বর্তমান ব্যালেন্স:</strong> ৳${user.balance.toFixed(2)}</p>
-            <p><strong>মোট আয়:</strong> ৳${user.totalEarnings.toFixed(2)}</p>
-            <p><strong>মোট রেফারেল:</strong> ${user.referrals}</p>
-            <p><strong>রেফারেল কমিশন:</strong> ৳${user.referralCommission.toFixed(2)}</p>
-            <hr style="margin: 15px 0; border-color: var(--border-color);">
-            <h4>ব্যালেন্স অ্যাডজাস্ট করুন</h4>
-            <div class="form-group">
-                <label>অ্যামাউন্ট (বিয়োগ করতে মাইনাস ব্যবহার করুন)</label>
-                <input type="number" id="adjust-balance-amount" placeholder="e.g., 50 or -20">
-            </div>
-            <button class="btn btn-primary" onclick="adjustUserBalance(${userId})">আপডেট ব্যালেন্স</button>
-        `;
-        userDetailsModal.style.display = "flex";
-    }
-
-    window.adjustUserBalance = function(userId) {
-        const amount = parseFloat(document.getElementById('adjust-balance-amount').value);
-        if (isNaN(amount)) {
-            alert('Please enter a valid amount.');
-            return;
-        }
-        const user = mockUsers.find(u => u.id === userId);
-        if (user) {
-            user.balance += amount;
-            alert(`Balance updated for ${user.name}. New balance: ৳${user.balance.toFixed(2)}`);
-            closeModal(userDetailsModal);
-            rerenderAll();
-        }
-    }
-    
-    document.getElementById('add-new-task-btn').addEventListener('click', () => {
-        document.getElementById('task-form').reset();
-        document.getElementById('task-modal-title').textContent = 'নতুন টাস্ক';
-        taskFormModal.style.display = 'flex';
-    });
-    
-    document.getElementById('add-new-winner-btn').addEventListener('click', () => {
-        document.getElementById('winner-form').reset();
-        document.getElementById('winner-modal-title').textContent = 'নতুন বিজয়ী';
-        winnerFormModal.style.display = 'flex';
-    });
-
-
-    // --- Initial Render ---
-    function rerenderAll() {
-        renderDashboard();
-        renderUserList();
-        renderTransactions();
-        renderSettings();
-        renderSocialTasks();
-        renderDailyWinners();
-    }
-
-    rerenderAll();
+/* ====== UI helpers & nav ====== */
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.add('active');
+  });
 });
+document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('infoUrl').textContent = API_URL;
+document.getElementById('infoKey').textContent = BRIDGE_KEY ? 'set' : 'not-set';
+
+/* ====== Dashboard/metrics ====== */
+async function loadStats(){
+  try{
+    const s = await callBridge('stats');
+    const r = s.result || s;
+    document.getElementById('mUsers').textContent = r.users ?? 0;
+    document.getElementById('mPending').textContent = r.pending ?? 0;
+    document.getElementById('mApproved').textContent = r.approved ?? 0;
+    document.getElementById('statSummary').textContent = `Users: ${r.users||0} • Pending: ${r.pending||0}`;
+  }catch(e){ console.error(e) }
+}
+
+/* ====== Withdraws ====== */
+async function loadWithdraws(){
+  const res = await callBridge('withdraws');
+  const rows = Array.isArray(res) ? res : (res.result||[]);
+  const tbody = document.querySelector('#tblWithdraws tbody');
+  tbody.innerHTML = '';
+  if(rows.length===0){ tbody.innerHTML = '<tr><td colspan="7">No withdraws</td></tr>'; return; }
+  for(const w of rows){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${w.id}</td>
+      <td>${w.userId}</td>
+      <td>${w.method||'-'}</td>
+      <td>${w.amount}৳</td>
+      <td class="status ${w.status}">${w.status}</td>
+      <td>${w.status==='pending' ? `<input id="txn-${w.id}" placeholder="Txn ID" />` : (w.txnId||'-')}</td>
+      <td>${w.status==='pending' ? `<button class="btn" onclick="approveWithdraw('${w.id}')">Approve</button> <button class="btn ghost" onclick="rejectWithdrawPrompt('${w.id}')">Reject</button>` : '—'}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+async function approveWithdraw(id){
+  const txn = (document.getElementById(`txn-${id}`)||{value:''}).value.trim();
+  if(!txn) return showToast('Please enter Txn ID');
+  const resp = await callBridge('withdraw/approve', { id, txn });
+  showToast(resp.message || 'Approved');
+  await reloadAll();
+}
+async function rejectWithdrawPrompt(id){
+  const reason = prompt('Reject reason (optional):','Invalid account');
+  if(reason===null) return;
+  const resp = await callBridge('withdraw/reject', { id, reason });
+  showToast(resp.message || 'Rejected');
+  await reloadAll();
+}
+
+/* ====== Users ====== */
+async function loadUsers(){
+  const res = await callBridge('users');
+  const list = Array.isArray(res) ? res : (res.result||[]);
+  const tbody = document.querySelector('#tblUsers tbody'); tbody.innerHTML = '';
+  if(list.length===0){ tbody.innerHTML = '<tr><td colspan="4">No users</td></tr>'; return; }
+  for(const u of list){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${u.id}</td><td>${u.name||'-'}</td><td>${u.balance||0}৳</td><td>${u.status||'-'}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+/* ====== Notice ====== */
+document.getElementById('btnSendNotice').addEventListener('click', async ()=>{
+  const t = document.getElementById('noticeText').value.trim();
+  if(!t) return showToast('Write notice first');
+  const resp = await callBridge('sendNotice', { text: t });
+  showToast(resp.message || 'Notice sent');
+});
+
+/* ====== Settings ====== */
+async function loadSettings(){
+  try{
+    const s = await callBridge('get_settings');
+    const st = s.result || s;
+    document.getElementById('bonusEnabled').checked = !!st.dailyBonusEnabled;
+    document.getElementById('bonusAmount').value = st.bonusAmount ?? 10;
+    document.getElementById('bonusCooldown').value = st.cooldownHours ?? 24;
+    document.getElementById('adminPIN').value = st.adminPIN || '';
+    document.getElementById('ownerIds').value = (st.owners||[]).join(',');
+  }catch(e){ console.error(e) }
+}
+document.getElementById('btnSaveSettings').addEventListener('click', async ()=>{
+  const payload = { enabled: document.getElementById('bonusEnabled').checked, amount: Number(document.getElementById('bonusAmount').value||0), cooldown: Number(document.getElementById('bonusCooldown').value||24), adminPIN: document.getElementById('adminPIN').value };
+  const resp = await callBridge('set_settings', payload);
+  showToast(resp.message || 'Saved');
+  loadSettings();
+});
+document.getElementById('btnResetDefaults').addEventListener('click', async ()=>{
+  if(confirm('Reset to defaults?')) {
+    const resp = await callBridge('set_settings', { enabled:false, amount:10, cooldown:24 });
+    showToast(resp.message || 'Reset');
+    loadSettings();
+  }
+});
+document.getElementById('btnSaveOwners').addEventListener('click', async ()=>{
+  const owners = (document.getElementById('ownerIds').value||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const resp = await callBridge('set_settings', { owners });
+  showToast(resp.message || 'Owners saved');
+  loadSettings();
+});
+
+/* ====== Logs ====== */
+async function loadLogs(){
+  const res = await callBridge('logs');
+  const list = Array.isArray(res) ? res : (res.result||[]);
+  const tbody = document.querySelector('#tblLogs tbody'); tbody.innerHTML = '';
+  if(list.length===0){ tbody.innerHTML = '<tr><td colspan="3">No logs</td></tr>'; return; }
+  for(const l of list){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${l.ts}</td><td>${l.type}</td><td><pre style="white-space:pre-wrap;margin:0">${JSON.stringify(l.info)}</pre></td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+/* ====== Exports & Utilities ====== */
+function downloadFile(filename, text){
+  const a = document.createElement('a'); const blob = new Blob([text], {type:'application/json'}); a.href = URL.createObjectURL(blob); a.download = filename; a.click(); URL.revokeObjectURL(a.href);
+}
+document.getElementById('btnExportUsers').addEventListener('click', async ()=>{
+  const r = await callBridge('users'); const data = JSON.stringify(r, null, 2); downloadFile('users.json', data);
+});
+document.getElementById('btnExportWithdraws').addEventListener('click', async ()=>{
+  const r = await callBridge('withdraws'); const data = JSON.stringify(r, null, 2); downloadFile('withdraws.json', data);
+});
+document.getElementById('btnExportAll').addEventListener('click', async ()=>{
+  const u = await callBridge('users'); const w = await callBridge('withdraws'); const s = await callBridge('get_settings'); const l = await callBridge('logs');
+  downloadFile('backup.json', JSON.stringify({ users:u, withdraws:w, settings:s, logs:l }, null, 2));
+});
+document.getElementById('btnExportCSV').addEventListener('click', async ()=>{
+  const r = await callBridge('users'); const arr = Array.isArray(r)?r:(r.result||[]);
+  if(!arr.length) return showToast('No users'); const keys = Object.keys(arr[0]); const csv = [keys.join(',')].concat(arr.map(o=>keys.map(k=>JSON.stringify(o[k]||'')).join(','))).join('\n'); downloadFile('users.csv', csv);
+});
+document.getElementById('btnExportWithdrawCSV').addEventListener('click', async ()=>{
+  const r = await callBridge('withdraws'); const arr = Array.isArray(r)?r:(r.result||[]);
+  if(!arr.length) return showToast('No withdraws'); const keys = Object.keys(arr[0]); const csv = [keys.join(',')].concat(arr.map(o=>keys.map(k=>JSON.stringify(o[k]||'')).join(','))).join('\n'); downloadFile('withdraws.csv', csv);
+});
+
+/* ====== Reload All ====== */
+async function reloadAll(){
+  await Promise.all([ loadStats(), loadWithdraws(), loadUsers(), loadSettings(), loadLogs() ]);
+}
+document.getElementById('btnReloadAll').addEventListener('click', reloadAll);
+document.getElementById('btnRefreshWithdraws').addEventListener('click', loadWithdraws);
+document.getElementById('btnRefreshUsers').addEventListener('click', loadUsers);
+document.getElementById('btnRefreshLogs').addEventListener('click', loadLogs);
+
+/* ====== Init ====== */
+(async ()=>{ try{ await reloadAll(); }catch(e){ console.error(e); showToast('Init error: '+e.message) } })();
 </script>
 </body>
 </html>
