@@ -11,86 +11,17 @@
         
         body { font-family: 'Roboto', 'Noto Sans Bengali', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; min-height: 100vh; }
         
-        /* === সাইডবার স্লাইড করার জন্য নতুন এবং পরিবর্তিত স্টাইল শুরু === */
-        .sidebar { 
-            background-color: var(--sidebar-color); 
-            width: 250px; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            position: fixed; 
-            top: 0;
-            left: 0;
-            height: 100%; 
-            z-index: 1000;
-            transform: translateX(-100%); /* প্রাথমিকভাবে বাম দিকে লুকানো থাকবে */
-            transition: transform 0.3s ease-in-out;
-        }
-        .sidebar.open {
-            transform: translateX(0); /* ক্লাস যোগ হলে স্লাইড করে ভেতরে আসবে */
-        }
-        
-        .main-content { 
-            flex-grow: 1; 
-            padding: 30px; 
-            transition: margin-left 0.3s ease-in-out;
-        }
-
-        /* বড় স্ক্রিনের জন্য (ডেস্কটপ) */
-        @media (min-width: 768px) {
-            body.sidebar-open .main-content {
-                margin-left: 250px; /* সাইডবার খোলা থাকলে কনটেন্ট ডানে সরবে */
-            }
-        }
-        
-        #menu-toggle {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            background: var(--primary-color);
-            border: none;
-            color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        #menu-toggle .bar {
-            width: 100%;
-            height: 3px;
-            background-color: white;
-            border-radius: 2px;
-        }
-
-        #sidebar-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            display: none; /* ডিফল্টভাবে লুকানো থাকবে */
-        }
-
-        /* ছোট স্ক্রিনের জন্য (মোবাইল) */
-        @media (max-width: 767px) {
-            body.sidebar-open #sidebar-overlay {
-                display: block; /* সাইডবার খুললে ওভারলে দেখা যাবে */
-            }
-        }
-        /* === সাইডবার স্লাইড করার জন্য নতুন স্টাইল শেষ === */
-
+        .sidebar { background-color: var(--sidebar-color); width: 250px; padding: 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100%; z-index: 1000; transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+        .sidebar.open { transform: translateX(0); }
+        .main-content { flex-grow: 1; padding: 30px; transition: margin-left 0.3s ease-in-out; }
+        @media (min-width: 768px) { body.sidebar-open .main-content { margin-left: 250px; } }
+        #menu-toggle { position: fixed; top: 15px; left: 15px; z-index: 1001; background: var(--primary-color); border: none; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-around; padding: 8px; box-sizing: border-box; }
+        #menu-toggle .bar { width: 100%; height: 3px; background-color: white; border-radius: 2px; }
+        #sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+        @media (max-width: 767px) { body.sidebar-open #sidebar-overlay { display: block; } }
         .sidebar h1 { color: var(--accent-color); text-align: center; margin-bottom: 30px; }
         .sidebar nav a { display: block; color: var(--text-color); padding: 15px; text-decoration: none; border-radius: 8px; margin-bottom: 10px; transition: background-color 0.2s; }
         .sidebar nav a.active, .sidebar nav a:hover { background-color: var(--primary-color); }
-        
         .page { display: none; }
         .page.active { display: block; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
@@ -110,7 +41,7 @@
         .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); }
         .form-control { width: 100%; padding: 12px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px; box-sizing: border-box; }
         .form-control:focus { outline: none; border-color: var(--accent-color); }
-        textarea.form-control { min-height: 150px; resize: vertical; }
+        textarea.form-control { min-height: 100px; resize: vertical; }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1050; }
         .modal-content { background: var(--card-color); padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
@@ -131,7 +62,6 @@
         </div>
     </div>
 
-    <!-- সাইডবার (HTML অপরিবর্তিত) -->
     <aside class="sidebar">
         <h1>Admin Panel</h1>
         <nav>
@@ -139,14 +69,13 @@
             <a href="#" class="nav-item" data-page="users">Users</a>
             <a href="#" class="nav-item" data-page="withdrawals">Withdrawals</a>
             <a href="#" class="nav-item" data-page="settings">Settings</a>
+            <a href="#" class="nav-item" data-page="broadcast">Broadcast</a>
         </nav>
     </aside>
 
-    <!-- নতুন ওভারলে -->
     <div id="sidebar-overlay"></div>
 
     <main class="main-content" style="display: none;">
-        <!-- নতুন মেনু বাটন -->
         <button id="menu-toggle" style="display: none;">
             <div class="bar"></div>
             <div class="bar"></div>
@@ -198,25 +127,35 @@
                 <h3>Withdrawal Settings</h3>
                 <div class="form-group"><label for="minWithdrawAmount">Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div>
                 <div class="form-group"><label for="minWithdrawReferrals">Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div>
-                
                 <h3>Reward Settings</h3>
                 <div class="form-group"><label for="adReward">Reward per Ad Watch (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div>
                 <div class="form-group"><label for="referralReward">Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control"></div>
-                
                 <h3>Link Settings</h3>
                 <div class="form-group"><label for="tutorialLink">Tutorial Video Link</label><input type="text" id="tutorialLink" class="form-control"></div>
                 <div class="form-group"><label for="adminChatLink">Admin Chat Link</label><input type="text" id="adminChatLink" class="form-control"></div>
                 <div class="form-group"><label for="adminCallLink">Admin Call Link (e.g., tel:+8801...)</label><input type="text" id="adminCallLink" class="form-control"></div>
                 <div class="form-group"><label for="telegramChannelLink">Telegram Channel Link (for Task)</label><input type="text" id="telegramChannelLink" class="form-control"></div>
                 <div class="form-group"><label for="youtubeChannelLink">YouTube Channel Link (for Task)</label><input type="text" id="youtubeChannelLink" class="form-control"></div>
-
                 <h3>Content Settings</h3>
                 <div class="form-group"><label for="welcomeMessageTitle">Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div>
-                <div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control"></textarea></div>
-                <div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control"></textarea></div>
-                
+                <div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control" rows="5"></textarea></div>
+                <div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control" rows="5"></textarea></div>
                 <button type="submit" class="btn btn-primary">Save Settings</button>
             </form>
+        </div>
+        
+        <div id="page-broadcast" class="page">
+            <h2>Send Broadcast Message</h2>
+            <form id="broadcast-form">
+                <div class="form-group"><label for="broadcast-message">Message (required)</label><textarea id="broadcast-message" class="form-control" rows="4" required placeholder="Type your message here..."></textarea></div>
+                <div class="form-group"><label for="broadcast-image-url">Image URL (optional)</label><input type="url" id="broadcast-image-url" class="form-control" placeholder="https://example.com/image.jpg"></div>
+                <div class="form-group"><label for="broadcast-video-url">Video URL (optional)</label><input type="url" id="broadcast-video-url" class="form-control" placeholder="https://example.com/video.mp4"></div>
+                <button type="submit" class="btn btn-primary">Send to All Users</button>
+            </form>
+            <div class="table-container" style="margin-top: 40px;">
+                <h3>Broadcast History</h3>
+                <table><thead><tr><th>Date</th><th>Message</th><th>Media URL</th></tr></thead><tbody id="broadcast-history-table"></tbody></table>
+            </div>
         </div>
     </main>
 
@@ -226,41 +165,38 @@
             <form id="edit-user-form">
                 <input type="hidden" id="edit-user-id">
                 <div class="form-group"><label for="edit-user-name">Name</label><input type="text" id="edit-user-name" class="form-control" disabled></div>
-                <div class="form-group"><label for="edit-user-balance">Balance</label><input type="number" id="edit-user-balance" class="form-control" step="0.01"></div>
+                <div class="form-group"><label for="edit-user-balance">Current Balance (Set directly)</label><input type="number" id="edit-user-balance" class="form-control" step="0.01"></div>
                 <div class="form-group"><label for="edit-user-referrals">Referrals</label><input type="number" id="edit-user-referrals" class="form-control"></div>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </form>
+            <hr style="border-color: var(--border-color); margin: 25px 0;">
+            <h4>Adjust Balance</h4>
+            <div class="form-group">
+                <label for="adjust-balance-amount">Amount to Add / Deduct</label>
+                <input type="number" id="adjust-balance-amount" class="form-control" step="0.01" placeholder="e.g., 10 or 50.50">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="button" id="add-balance-btn" class="btn btn-success">Add Balance</button>
+                <button type="button" id="deduct-balance-btn" class="btn btn-danger">Deduct Balance</button>
+            </div>
         </div>
     </div>
     
-    <!-- সাইডবার টগল করার জন্য নতুন জাভাস্ক্রিপ্ট -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             const body = document.body;
-
-            const toggleSidebar = () => {
-                sidebar.classList.toggle('open');
-                body.classList.toggle('sidebar-open');
-            };
-
+            const toggleSidebar = () => { sidebar.classList.toggle('open'); body.classList.toggle('sidebar-open'); };
             menuToggle.addEventListener('click', toggleSidebar);
             overlay.addEventListener('click', toggleSidebar);
-
-            // ছোট স্ক্রিনে কোনো মেনু আইটেমে ক্লিক করলে সাইডবার বন্ধ হয়ে যাবে
             document.querySelectorAll('.sidebar .nav-item').forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth < 768 && sidebar.classList.contains('open')) {
-                        toggleSidebar();
-                    }
-                });
+                link.addEventListener('click', () => { if (window.innerWidth < 768 && sidebar.classList.contains('open')) { toggleSidebar(); } });
             });
         });
     </script>
 
-    <!-- Firebase SDK (অপরিবর্তিত) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
         import { getDatabase, ref, onValue, get, set, update, remove } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
@@ -278,22 +214,18 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- AUTHENTICATION ---
-        const ADMIN_PASSWORD = "admin"; // <-- এখানে আপনার পছন্দমত একটি কঠিন পাসওয়ার্ড দিন
+        const ADMIN_PASSWORD = "admin";
         document.getElementById('login-btn').addEventListener('click', () => {
             if (document.getElementById('admin-password').value === ADMIN_PASSWORD) {
                 document.getElementById('login-overlay').style.display = 'none';
-                document.querySelector('.sidebar').classList.add('open'); // ডিফল্টভাবে সাইডবার খোলা থাকবে
+                document.querySelector('.sidebar').classList.add('open');
                 document.body.classList.add('sidebar-open');
                 document.querySelector('.main-content').style.display = 'block';
-                document.getElementById('menu-toggle').style.display = 'flex'; // মেনু বাটন দেখানো হবে
+                document.getElementById('menu-toggle').style.display = 'flex';
                 loadDashboardData();
-            } else {
-                alert('Incorrect Password!');
-            }
+            } else { alert('Incorrect Password!'); }
         });
 
-        // --- NAVIGATION ---
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -301,192 +233,43 @@
                 document.querySelector('.page.active').classList.remove('active');
                 item.classList.add('active');
                 document.getElementById(`page-${item.dataset.page}`).classList.add('active');
-                
                 const page = item.dataset.page;
                 if (page === 'dashboard') loadDashboardData();
                 if (page === 'users') loadUsers();
                 if (page === 'withdrawals') loadWithdrawals();
                 if (page === 'settings') loadSettings();
+                if (page === 'broadcast') loadBroadcastHistory();
             });
         });
 
-        // --- DASHBOARD ---
-        function loadDashboardData() {
-            onValue(ref(db, 'users'), (snapshot) => {
-                const data = snapshot.val();
-                if (data) {
-                    document.getElementById('total-users').innerText = Object.keys(data).length;
-                    document.getElementById('total-balance').innerText = Object.values(data).reduce((sum, user) => sum + (user.balance || 0), 0).toFixed(2);
-                } else {
-                    document.getElementById('total-users').innerText = 0;
-                    document.getElementById('total-balance').innerText = '0.00';
-                }
-            });
-            onValue(ref(db, 'withdrawals/pending'), (snapshot) => {
-                const data = snapshot.val();
-                document.getElementById('pending-withdrawals').innerText = data ? Object.keys(data).length : 0;
-            });
-            onValue(ref(db, 'withdrawals/completed'), (snapshot) => {
-                const data = snapshot.val();
-                const totalWithdrawn = data ? Object.values(data).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0;
-                document.getElementById('total-withdrawn').innerText = totalWithdrawn.toFixed(2);
-            });
-        }
+        function loadDashboardData() { onValue(ref(db, 'users'), s => { const d = s.val(); document.getElementById('total-users').innerText = d ? Object.keys(d).length : 0; document.getElementById('total-balance').innerText = d ? Object.values(d).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2) : '0.00'; }); onValue(ref(db, 'withdrawals/pending'), s => { document.getElementById('pending-withdrawals').innerText = s.exists() ? Object.keys(s.val()).length : 0; }); onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); }); }
         
-        // --- USERS MANAGEMENT ---
-        function loadUsers() {
-            onValue(ref(db, 'users'), (snapshot) => {
-                const usersTableBody = document.getElementById('users-table-body');
-                usersTableBody.innerHTML = '';
-                const data = snapshot.val();
-                if (data) {
-                    for (const userId in data) {
-                        const user = data[userId];
-                        usersTableBody.innerHTML += `
-                            <tr data-user-id="${userId}" data-user-name="${user.name || ''}">
-                                <td>${userId}</td>
-                                <td>${user.name || 'N/A'}</td>
-                                <td>${(user.balance || 0).toFixed(2)}</td>
-                                <td>${user.referrals || 0}</td>
-                                <td><button class="btn btn-primary edit-user-btn" data-id="${userId}">Edit</button></td>
-                            </tr>`;
-                    }
-                } else {
-                    usersTableBody.innerHTML = '<tr><td colspan="5">No users found.</td></tr>';
-                }
-            });
-        }
+        function loadUsers() { onValue(ref(db, 'users'), s => { const t = document.getElementById('users-table-body'); t.innerHTML = ''; if (s.exists()) { for (const uid in s.val()) { const u = s.val()[uid]; t.innerHTML += `<tr data-user-id="${uid}" data-user-name="${u.name||''}"><td>${uid}</td><td>${u.name||'N/A'}</td><td>${(u.balance||0).toFixed(2)}</td><td>${u.referrals||0}</td><td><button class="btn btn-primary edit-user-btn" data-id="${uid}">Edit</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="5">No users found.</td></tr>'; } }); }
 
-        document.getElementById('user-search').addEventListener('keyup', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            document.querySelectorAll('#users-table-body tr').forEach(row => {
-                const userName = row.dataset.userName.toLowerCase();
-                const userId = row.dataset.userId.toLowerCase();
-                row.style.display = (userName.includes(searchTerm) || userId.includes(searchTerm)) ? '' : 'none';
-            });
-        });
+        document.getElementById('user-search').addEventListener('keyup', e => { const term = e.target.value.toLowerCase(); document.querySelectorAll('#users-table-body tr').forEach(r => { r.style.display = (r.dataset.userName.toLowerCase().includes(term) || r.dataset.userId.toLowerCase().includes(term)) ? '' : 'none'; }); });
 
         const modal = document.getElementById('edit-user-modal');
-        document.getElementById('users-table-body').addEventListener('click', async (e) => {
-            if (e.target.classList.contains('edit-user-btn')) {
-                const userId = e.target.dataset.id;
-                const snapshot = await get(ref(db, `users/${userId}`));
-                if(snapshot.exists()){
-                    const user = snapshot.val();
-                    document.getElementById('edit-user-id').value = userId;
-                    document.getElementById('edit-user-name').value = user.name || '';
-                    document.getElementById('edit-user-balance').value = user.balance || 0;
-                    document.getElementById('edit-user-referrals').value = user.referrals || 0;
-                    modal.style.display = 'flex';
-                }
-            }
-        });
-
+        document.getElementById('users-table-body').addEventListener('click', async e => { if (e.target.classList.contains('edit-user-btn')) { const uid = e.target.dataset.id; const u = (await get(ref(db, `users/${uid}`))).val(); if(u){ document.getElementById('edit-user-id').value = uid; document.getElementById('edit-user-name').value = u.name||''; document.getElementById('edit-user-balance').value = u.balance||0; document.getElementById('edit-user-referrals').value = u.referrals||0; document.getElementById('adjust-balance-amount').value = ''; modal.style.display = 'flex'; } } });
+        
         document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
-        document.getElementById('edit-user-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const userId = document.getElementById('edit-user-id').value;
-            const updates = {
-                balance: parseFloat(document.getElementById('edit-user-balance').value),
-                referrals: parseInt(document.getElementById('edit-user-referrals').value)
-            };
-            update(ref(db, `users/${userId}`), updates)
-                .then(() => { alert('User updated successfully!'); modal.style.display = 'none'; })
-                .catch(err => alert('Error updating user: ' + err.message));
-        });
-
-        // --- WITHDRAWALS MANAGEMENT ---
-        function loadWithdrawals() {
-            onValue(ref(db, 'withdrawals/pending'), (snapshot) => {
-                const tableBody = document.getElementById('pending-withdrawals-table');
-                tableBody.innerHTML = '';
-                const data = snapshot.val();
-                if (data) {
-                    for (const id in data) {
-                        const req = data[id];
-                        tableBody.innerHTML += `<tr><td>${req.userId}</td><td>${req.userName || 'N/A'}</td><td>${req.amount}</td><td>${req.method}</td><td>${req.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`;
-                    }
-                } else {
-                    tableBody.innerHTML = '<tr><td colspan="6">No pending requests.</td></tr>';
-                }
-            });
-            onValue(ref(db, 'withdrawals/completed'), (snapshot) => {
-                const tableBody = document.getElementById('completed-withdrawals-table');
-                tableBody.innerHTML = '';
-                const data = snapshot.val();
-                if(data){
-                    Object.entries(data).forEach(([id, req]) => {
-                        tableBody.innerHTML += `<tr><td>${req.userId}</td><td>${req.userName||'N/A'}</td><td>${req.amount}</td><td>${req.method}</td><td>${req.accountNumber}</td><td style="color:${req.status === 'approved' ? 'var(--success-color)' : 'var(--error-color)'};">${req.status}</td></tr>`;
-                    });
-                } else {
-                    tableBody.innerHTML = '<tr><td colspan="6">No history found.</td></tr>';
-                }
-            });
-        }
         
-        window.handleWithdrawal = async (id, newStatus) => {
-            const pendingRef = ref(db, `withdrawals/pending/${id}`);
-            const snapshot = await get(pendingRef);
-            if (!snapshot.exists()) { alert('Request not found or already processed.'); return; }
-            
-            const requestData = snapshot.val();
-            requestData.status = newStatus;
+        document.getElementById('edit-user-form').addEventListener('submit', e => { e.preventDefault(); const uid = document.getElementById('edit-user-id').value; const u = { balance: parseFloat(document.getElementById('edit-user-balance').value), referrals: parseInt(document.getElementById('edit-user-referrals').value) }; update(ref(db, `users/${uid}`), u).then(() => { alert('User updated!'); modal.style.display = 'none'; }).catch(err => alert('Error: ' + err.message)); });
 
-            if (newStatus === 'rejected') {
-                const userBalanceRef = ref(db, `users/${requestData.userId}/balance`);
-                const userSnapshot = await get(userBalanceRef);
-                if (userSnapshot.exists()) {
-                    await set(userBalanceRef, userSnapshot.val() + requestData.amount);
-                }
-            }
-            
-            await set(ref(db, `withdrawals/completed/${id}`), requestData);
-            await remove(pendingRef);
-            alert(`Request has been ${newStatus}.`);
-        }
+        document.getElementById('add-balance-btn').addEventListener('click', async () => { const uid = document.getElementById('edit-user-id').value; const amountInput = document.getElementById('adjust-balance-amount'); const amount = parseFloat(amountInput.value); if (!uid || isNaN(amount) || amount <= 0) { alert('Please enter a valid positive amount.'); return; } const userRef = ref(db, `users/${uid}`); const s = await get(userRef); if (s.exists()) { const cb = s.val().balance || 0; const nb = cb + amount; update(userRef, { balance: nb }).then(() => { alert(`${amount.toFixed(2)} Taka added. New balance: ${nb.toFixed(2)}`); document.getElementById('edit-user-balance').value = nb.toFixed(2); amountInput.value = ''; }); } });
 
-        // --- SETTINGS MANAGEMENT ---
-        function loadSettings() {
-            get(ref(db, 'settings')).then((snapshot) => {
-                if(snapshot.exists()) {
-                    const s = snapshot.val();
-                    document.getElementById('minWithdrawAmount').value = s.minWithdrawAmount || '';
-                    document.getElementById('minWithdrawReferrals').value = s.minWithdrawReferrals || '';
-                    document.getElementById('adReward').value = s.adReward || '';
-                    document.getElementById('referralReward').value = s.referralReward || '';
-                    document.getElementById('tutorialLink').value = s.tutorialLink || '';
-                    document.getElementById('adminChatLink').value = s.adminChatLink || '';
-                    document.getElementById('adminCallLink').value = s.adminCallLink || '';
-                    document.getElementById('telegramChannelLink').value = s.telegramChannelLink || '';
-                    document.getElementById('youtubeChannelLink').value = s.youtubeChannelLink || '';
-                    document.getElementById('welcomeMessageTitle').value = s.welcomeMessageTitle || '';
-                    document.getElementById('welcomeMessageBody').value = s.welcomeMessageBody || '';
-                    document.getElementById('noticeContent').value = s.noticeContent || '';
-                }
-            });
-        }
+        document.getElementById('deduct-balance-btn').addEventListener('click', async () => { const uid = document.getElementById('edit-user-id').value; const amountInput = document.getElementById('adjust-balance-amount'); const amount = parseFloat(amountInput.value); if (!uid || isNaN(amount) || amount <= 0) { alert('Please enter a valid positive amount.'); return; } const userRef = ref(db, `users/${uid}`); const s = await get(userRef); if (s.exists()) { const cb = s.val().balance || 0; if (cb < amount) { alert(`Failed. User only has ${cb.toFixed(2)} Taka.`); return; } const nb = cb - amount; update(userRef, { balance: nb }).then(() => { alert(`${amount.toFixed(2)} Taka deducted. New balance: ${nb.toFixed(2)}`); document.getElementById('edit-user-balance').value = nb.toFixed(2); amountInput.value = ''; }); } });
+
+        function loadWithdrawals() { onValue(ref(db, 'withdrawals/pending'), s => { const t = document.getElementById('pending-withdrawals-table'); t.innerHTML = ''; if (s.exists()) { for (const id in s.val()) { const r = s.val()[id]; t.innerHTML += `<tr><td>${r.userId}</td><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="6">No pending requests.</td></tr>'; } }); onValue(ref(db, 'withdrawals/completed'), s => { const t = document.getElementById('completed-withdrawals-table'); t.innerHTML = ''; if(s.exists()){ Object.values(s.val()).forEach(r => { t.innerHTML += `<tr><td>${r.userId}</td><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td style="color:${r.status==='approved'?'var(--success-color)':'var(--error-color)'};">${r.status}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="6">No history found.</td></tr>'; } }); }
         
-        document.getElementById('settings-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newSettings = {
-                minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0,
-                minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0,
-                adReward: parseFloat(document.getElementById('adReward').value) || 0,
-                referralReward: parseFloat(document.getElementById('referralReward').value) || 0,
-                tutorialLink: document.getElementById('tutorialLink').value,
-                adminChatLink: document.getElementById('adminChatLink').value,
-                adminCallLink: document.getElementById('adminCallLink').value,
-                telegramChannelLink: document.getElementById('telegramChannelLink').value,
-                youtubeChannelLink: document.getElementById('youtubeChannelLink').value,
-                welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value,
-                welcomeMessageBody: document.getElementById('welcomeMessageBody').value,
-                noticeContent: document.getElementById('noticeContent').value
-            };
+        window.handleWithdrawal = async (id, status) => { const reqRef = ref(db, `withdrawals/pending/${id}`); const s = await get(reqRef); if (!s.exists()) { alert('Request already processed.'); return; } const d = s.val(); d.status = status; if (status === 'rejected') { const userBalRef = ref(db, `users/${d.userId}/balance`); const userBal = (await get(userBalRef)).val(); await set(userBalRef, userBal + d.amount); } await set(ref(db, `withdrawals/completed/${id}`), d); await remove(reqRef); alert(`Request has been ${status}.`); }
 
-            set(ref(db, 'settings'), newSettings)
-                .then(() => alert('Settings saved successfully!'))
-                .catch(err => alert('Error saving settings: ' + err.message));
-        });
+        function loadSettings() { get(ref(db, 'settings')).then(s => { if(s.exists()) { const d = s.val(); Object.keys(d).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = d[k]; }); } }); }
+        
+        document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const s = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0, minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0, adReward: parseFloat(document.getElementById('adReward').value) || 0, referralReward: parseFloat(document.getElementById('referralReward').value) || 0, tutorialLink: document.getElementById('tutorialLink').value, adminChatLink: document.getElementById('adminChatLink').value, adminCallLink: document.getElementById('adminCallLink').value, telegramChannelLink: document.getElementById('telegramChannelLink').value, youtubeChannelLink: document.getElementById('youtubeChannelLink').value, welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value }; set(ref(db, 'settings'), s).then(() => alert('Settings saved!')).catch(err => alert('Error: ' + err.message)); });
+
+        function loadBroadcastHistory() { onValue(ref(db, 'broadcast/history'), s => { const t = document.getElementById('broadcast-history-table'); t.innerHTML = ''; if (s.exists()) { Object.keys(s.val()).reverse().forEach(k => { const m = s.val()[k]; const d = new Date(m.timestamp).toLocaleString(); let media = !m.imageUrl && !m.videoUrl ? 'N/A' : `<a href="${m.imageUrl||m.videoUrl}" target="_blank">${m.imageUrl?'Image':'Video'} Link</a>`; t.innerHTML += `<tr><td>${d}</td><td style="white-space: pre-wrap; word-break: break-word;">${m.text}</td><td>${media}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="3">No history found.</td></tr>'; } }); }
+        
+        document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const text = document.getElementById('broadcast-message').value; if (!text.trim()) { alert('Message cannot be empty.'); return; } const id = Date.now(); const msg = { id, text, imageUrl: document.getElementById('broadcast-image-url').value||null, videoUrl: document.getElementById('broadcast-video-url').value||null, timestamp: id }; set(ref(db, 'broadcast/latestMessage'), msg).then(() => set(ref(db, `broadcast/history/${id}`), msg)).then(() => { alert('Broadcast sent!'); document.getElementById('broadcast-form').reset(); }).catch(err => alert('Error: ' + err.message)); });
     </script>
 </body>
 </html>
