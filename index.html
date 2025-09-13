@@ -1,1 +1,377 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Earne-Admin Panel</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&display=swap');
+        :root { --bg-color: #1a1a2e; --sidebar-color: #16213e; --card-color: #1f2847; --primary-color: #0f3460; --accent-color: #e94560; --text-color: #e0e0e0; --text-secondary: #a0a0c0; --border-color: #30395e; --success-color: #28a745; --error-color: #dc3545; }
+        body { font-family: 'Roboto', 'Noto Sans Bengali', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; display: flex; min-height: 100vh; }
+        .sidebar { background-color: var(--sidebar-color); width: 250px; padding: 20px; display: flex; flex-direction: column; position: fixed; height: 100%; }
+        .sidebar h1 { color: var(--accent-color); text-align: center; margin-bottom: 30px; }
+        .sidebar nav a { display: block; color: var(--text-color); padding: 15px; text-decoration: none; border-radius: 8px; margin-bottom: 10px; transition: background-color 0.2s; }
+        .sidebar nav a.active, .sidebar nav a:hover { background-color: var(--primary-color); }
+        .main-content { flex-grow: 1; padding: 30px; margin-left: 250px; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .card { background-color: var(--card-color); padding: 25px; border-radius: 12px; border-left: 5px solid var(--accent-color); }
+        .card h3 { margin: 0 0 10px; color: var(--text-secondary); }
+        .card p { font-size: 2rem; font-weight: 700; margin: 0; color: #fff; }
+        .table-container { background-color: var(--card-color); padding: 20px; border-radius: 12px; margin-top: 30px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
+        th { background-color: var(--primary-color); }
+        tr:hover { background-color: rgba(255, 255, 255, 0.05); }
+        .btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .btn-success { background-color: var(--success-color); color: white; }
+        .btn-danger { background-color: var(--error-color); color: white; }
+        .btn-primary { background-color: var(--accent-color); color: white; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); }
+        .form-control { width: 100%; padding: 12px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px; box-sizing: border-box; }
+        .form-control:focus { outline: none; border-color: var(--accent-color); }
+        textarea.form-control { min-height: 150px; resize: vertical; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--card-color); padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+        #login-box { background: var(--card-color); padding: 40px; border-radius: 12px; text-align: center; }
+        #login-box h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div id="login-box">
+            <h2>Admin Login</h2>
+            <div class="form-group">
+                <input type="password" id="admin-password" class="form-control" placeholder="Enter Password">
+            </div>
+            <button id="login-btn" class="btn btn-primary">Login</button>
+        </div>
+    </div>
+
+    <aside class="sidebar" style="display: none;">
+        <h1>Admin Panel</h1>
+        <nav>
+            <a href="#" class="nav-item active" data-page="dashboard">Dashboard</a>
+            <a href="#" class="nav-item" data-page="users">Users</a>
+            <a href="#" class="nav-item" data-page="withdrawals">Withdrawals</a>
+            <a href="#" class="nav-item" data-page="settings">Settings</a>
+        </nav>
+    </aside>
+
+    <main class="main-content" style="display: none;">
+        <div id="page-dashboard" class="page active">
+            <h2>Dashboard</h2>
+            <div class="dashboard-grid">
+                <div class="card"><h3>Total Users</h3><p id="total-users">0</p></div>
+                <div class="card"><h3>Pending Withdrawals</h3><p id="pending-withdrawals">0</p></div>
+                <div class="card"><h3>Total Withdrawn (Taka)</h3><p id="total-withdrawn">0</p></div>
+                <div class="card"><h3>Total Balance (All Users)</h3><p id="total-balance">0</p></div>
+            </div>
+        </div>
+
+        <div id="page-users" class="page">
+            <h2>Users Management</h2>
+            <div class="form-group"><input type="text" id="user-search" class="form-control" placeholder="Search by User ID or Name..."></div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>User ID</th><th>Name</th><th>Balance (TK)</th><th>Referrals</th><th>Actions</th></tr></thead>
+                    <tbody id="users-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="page-withdrawals" class="page">
+            <h2>Withdrawal Requests</h2>
+            <div class="table-container">
+                <h3>Pending Requests</h3>
+                <table>
+                    <thead><tr><th>User ID</th><th>Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Actions</th></tr></thead>
+                    <tbody id="pending-withdrawals-table"></tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <h3>Completed/Rejected History</h3>
+                <table>
+                    <thead><tr><th>User ID</th><th>Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Status</th></tr></thead>
+                    <tbody id="completed-withdrawals-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Settings Page (আপডেট করা হয়েছে) -->
+        <div id="page-settings" class="page">
+            <h2>App Settings</h2>
+            <form id="settings-form">
+                <h3>Withdrawal Settings</h3>
+                <div class="form-group"><label for="minWithdrawAmount">Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div>
+                <div class="form-group"><label for="minWithdrawReferrals">Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div>
+                
+                <h3>Reward Settings</h3>
+                <div class="form-group"><label for="adReward">Reward per Ad Watch (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div>
+                <div class="form-group"><label for="referralReward">Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control"></div>
+                
+                <h3>Link Settings</h3>
+                <div class="form-group"><label for="tutorialLink">Tutorial Video Link</label><input type="text" id="tutorialLink" class="form-control"></div>
+                <div class="form-group"><label for="adminChatLink">Admin Chat Link</label><input type="text" id="adminChatLink" class="form-control"></div>
+                <div class="form-group"><label for="adminCallLink">Admin Call Link (e.g., tel:+8801...)</label><input type="text" id="adminCallLink" class="form-control"></div>
+                <div class="form-group"><label for="telegramChannelLink">Telegram Channel Link (for Task)</label><input type="text" id="telegramChannelLink" class="form-control"></div>
+                <div class="form-group"><label for="youtubeChannelLink">YouTube Channel Link (for Task)</label><input type="text" id="youtubeChannelLink" class="form-control"></div>
+
+                <h3>Content Settings</h3>
+                <div class="form-group"><label for="welcomeMessageTitle">Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div>
+                <div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control"></textarea></div>
+                <div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control"></textarea></div>
+                
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+            </form>
+        </div>
+    </main>
+
+    <div id="edit-user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Edit User</h3><span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span></div>
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id">
+                <div class="form-group"><label for="edit-user-name">Name</label><input type="text" id="edit-user-name" class="form-control" disabled></div>
+                <div class="form-group"><label for="edit-user-balance">Balance</label><input type="number" id="edit-user-balance" class="form-control" step="0.01"></div>
+                <div class="form-group"><label for="edit-user-referrals">Referrals</label><input type="number" id="edit-user-referrals" class="form-control"></div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        import { getDatabase, ref, onValue, get, set, update, remove } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAEJRfxHkMF7YEuTl7oB7ZSDiQDxuK0-u0",
+            authDomain: "daily-earne-2f8d2.firebaseapp.com",
+            databaseURL: "https://daily-earne-2f8d2-default-rtdb.firebaseio.com",
+            projectId: "daily-earne-2f8d2",
+            storageBucket: "daily-earne-2f8d2.firebasestorage.app",
+            messagingSenderId: "138048965028",
+            appId: "1:138048965028:web:a9ad47644cf425fe925931"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // --- AUTHENTICATION ---
+        const ADMIN_PASSWORD = "admin"; // <-- এখানে আপনার পছন্দমত একটি কঠিন পাসওয়ার্ড দিন
+        document.getElementById('login-btn').addEventListener('click', () => {
+            if (document.getElementById('admin-password').value === ADMIN_PASSWORD) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.querySelector('.sidebar').style.display = 'flex';
+                document.querySelector('.main-content').style.display = 'block';
+                loadDashboardData();
+            } else {
+                alert('Incorrect Password!');
+            }
+        });
+
+        // --- NAVIGATION ---
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('.nav-item.active').classList.remove('active');
+                document.querySelector('.page.active').classList.remove('active');
+                item.classList.add('active');
+                document.getElementById(`page-${item.dataset.page}`).classList.add('active');
+                
+                const page = item.dataset.page;
+                if (page === 'dashboard') loadDashboardData();
+                if (page === 'users') loadUsers();
+                if (page === 'withdrawals') loadWithdrawals();
+                if (page === 'settings') loadSettings();
+            });
+        });
+
+        // --- DASHBOARD ---
+        function loadDashboardData() {
+            onValue(ref(db, 'users'), (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    document.getElementById('total-users').innerText = Object.keys(data).length;
+                    document.getElementById('total-balance').innerText = Object.values(data).reduce((sum, user) => sum + (user.balance || 0), 0).toFixed(2);
+                } else {
+                    document.getElementById('total-users').innerText = 0;
+                    document.getElementById('total-balance').innerText = '0.00';
+                }
+            });
+            onValue(ref(db, 'withdrawals/pending'), (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById('pending-withdrawals').innerText = data ? Object.keys(data).length : 0;
+            });
+            onValue(ref(db, 'withdrawals/completed'), (snapshot) => {
+                const data = snapshot.val();
+                const totalWithdrawn = data ? Object.values(data).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0;
+                document.getElementById('total-withdrawn').innerText = totalWithdrawn.toFixed(2);
+            });
+        }
+        
+        // --- USERS MANAGEMENT ---
+        function loadUsers() {
+            onValue(ref(db, 'users'), (snapshot) => {
+                const usersTableBody = document.getElementById('users-table-body');
+                usersTableBody.innerHTML = '';
+                const data = snapshot.val();
+                if (data) {
+                    for (const userId in data) {
+                        const user = data[userId];
+                        usersTableBody.innerHTML += `
+                            <tr data-user-id="${userId}" data-user-name="${user.name || ''}">
+                                <td>${userId}</td>
+                                <td>${user.name || 'N/A'}</td>
+                                <td>${(user.balance || 0).toFixed(2)}</td>
+                                <td>${user.referrals || 0}</td>
+                                <td><button class="btn btn-primary edit-user-btn" data-id="${userId}">Edit</button></td>
+                            </tr>`;
+                    }
+                } else {
+                    usersTableBody.innerHTML = '<tr><td colspan="5">No users found.</td></tr>';
+                }
+            });
+        }
+
+        document.getElementById('user-search').addEventListener('keyup', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('#users-table-body tr').forEach(row => {
+                const userName = row.dataset.userName.toLowerCase();
+                const userId = row.dataset.userId.toLowerCase();
+                row.style.display = (userName.includes(searchTerm) || userId.includes(searchTerm)) ? '' : 'none';
+            });
+        });
+
+        const modal = document.getElementById('edit-user-modal');
+        document.getElementById('users-table-body').addEventListener('click', async (e) => {
+            if (e.target.classList.contains('edit-user-btn')) {
+                const userId = e.target.dataset.id;
+                const snapshot = await get(ref(db, `users/${userId}`));
+                if(snapshot.exists()){
+                    const user = snapshot.val();
+                    document.getElementById('edit-user-id').value = userId;
+                    document.getElementById('edit-user-name').value = user.name || '';
+                    document.getElementById('edit-user-balance').value = user.balance || 0;
+                    document.getElementById('edit-user-referrals').value = user.referrals || 0;
+                    modal.style.display = 'flex';
+                }
+            }
+        });
+
+        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
+        document.getElementById('edit-user-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('edit-user-id').value;
+            const updates = {
+                balance: parseFloat(document.getElementById('edit-user-balance').value),
+                referrals: parseInt(document.getElementById('edit-user-referrals').value)
+            };
+            update(ref(db, `users/${userId}`), updates)
+                .then(() => { alert('User updated successfully!'); modal.style.display = 'none'; })
+                .catch(err => alert('Error updating user: ' + err.message));
+        });
+
+        // --- WITHDRAWALS MANAGEMENT ---
+        function loadWithdrawals() {
+            onValue(ref(db, 'withdrawals/pending'), (snapshot) => {
+                const tableBody = document.getElementById('pending-withdrawals-table');
+                tableBody.innerHTML = '';
+                const data = snapshot.val();
+                if (data) {
+                    for (const id in data) {
+                        const req = data[id];
+                        tableBody.innerHTML += `<tr><td>${req.userId}</td><td>${req.userName || 'N/A'}</td><td>${req.amount}</td><td>${req.method}</td><td>${req.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`;
+                    }
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="6">No pending requests.</td></tr>';
+                }
+            });
+            onValue(ref(db, 'withdrawals/completed'), (snapshot) => {
+                const tableBody = document.getElementById('completed-withdrawals-table');
+                tableBody.innerHTML = '';
+                const data = snapshot.val();
+                if(data){
+                    Object.entries(data).forEach(([id, req]) => {
+                        tableBody.innerHTML += `<tr><td>${req.userId}</td><td>${req.userName||'N/A'}</td><td>${req.amount}</td><td>${req.method}</td><td>${req.accountNumber}</td><td style="color:${req.status === 'approved' ? 'var(--success-color)' : 'var(--error-color)'};">${req.status}</td></tr>`;
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="6">No history found.</td></tr>';
+                }
+            });
+        }
+        
+        window.handleWithdrawal = async (id, newStatus) => {
+            const pendingRef = ref(db, `withdrawals/pending/${id}`);
+            const snapshot = await get(pendingRef);
+            if (!snapshot.exists()) { alert('Request not found or already processed.'); return; }
+            
+            const requestData = snapshot.val();
+            requestData.status = newStatus;
+
+            if (newStatus === 'rejected') {
+                const userBalanceRef = ref(db, `users/${requestData.userId}/balance`);
+                const userSnapshot = await get(userBalanceRef);
+                if (userSnapshot.exists()) {
+                    await set(userBalanceRef, userSnapshot.val() + requestData.amount);
+                }
+            }
+            
+            await set(ref(db, `withdrawals/completed/${id}`), requestData);
+            await remove(pendingRef);
+            alert(`Request has been ${newStatus}.`);
+        }
+
+        // --- SETTINGS MANAGEMENT (আপডেট করা হয়েছে) ---
+        function loadSettings() {
+            get(ref(db, 'settings')).then((snapshot) => {
+                if(snapshot.exists()) {
+                    const s = snapshot.val();
+                    document.getElementById('minWithdrawAmount').value = s.minWithdrawAmount || '';
+                    document.getElementById('minWithdrawReferrals').value = s.minWithdrawReferrals || '';
+                    document.getElementById('adReward').value = s.adReward || '';
+                    document.getElementById('referralReward').value = s.referralReward || '';
+                    document.getElementById('tutorialLink').value = s.tutorialLink || '';
+                    document.getElementById('adminChatLink').value = s.adminChatLink || '';
+                    document.getElementById('adminCallLink').value = s.adminCallLink || '';
+                    document.getElementById('telegramChannelLink').value = s.telegramChannelLink || '';
+                    document.getElementById('youtubeChannelLink').value = s.youtubeChannelLink || '';
+                    document.getElementById('welcomeMessageTitle').value = s.welcomeMessageTitle || '';
+                    document.getElementById('welcomeMessageBody').value = s.welcomeMessageBody || '';
+                    document.getElementById('noticeContent').value = s.noticeContent || '';
+                }
+            });
+        }
+        
+        document.getElementById('settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newSettings = {
+                minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0,
+                minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0,
+                adReward: parseFloat(document.getElementById('adReward').value) || 0,
+                referralReward: parseFloat(document.getElementById('referralReward').value) || 0,
+                tutorialLink: document.getElementById('tutorialLink').value,
+                adminChatLink: document.getElementById('adminChatLink').value,
+                adminCallLink: document.getElementById('adminCallLink').value,
+                telegramChannelLink: document.getElementById('telegramChannelLink').value,
+                youtubeChannelLink: document.getElementById('youtubeChannelLink').value,
+                welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value,
+                welcomeMessageBody: document.getElementById('welcomeMessageBody').value,
+                noticeContent: document.getElementById('noticeContent').value
+            };
+
+            set(ref(db, 'settings'), newSettings)
+                .then(() => alert('Settings saved successfully!'))
+                .catch(err => alert('Error saving settings: ' + err.message));
+        });
+    </script>
+</body>
+</html>
