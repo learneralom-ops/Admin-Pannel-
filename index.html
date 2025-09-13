@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,12 +8,89 @@
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&display=swap');
         :root { --bg-color: #1a1a2e; --sidebar-color: #16213e; --card-color: #1f2847; --primary-color: #0f3460; --accent-color: #e94560; --text-color: #e0e0e0; --text-secondary: #a0a0c0; --border-color: #30395e; --success-color: #28a745; --error-color: #dc3545; }
-        body { font-family: 'Roboto', 'Noto Sans Bengali', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; display: flex; min-height: 100vh; }
-        .sidebar { background-color: var(--sidebar-color); width: 250px; padding: 20px; display: flex; flex-direction: column; position: fixed; height: 100%; }
+        
+        body { font-family: 'Roboto', 'Noto Sans Bengali', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; min-height: 100vh; }
+        
+        /* === সাইডবার স্লাইড করার জন্য নতুন এবং পরিবর্তিত স্টাইল শুরু === */
+        .sidebar { 
+            background-color: var(--sidebar-color); 
+            width: 250px; 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            position: fixed; 
+            top: 0;
+            left: 0;
+            height: 100%; 
+            z-index: 1000;
+            transform: translateX(-100%); /* প্রাথমিকভাবে বাম দিকে লুকানো থাকবে */
+            transition: transform 0.3s ease-in-out;
+        }
+        .sidebar.open {
+            transform: translateX(0); /* ক্লাস যোগ হলে স্লাইড করে ভেতরে আসবে */
+        }
+        
+        .main-content { 
+            flex-grow: 1; 
+            padding: 30px; 
+            transition: margin-left 0.3s ease-in-out;
+        }
+
+        /* বড় স্ক্রিনের জন্য (ডেস্কটপ) */
+        @media (min-width: 768px) {
+            body.sidebar-open .main-content {
+                margin-left: 250px; /* সাইডবার খোলা থাকলে কনটেন্ট ডানে সরবে */
+            }
+        }
+        
+        #menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        #menu-toggle .bar {
+            width: 100%;
+            height: 3px;
+            background-color: white;
+            border-radius: 2px;
+        }
+
+        #sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none; /* ডিফল্টভাবে লুকানো থাকবে */
+        }
+
+        /* ছোট স্ক্রিনের জন্য (মোবাইল) */
+        @media (max-width: 767px) {
+            body.sidebar-open #sidebar-overlay {
+                display: block; /* সাইডবার খুললে ওভারলে দেখা যাবে */
+            }
+        }
+        /* === সাইডবার স্লাইড করার জন্য নতুন স্টাইল শেষ === */
+
         .sidebar h1 { color: var(--accent-color); text-align: center; margin-bottom: 30px; }
         .sidebar nav a { display: block; color: var(--text-color); padding: 15px; text-decoration: none; border-radius: 8px; margin-bottom: 10px; transition: background-color 0.2s; }
         .sidebar nav a.active, .sidebar nav a:hover { background-color: var(--primary-color); }
-        .main-content { flex-grow: 1; padding: 30px; margin-left: 250px; }
+        
         .page { display: none; }
         .page.active { display: block; }
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
@@ -35,7 +111,7 @@
         .form-control { width: 100%; padding: 12px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px; box-sizing: border-box; }
         .form-control:focus { outline: none; border-color: var(--accent-color); }
         textarea.form-control { min-height: 150px; resize: vertical; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1050; }
         .modal-content { background: var(--card-color); padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; justify-content: center; align-items: center; }
@@ -55,7 +131,8 @@
         </div>
     </div>
 
-    <aside class="sidebar" style="display: none;">
+    <!-- সাইডবার (HTML অপরিবর্তিত) -->
+    <aside class="sidebar">
         <h1>Admin Panel</h1>
         <nav>
             <a href="#" class="nav-item active" data-page="dashboard">Dashboard</a>
@@ -65,7 +142,17 @@
         </nav>
     </aside>
 
+    <!-- নতুন ওভারলে -->
+    <div id="sidebar-overlay"></div>
+
     <main class="main-content" style="display: none;">
+        <!-- নতুন মেনু বাটন -->
+        <button id="menu-toggle" style="display: none;">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </button>
+
         <div id="page-dashboard" class="page active">
             <h2>Dashboard</h2>
             <div class="dashboard-grid">
@@ -105,7 +192,6 @@
             </div>
         </div>
 
-        <!-- Settings Page (আপডেট করা হয়েছে) -->
         <div id="page-settings" class="page">
             <h2>App Settings</h2>
             <form id="settings-form">
@@ -146,8 +232,35 @@
             </form>
         </div>
     </div>
+    
+    <!-- সাইডবার টগল করার জন্য নতুন জাভাস্ক্রিপ্ট -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
 
-    <!-- Firebase SDK -->
+            const toggleSidebar = () => {
+                sidebar.classList.toggle('open');
+                body.classList.toggle('sidebar-open');
+            };
+
+            menuToggle.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+
+            // ছোট স্ক্রিনে কোনো মেনু আইটেমে ক্লিক করলে সাইডবার বন্ধ হয়ে যাবে
+            document.querySelectorAll('.sidebar .nav-item').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (window.innerWidth < 768 && sidebar.classList.contains('open')) {
+                        toggleSidebar();
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Firebase SDK (অপরিবর্তিত) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
         import { getDatabase, ref, onValue, get, set, update, remove } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
@@ -170,8 +283,10 @@
         document.getElementById('login-btn').addEventListener('click', () => {
             if (document.getElementById('admin-password').value === ADMIN_PASSWORD) {
                 document.getElementById('login-overlay').style.display = 'none';
-                document.querySelector('.sidebar').style.display = 'flex';
+                document.querySelector('.sidebar').classList.add('open'); // ডিফল্টভাবে সাইডবার খোলা থাকবে
+                document.body.classList.add('sidebar-open');
                 document.querySelector('.main-content').style.display = 'block';
+                document.getElementById('menu-toggle').style.display = 'flex'; // মেনু বাটন দেখানো হবে
                 loadDashboardData();
             } else {
                 alert('Incorrect Password!');
@@ -330,7 +445,7 @@
             alert(`Request has been ${newStatus}.`);
         }
 
-        // --- SETTINGS MANAGEMENT (আপডেট করা হয়েছে) ---
+        // --- SETTINGS MANAGEMENT ---
         function loadSettings() {
             get(ref(db, 'settings')).then((snapshot) => {
                 if(snapshot.exists()) {
