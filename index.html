@@ -199,7 +199,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-        import { getDatabase, ref, onValue, get, set, update, remove } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+        // *** CHANGE HERE: Added 'push' to the import list ***
+        import { getDatabase, ref, onValue, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAEJRfxHkMF7YEuTl7oB7ZSDiQDxuK0-u0",
@@ -269,7 +270,43 @@
 
         function loadBroadcastHistory() { onValue(ref(db, 'broadcast/history'), s => { const t = document.getElementById('broadcast-history-table'); t.innerHTML = ''; if (s.exists()) { Object.keys(s.val()).reverse().forEach(k => { const m = s.val()[k]; const d = new Date(m.timestamp).toLocaleString(); let media = !m.imageUrl && !m.videoUrl ? 'N/A' : `<a href="${m.imageUrl||m.videoUrl}" target="_blank">${m.imageUrl?'Image':'Video'} Link</a>`; t.innerHTML += `<tr><td>${d}</td><td style="white-space: pre-wrap; word-break: break-word;">${m.text}</td><td>${media}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="3">No history found.</td></tr>'; } }); }
         
-        document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const text = document.getElementById('broadcast-message').value; if (!text.trim()) { alert('Message cannot be empty.'); return; } const id = Date.now(); const msg = { id, text, imageUrl: document.getElementById('broadcast-image-url').value||null, videoUrl: document.getElementById('broadcast-video-url').value||null, timestamp: id }; set(ref(db, 'broadcast/latestMessage'), msg).then(() => set(ref(db, `broadcast/history/${id}`), msg)).then(() => { alert('Broadcast sent!'); document.getElementById('broadcast-form').reset(); }).catch(err => alert('Error: ' + err.message)); });
+        // ==========================================================
+        // *** UPDATED BROADCAST LOGIC STARTS HERE ***
+        // ==========================================================
+        document.getElementById('broadcast-form').addEventListener('submit', e => {
+            e.preventDefault();
+            const text = document.getElementById('broadcast-message').value;
+            if (!text.trim()) {
+                alert('Message cannot be empty.');
+                return;
+            }
+
+            const timestamp = Date.now();
+            const msg = {
+                text: text,
+                imageUrl: document.getElementById('broadcast-image-url').value || null,
+                videoUrl: document.getElementById('broadcast-video-url').value || null,
+                timestamp: timestamp
+            };
+
+            // Step 1: Set the latest message for all users to see immediately.
+            // The user app should be listening to this path: 'broadcast/latestMessage'
+            set(ref(db, 'broadcast/latestMessage'), msg)
+                .then(() => {
+                    // Step 2: Push the same message to history with a unique ID for logging.
+                    // This creates a reliable history list.
+                    return push(ref(db, 'broadcast/history'), msg);
+                })
+                .then(() => {
+                    alert('Broadcast sent successfully!');
+                    document.getElementById('broadcast-form').reset();
+                })
+                .catch(err => alert('Error sending broadcast: ' + err.message));
+        });
+        // ==========================================================
+        // *** UPDATED BROADCAST LOGIC ENDS HERE ***
+        // ==========================================================
+
     </script>
 </body>
 </html>
