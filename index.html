@@ -140,6 +140,14 @@
                 <div class="form-group"><label for="welcomeMessageTitle">Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div>
                 <div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control" rows="5"></textarea></div>
                 <div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control" rows="5"></textarea></div>
+                
+                <!-- ========== Marquee Section Start ========== -->
+<div class="form-group">
+    <label for="marqueeText">Scrolling Offer Text (Marquee)</label>
+    <input type="text" id="marqueeText" class="form-control" placeholder="e.g., 🔥 New offer! Get 50 Taka bonus on 5 referrals!">
+</div>
+<!-- ========== Marquee Section End ========== -->
+                
                 <button type="submit" class="btn btn-primary">Save Settings</button>
             </form>
         </div>
@@ -266,7 +274,10 @@
 
         function loadSettings() { get(ref(db, 'settings')).then(s => { if(s.exists()) { const d = s.val(); Object.keys(d).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = d[k]; }); } }); }
         
-        document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const s = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0, minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0, adReward: parseFloat(document.getElementById('adReward').value) || 0, referralReward: parseFloat(document.getElementById('referralReward').value) || 0, tutorialLink: document.getElementById('tutorialLink').value, adminChatLink: document.getElementById('adminChatLink').value, adminCallLink: document.getElementById('adminCallLink').value, telegramChannelLink: document.getElementById('telegramChannelLink').value, youtubeChannelLink: document.getElementById('youtubeChannelLink').value, welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value }; set(ref(db, 'settings'), s).then(() => alert('Settings saved!')).catch(err => alert('Error: ' + err.message)); });
+        document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const s = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0, minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0, adReward: parseFloat(document.getElementById('adReward').value) || 0, referralReward: parseFloat(document.getElementById('referralReward').value) || 0, tutorialLink: document.getElementById('tutorialLink').value, adminChatLink: document.getElementById('adminChatLink').value, adminCallLink: document.getElementById('adminCallLink').value, telegramChannelLink: document.getElementById('telegramChannelLink').value, youtubeChannelLink: document.getElementById('youtubeChannelLink').value, welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, 
+          // ========== নতুন লাইনটি এখানে যোগ করা হয়েছে ==========
+        marqueeText: document.getElementById('marqueeText').value
+        }; set(ref(db, 'settings'), s).then(() => alert('Settings saved!')).catch(err => alert('Error: ' + err.message)); });
 
         // ==========================================================
         // *** COMPLETE BROADCAST SECTION UPDATE ***
