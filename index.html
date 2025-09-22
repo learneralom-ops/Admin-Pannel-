@@ -46,15 +46,19 @@
         .modal-content { background: var(--card-color); padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        #login-box { background: var(--card-color); padding: 40px; border-radius: 12px; text-align: center; }
+        #login-box { background: var(--card-color); padding: 40px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; }
         #login-box h2 { margin-top: 0; }
     </style>
 </head>
 <body>
 
+    <!-- *** লগইন ফর্ম পরিবর্তন করা হয়েছে *** -->
     <div id="login-overlay">
         <div id="login-box">
             <h2>Admin Login</h2>
+            <div class="form-group">
+                <input type="email" id="admin-email" class="form-control" placeholder="Enter Admin Email">
+            </div>
             <div class="form-group">
                 <input type="password" id="admin-password" class="form-control" placeholder="Enter Password">
             </div>
@@ -82,114 +86,15 @@
             <div class="bar"></div>
         </button>
 
-        <div id="page-dashboard" class="page active">
-            <h2>Dashboard</h2>
-            <div class="dashboard-grid">
-                <div class="card"><h3>Total Users</h3><p id="total-users">0</p></div>
-                <div class="card"><h3>Pending Withdrawals</h3><p id="pending-withdrawals">0</p></div>
-                <div class="card"><h3>Total Withdrawn (Taka)</h3><p id="total-withdrawn">0</p></div>
-                <div class="card"><h3>Total Balance (All Users)</h3><p id="total-balance">0</p></div>
-            </div>
-        </div>
-
-        <div id="page-users" class="page">
-            <h2>Users Management</h2>
-            <div class="form-group"><input type="text" id="user-search" class="form-control" placeholder="Search by User ID or Name..."></div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>User ID</th><th>Name</th><th>Balance (TK)</th><th>Referrals</th><th>Actions</th></tr></thead>
-                    <tbody id="users-table-body"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="page-withdrawals" class="page">
-            <h2>Withdrawal Requests</h2>
-            <div class="table-container">
-                <h3>Pending Requests</h3>
-                <table>
-                    <thead><tr><th>User ID</th><th>Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Actions</th></tr></thead>
-                    <tbody id="pending-withdrawals-table"></tbody>
-                </table>
-            </div>
-            <div class="table-container">
-                <h3>Completed/Rejected History</h3>
-                <table>
-                    <thead><tr><th>User ID</th><th>Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Status</th></tr></thead>
-                    <tbody id="completed-withdrawals-table"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="page-settings" class="page">
-            <h2>App Settings</h2>
-            <form id="settings-form">
-                <h3>Withdrawal Settings</h3>
-                <div class="form-group"><label for="minWithdrawAmount">Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div>
-                <div class="form-group"><label for="minWithdrawReferrals">Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div>
-                <h3>Reward Settings</h3>
-                <div class="form-group"><label for="adReward">Reward per Ad Watch (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div>
-                <div class="form-group"><label for="referralReward">Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control"></div>
-                <h3>Link Settings</h3>
-                <div class="form-group"><label for="tutorialLink">Tutorial Video Link</label><input type="text" id="tutorialLink" class="form-control"></div>
-                <div class="form-group"><label for="adminChatLink">Admin Chat Link</label><input type="text" id="adminChatLink" class="form-control"></div>
-                <div class="form-group"><label for="adminCallLink">Admin Call Link (e.g., tel:+8801...)</label><input type="text" id="adminCallLink" class="form-control"></div>
-                <div class="form-group"><label for="telegramChannelLink">Telegram Channel Link (for Task)</label><input type="text" id="telegramChannelLink" class="form-control"></div>
-                <div class="form-group"><label for="youtubeChannelLink">YouTube Channel Link (for Task)</label><input type="text" id="youtubeChannelLink" class="form-control"></div>
-                <h3>Content Settings</h3>
-                <div class="form-group"><label for="welcomeMessageTitle">Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div>
-                <div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control" rows="5"></textarea></div>
-                <div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control" rows="5"></textarea></div>
-                
-                <!-- ========== Marquee Section Start ========== -->
-<div class="form-group">
-    <label for="marqueeText">Scrolling Offer Text (Marquee)</label>
-    <input type="text" id="marqueeText" class="form-control" placeholder="e.g., 🔥 New offer! Get 50 Taka bonus on 5 referrals!">
-</div>
-<!-- ========== Marquee Section End ========== -->
-                
-                <button type="submit" class="btn btn-primary">Save Settings</button>
-            </form>
-        </div>
-        
-        <div id="page-broadcast" class="page">
-            <h2>Send Broadcast to Telegram Bot</h2>
-            <form id="broadcast-form">
-                <div class="form-group"><label for="broadcast-message">Message (required)</label><textarea id="broadcast-message" class="form-control" rows="4" required placeholder="Type your message here..."></textarea></div>
-                <div class="form-group"><label for="broadcast-image-url">Image URL (optional)</label><input type="url" id="broadcast-image-url" class="form-control" placeholder="https://example.com/image.jpg"></div>
-                <div class="form-group"><label for="broadcast-video-url">Video URL (optional)</label><input type="url" id="broadcast-video-url" class="form-control" placeholder="https://example.com/video.mp4"></div>
-                <button type="submit" class="btn btn-primary">Send to All Users via Bot</button>
-            </form>
-            <div class="table-container" style="margin-top: 40px;">
-                <h3>Broadcast History</h3>
-                <!-- UPDATED TABLE HEADER -->
-                <table><thead><tr><th>Date</th><th>Message</th><th>Media URL</th><th>Actions</th></tr></thead><tbody id="broadcast-history-table"></tbody></table>
-            </div>
-        </div>
+        <!-- *** বাকি পেইজের কন্টেন্ট অপরিবর্তিত *** -->
+        <div id="page-dashboard" class="page active"><h2>Dashboard</h2><div class="dashboard-grid"><div class="card"><h3>Total Users</h3><p id="total-users">0</p></div><div class="card"><h3>Pending Withdrawals</h3><p id="pending-withdrawals">0</p></div><div class="card"><h3>Total Withdrawn (Taka)</h3><p id="total-withdrawn">0</p></div><div class="card"><h3>Total Balance (All Users)</h3><p id="total-balance">0</p></div></div></div>
+        <div id="page-users" class="page"><h2>Users Management</h2><div class="form-group"><input type="text" id="user-search" class="form-control" placeholder="Search by User ID or Name..."></div><div class="table-container"><table><thead><tr><th>User ID</th><th>Name</th><th>Balance (TK)</th><th>Referrals</th><th>Actions</th></tr></thead><tbody id="users-table-body"></tbody></table></div></div>
+        <div id="page-withdrawals" class="page"><h2>Withdrawal Requests</h2><div class="table-container"><h3>Pending Requests</h3><table><thead><tr><th>User ID</th><th>Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Actions</th></tr></thead><tbody id="pending-withdrawals-table"></tbody></table></div><div class="table-container"><h3>Completed/Rejected History</h3><table><thead><tr><th>User ID</th><th>Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Status</th></tr></thead><tbody id="completed-withdrawals-table"></tbody></table></div></div>
+        <div id="page-settings" class="page"><h2>App Settings</h2><form id="settings-form"><h3>Withdrawal Settings</h3><div class="form-group"><label for="minWithdrawAmount">Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div><div class="form-group"><label for="minWithdrawReferrals">Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div><h3>Reward Settings</h3><div class="form-group"><label for="adReward">Reward per Ad Watch (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div><div class="form-group"><label for="referralReward">Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control"></div><h3>Link Settings</h3><div class="form-group"><label for="tutorialLink">Tutorial Video Link</label><input type="text" id="tutorialLink" class="form-control"></div><div class="form-group"><label for="adminChatLink">Admin Chat Link</label><input type="text" id="adminChatLink" class="form-control"></div><div class="form-group"><label for="adminCallLink">Admin Call Link (e.g., tel:+8801...)</label><input type="text" id="adminCallLink" class="form-control"></div><div class="form-group"><label for="telegramChannelLink">Telegram Channel Link (for Task)</label><input type="text" id="telegramChannelLink" class="form-control"></div><div class="form-group"><label for="youtubeChannelLink">YouTube Channel Link (for Task)</label><input type="text" id="youtubeChannelLink" class="form-control"></div><h3>Content Settings</h3><div class="form-group"><label for="welcomeMessageTitle">Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div><div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control" rows="5"></textarea></div><div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control" rows="5"></textarea></div><div class="form-group"><label for="marqueeText">Scrolling Offer Text (Marquee)</label><input type="text" id="marqueeText" class="form-control" placeholder="e.g., 🔥 New offer! Get 50 Taka bonus on 5 referrals!"></div><button type="submit" class="btn btn-primary">Save Settings</button></form></div>
+        <div id="page-broadcast" class="page"><h2>Send Broadcast to Telegram Bot</h2><form id="broadcast-form"><div class="form-group"><label for="broadcast-message">Message (required)</label><textarea id="broadcast-message" class="form-control" rows="4" required placeholder="Type your message here..."></textarea></div><div class="form-group"><label for="broadcast-image-url">Image URL (optional)</label><input type="url" id="broadcast-image-url" class="form-control" placeholder="https://example.com/image.jpg"></div><div class="form-group"><label for="broadcast-video-url">Video URL (optional)</label><input type="url" id="broadcast-video-url" class="form-control" placeholder="https://example.com/video.mp4"></div><button type="submit" class="btn btn-primary">Send to All Users via Bot</button></form><div class="table-container" style="margin-top: 40px;"><h3>Broadcast History</h3><table><thead><tr><th>Date</th><th>Message</th><th>Media URL</th><th>Actions</th></tr></thead><tbody id="broadcast-history-table"></tbody></table></div></div>
     </main>
 
-    <div id="edit-user-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h3>Edit User</h3><span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span></div>
-            <form id="edit-user-form">
-                <input type="hidden" id="edit-user-id">
-                <div class="form-group"><label for="edit-user-name">Name</label><input type="text" id="edit-user-name" class="form-control" disabled></div>
-                <div class="form-group"><label for="edit-user-balance">Current Balance (Set directly)</label><input type="number" id="edit-user-balance" class="form-control" step="0.01"></div>
-                <div class="form-group"><label for="edit-user-referrals">Referrals</label><input type="number" id="edit-user-referrals" class="form-control"></div>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </form>
-            <hr style="border-color: var(--border-color); margin: 25px 0;">
-            <h4>Adjust Balance</h4>
-            <div class="form-group">
-                <label for="adjust-balance-amount">Amount to Add / Deduct</label>
-                <input type="number" id="adjust-balance-amount" class="form-control" step="0.01" placeholder="e.g., 10 or 50.50">
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button type="button" id="add-balance-btn" class="btn btn-success">Add Balance</button>
-                <button type="button" id="deduct-balance-btn" class="btn btn-danger">Deduct Balance</button>
-            </div>
-        </div>
-    </div>
+    <div id="edit-user-modal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Edit User</h3><span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span></div><form id="edit-user-form"><input type="hidden" id="edit-user-id"><div class="form-group"><label for="edit-user-name">Name</label><input type="text" id="edit-user-name" class="form-control" disabled></div><div class="form-group"><label for="edit-user-balance">Current Balance (Set directly)</label><input type="number" id="edit-user-balance" class="form-control" step="0.01"></div><div class="form-group"><label for="edit-user-referrals">Referrals</label><input type="number" id="edit-user-referrals" class="form-control"></div><button type="submit" class="btn btn-primary">Save Changes</button></form><hr style="border-color: var(--border-color); margin: 25px 0;"><div class="form-group"><label for="adjust-balance-amount">Amount to Add / Deduct</label><input type="number" id="adjust-balance-amount" class="form-control" step="0.01" placeholder="e.g., 10 or 50.50"></div><div style="display: flex; gap: 10px;"><button type="button" id="add-balance-btn" class="btn btn-success">Add Balance</button><button type="button" id="deduct-balance-btn" class="btn btn-danger">Deduct Balance</button></div></div></div>
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -206,34 +111,51 @@
         });
     </script>
 
+    <!-- *** কোডের প্রধান পরিবর্তনগুলো এই <script> ট্যাগের ভেতরে করা হয়েছে *** -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+        // *** নতুন: Authentication মডিউল যোগ করা হয়েছে ***
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
         import { getDatabase, ref, onValue, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
         const firebaseConfig = {
-  apiKey: "AIzaSyA2HUBFhHEWg4MwkJB4BVdJxUun0Gy07Ts",
-  authDomain: "daily-earne-aea89.firebaseapp.com",
-  databaseURL: "https://daily-earne-aea89-default-rtdb.firebaseio.com",
-  projectId: "daily-earne-aea89",
-  storageBucket: "daily-earne-aea89.firebasestorage.app",
-  messagingSenderId: "444567470638",
-  appId: "1:444567470638:web:0fa323d9f5ef6aba1155bf"
-};
+            apiKey: "AIzaSyA2HUBFhHEWg4MwkJB4BVdJxUun0Gy07Ts",
+            authDomain: "daily-earne-aea89.firebaseapp.com",
+            databaseURL: "https://daily-earne-aea89-default-rtdb.firebaseio.com",
+            projectId: "daily-earne-aea89",
+            storageBucket: "daily-earne-aea89.firebasestorage.app",
+            messagingSenderId: "444567470638",
+            appId: "1:444567470638:web:0fa323d9f5ef6aba1155bf"
+        };
 
         const app = initializeApp(firebaseConfig);
+        // *** নতুন: Auth সার্ভিস চালু করা হয়েছে ***
+        const auth = getAuth(app);
         const db = getDatabase(app);
 
-        const ADMIN_PASSWORD = "Alom";
+        // *** নতুন: Firebase Authentication দিয়ে লগইন সিস্টেম ***
         document.getElementById('login-btn').addEventListener('click', () => {
-            if (document.getElementById('admin-password').value === ADMIN_PASSWORD) {
-                document.getElementById('login-overlay').style.display = 'none';
-                document.querySelector('.sidebar').classList.add('open');
-                document.body.classList.add('sidebar-open');
-                document.querySelector('.main-content').style.display = 'block';
-                document.getElementById('menu-toggle').style.display = 'flex';
-                loadDashboardData();
-            } else { alert('Incorrect Password!'); }
+            const email = document.getElementById('admin-email').value;
+            const password = document.getElementById('admin-password').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // লগইন সফল হয়েছে
+                    console.log("Admin logged in successfully:", userCredential.user.uid);
+                    document.getElementById('login-overlay').style.display = 'none';
+                    document.querySelector('.sidebar').classList.add('open');
+                    document.body.classList.add('sidebar-open');
+                    document.querySelector('.main-content').style.display = 'block';
+                    document.getElementById('menu-toggle').style.display = 'flex';
+                    loadDashboardData();
+                })
+                .catch((error) => {
+                    // লগইন ব্যর্থ হয়েছে
+                    alert('Login Failed: ' + error.message);
+                });
         });
+
+        // *** নিচের কোডগুলোতে কোনো পরিবর্তন করা হয়নি, এগুলো আগের মতোই আছে ***
 
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
@@ -250,115 +172,22 @@
                 if (page === 'broadcast') loadBroadcastHistory();
             });
         });
-
         function loadDashboardData() { onValue(ref(db, 'users'), s => { const d = s.val(); document.getElementById('total-users').innerText = d ? Object.keys(d).length : 0; document.getElementById('total-balance').innerText = d ? Object.values(d).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2) : '0.00'; }); onValue(ref(db, 'withdrawals/pending'), s => { document.getElementById('pending-withdrawals').innerText = s.exists() ? Object.keys(s.val()).length : 0; }); onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); }); }
-        
         function loadUsers() { onValue(ref(db, 'users'), s => { const t = document.getElementById('users-table-body'); t.innerHTML = ''; if (s.exists()) { for (const uid in s.val()) { const u = s.val()[uid]; t.innerHTML += `<tr data-user-id="${uid}" data-user-name="${u.name||''}"><td>${uid}</td><td>${u.name||'N/A'}</td><td>${(u.balance||0).toFixed(2)}</td><td>${u.referrals||0}</td><td><button class="btn btn-primary edit-user-btn" data-id="${uid}">Edit</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="5">No users found.</td></tr>'; } }); }
-
         document.getElementById('user-search').addEventListener('keyup', e => { const term = e.target.value.toLowerCase(); document.querySelectorAll('#users-table-body tr').forEach(r => { r.style.display = (r.dataset.userName.toLowerCase().includes(term) || r.dataset.userId.toLowerCase().includes(term)) ? '' : 'none'; }); });
-
         const modal = document.getElementById('edit-user-modal');
         document.getElementById('users-table-body').addEventListener('click', async e => { if (e.target.classList.contains('edit-user-btn')) { const uid = e.target.dataset.id; const u = (await get(ref(db, `users/${uid}`))).val(); if(u){ document.getElementById('edit-user-id').value = uid; document.getElementById('edit-user-name').value = u.name||''; document.getElementById('edit-user-balance').value = u.balance||0; document.getElementById('edit-user-referrals').value = u.referrals||0; document.getElementById('adjust-balance-amount').value = ''; modal.style.display = 'flex'; } } });
-        
         document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
-        
         document.getElementById('edit-user-form').addEventListener('submit', e => { e.preventDefault(); const uid = document.getElementById('edit-user-id').value; const u = { balance: parseFloat(document.getElementById('edit-user-balance').value), referrals: parseInt(document.getElementById('edit-user-referrals').value) }; update(ref(db, `users/${uid}`), u).then(() => { alert('User updated!'); modal.style.display = 'none'; }).catch(err => alert('Error: ' + err.message)); });
-
         document.getElementById('add-balance-btn').addEventListener('click', async () => { const uid = document.getElementById('edit-user-id').value; const amountInput = document.getElementById('adjust-balance-amount'); const amount = parseFloat(amountInput.value); if (!uid || isNaN(amount) || amount <= 0) { alert('Please enter a valid positive amount.'); return; } const userRef = ref(db, `users/${uid}`); const s = await get(userRef); if (s.exists()) { const cb = s.val().balance || 0; const nb = cb + amount; update(userRef, { balance: nb }).then(() => { alert(`${amount.toFixed(2)} Taka added. New balance: ${nb.toFixed(2)}`); document.getElementById('edit-user-balance').value = nb.toFixed(2); amountInput.value = ''; }); } });
-
         document.getElementById('deduct-balance-btn').addEventListener('click', async () => { const uid = document.getElementById('edit-user-id').value; const amountInput = document.getElementById('adjust-balance-amount'); const amount = parseFloat(amountInput.value); if (!uid || isNaN(amount) || amount <= 0) { alert('Please enter a valid positive amount.'); return; } const userRef = ref(db, `users/${uid}`); const s = await get(userRef); if (s.exists()) { const cb = s.val().balance || 0; if (cb < amount) { alert(`Failed. User only has ${cb.toFixed(2)} Taka.`); return; } const nb = cb - amount; update(userRef, { balance: nb }).then(() => { alert(`${amount.toFixed(2)} Taka deducted. New balance: ${nb.toFixed(2)}`); document.getElementById('edit-user-balance').value = nb.toFixed(2); amountInput.value = ''; }); } });
-
         function loadWithdrawals() { onValue(ref(db, 'withdrawals/pending'), s => { const t = document.getElementById('pending-withdrawals-table'); t.innerHTML = ''; if (s.exists()) { for (const id in s.val()) { const r = s.val()[id]; t.innerHTML += `<tr><td>${r.userId}</td><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="6">No pending requests.</td></tr>'; } }); onValue(ref(db, 'withdrawals/completed'), s => { const t = document.getElementById('completed-withdrawals-table'); t.innerHTML = ''; if(s.exists()){ Object.values(s.val()).forEach(r => { t.innerHTML += `<tr><td>${r.userId}</td><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td style="color:${r.status==='approved'?'var(--success-color)':'var(--error-color)'};">${r.status}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="6">No history found.</td></tr>'; } }); }
-        
         window.handleWithdrawal = async (id, status) => { const reqRef = ref(db, `withdrawals/pending/${id}`); const s = await get(reqRef); if (!s.exists()) { alert('Request already processed.'); return; } const d = s.val(); d.status = status; if (status === 'rejected') { const userBalRef = ref(db, `users/${d.userId}/balance`); const userBal = (await get(userBalRef)).val(); await set(userBalRef, userBal + d.amount); } await set(ref(db, `withdrawals/completed/${id}`), d); await remove(reqRef); alert(`Request has been ${status}.`); }
-
         function loadSettings() { get(ref(db, 'settings')).then(s => { if(s.exists()) { const d = s.val(); Object.keys(d).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = d[k]; }); } }); }
-        
-        document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const s = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0, minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0, adReward: parseFloat(document.getElementById('adReward').value) || 0, referralReward: parseFloat(document.getElementById('referralReward').value) || 0, tutorialLink: document.getElementById('tutorialLink').value, adminChatLink: document.getElementById('adminChatLink').value, adminCallLink: document.getElementById('adminCallLink').value, telegramChannelLink: document.getElementById('telegramChannelLink').value, youtubeChannelLink: document.getElementById('youtubeChannelLink').value, welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, 
-          // ========== নতুন লাইনটি এখানে যোগ করা হয়েছে ==========
-        marqueeText: document.getElementById('marqueeText').value
-        }; set(ref(db, 'settings'), s).then(() => alert('Settings saved!')).catch(err => alert('Error: ' + err.message)); });
-
-        // ==========================================================
-        // *** COMPLETE BROADCAST SECTION UPDATE ***
-        // ==========================================================
-
-        function loadBroadcastHistory() {
-            onValue(ref(db, 'broadcast/history'), s => {
-                const t = document.getElementById('broadcast-history-table');
-                t.innerHTML = '';
-                if (s.exists()) {
-                    const messages = s.val();
-                    const sortedKeys = Object.keys(messages).sort((a, b) => messages[b].timestamp - messages[a].timestamp);
-                    
-                    sortedKeys.forEach(key => {
-                        const m = messages[key];
-                        const d = new Date(m.timestamp).toLocaleString();
-                        let media = !m.imageUrl && !m.videoUrl ? 'N/A' : `<a href="${m.imageUrl || m.videoUrl}" target="_blank">${m.imageUrl ? 'Image' : 'Video'} Link</a>`;
-                        
-                        // Added a delete button with data-key attribute
-                        t.innerHTML += `<tr>
-                            <td>${d}</td>
-                            <td style="white-space: pre-wrap; word-break: break-word;">${m.text}</td>
-                            <td>${media}</td>
-                            <td><button class="btn btn-danger delete-broadcast-btn" data-key="${key}">Delete</button></td>
-                        </tr>`;
-                    });
-                } else {
-                    t.innerHTML = '<tr><td colspan="4">No history found.</td></tr>'; // colspan is now 4
-                }
-            });
-        }
-
-        // Event listener for deleting a broadcast message
-        document.getElementById('broadcast-history-table').addEventListener('click', (e) => {
-            if (e.target.classList.contains('delete-broadcast-btn')) {
-                const messageKey = e.target.dataset.key;
-                if (confirm('Are you sure you want to delete this broadcast message?')) {
-                    const messageRef = ref(db, `broadcast/history/${messageKey}`);
-                    remove(messageRef)
-                        .then(() => alert('Message deleted successfully.'))
-                        .catch(err => alert('Error deleting message: ' + err.message));
-                }
-            }
-        });
-        
-        // Updated logic to send messages to the bot via Cloud Functions queue
-        document.getElementById('broadcast-form').addEventListener('submit', e => {
-            e.preventDefault();
-            const text = document.getElementById('broadcast-message').value;
-            const imageUrl = document.getElementById('broadcast-image-url').value.trim();
-            const videoUrl = document.getElementById('broadcast-video-url').value.trim();
-
-            if (!text.trim()) {
-                alert('Message cannot be empty.');
-                return;
-            }
-
-            const broadcastTask = {
-                text: text,
-                imageUrl: imageUrl || null,
-                videoUrl: videoUrl || null,
-                timestamp: Date.now()
-            };
-
-            // 1. Push the task to the queue for the Cloud Function to process
-            const queueRef = ref(db, 'broadcast_queue/tasks');
-            const newQueueItemRef = push(queueRef, broadcastTask);
-            const taskKey = newQueueItemRef.key; // Get the unique key for this task
-
-            // 2. Also save it to history with a reference to the task key
-            const historyRef = ref(db, `broadcast/history/${taskKey}`);
-            set(historyRef, broadcastTask)
-                .then(() => {
-                    alert('Broadcast request sent to the queue! The bot will now send it to all users.');
-                    document.getElementById('broadcast-form').reset();
-                })
-                .catch(err => alert('Error sending broadcast request: ' + err.message));
-        });
-        // ==========================================================
-        // *** BROADCAST SECTION UPDATE ENDS HERE ***
-        // ==========================================================
+        document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const s = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0, minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0, adReward: parseFloat(document.getElementById('adReward').value) || 0, referralReward: parseFloat(document.getElementById('referralReward').value) || 0, tutorialLink: document.getElementById('tutorialLink').value, adminChatLink: document.getElementById('adminChatLink').value, adminCallLink: document.getElementById('adminCallLink').value, telegramChannelLink: document.getElementById('telegramChannelLink').value, youtubeChannelLink: document.getElementById('youtubeChannelLink').value, welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, marqueeText: document.getElementById('marqueeText').value }; set(ref(db, 'settings'), s).then(() => alert('Settings saved!')).catch(err => alert('Error: ' + err.message)); });
+        function loadBroadcastHistory() { onValue(ref(db, 'broadcast/history'), s => { const t = document.getElementById('broadcast-history-table'); t.innerHTML = ''; if (s.exists()) { const messages = s.val(); const sortedKeys = Object.keys(messages).sort((a, b) => messages[b].timestamp - messages[a].timestamp); sortedKeys.forEach(key => { const m = messages[key]; const d = new Date(m.timestamp).toLocaleString(); let media = !m.imageUrl && !m.videoUrl ? 'N/A' : `<a href="${m.imageUrl || m.videoUrl}" target="_blank">${m.imageUrl ? 'Image' : 'Video'} Link</a>`; t.innerHTML += `<tr><td>${d}</td><td style="white-space: pre-wrap; word-break: break-word;">${m.text}</td><td>${media}</td><td><button class="btn btn-danger delete-broadcast-btn" data-key="${key}">Delete</button></td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="4">No history found.</td></tr>'; } }); }
+        document.getElementById('broadcast-history-table').addEventListener('click', (e) => { if (e.target.classList.contains('delete-broadcast-btn')) { const messageKey = e.target.dataset.key; if (confirm('Are you sure you want to delete this broadcast message?')) { const messageRef = ref(db, `broadcast/history/${messageKey}`); remove(messageRef).then(() => alert('Message deleted successfully.')).catch(err => alert('Error deleting message: ' + err.message)); } } });
+        document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const text = document.getElementById('broadcast-message').value; const imageUrl = document.getElementById('broadcast-image-url').value.trim(); const videoUrl = document.getElementById('broadcast-video-url').value.trim(); if (!text.trim()) { alert('Message cannot be empty.'); return; } const broadcastTask = { text: text, imageUrl: imageUrl || null, videoUrl: videoUrl || null, timestamp: Date.now() }; const queueRef = ref(db, 'broadcast_queue/tasks'); const newQueueItemRef = push(queueRef, broadcastTask); const taskKey = newQueueItemRef.key; const historyRef = ref(db, `broadcast/history/${taskKey}`); set(historyRef, broadcastTask).then(() => { alert('Broadcast request sent to the queue! The bot will now send it to all users.'); document.getElementById('broadcast-form').reset(); }).catch(err => alert('Error sending broadcast request: ' + err.message)); });
 
     </script>
 </body>
