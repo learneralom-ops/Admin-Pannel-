@@ -106,7 +106,6 @@
         <div id="page-withdrawals" class="page"><h2>Withdrawal Requests</h2><div class="table-container"><h3>Pending Requests</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Actions</th></tr></thead><tbody id="pending-withdrawals-table"></tbody></table></div><div class="table-container" style="margin-top:30px;"><h3>Completed/Rejected History</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Status</th></tr></thead><tbody id="completed-withdrawals-table"></tbody></table></div></div>
         
         <div id="page-settings" class="page">
-             <!-- Settings page content remains unchanged -->
              <h2>App Settings</h2>
             <form id="settings-form">
                 <div class="settings-section"><h3>General Settings</h3><div class="form-group"><label for="minWithdrawAmount">Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div><div class="form-group"><label for="minWithdrawReferrals">Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div></div>
@@ -121,7 +120,7 @@
         <div id="page-broadcast" class="page"><h2>Send Broadcast Message</h2><form id="broadcast-form"><div class="form-group"><label for="broadcast-message">Message</label><textarea id="broadcast-message" class="form-control" rows="4" required></textarea></div><div class="form-group"><label for="broadcast-image-url">Image URL (Optional)</label><input type="url" id="broadcast-image-url" class="form-control"></div><button type="submit" class="btn btn-primary">Send to All App Users</button></form></div>
     </main>
 
-    <!-- ======================= আপডেটেড Edit User Modal ======================= -->
+    <!-- Edit User Modal -->
     <div id="edit-user-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -138,7 +137,7 @@
                     </div>
                     <div class="form-group">
                         <label for="edit-user-email">Email Address</label>
-                        <input type="email" id="edit-user-email" class="form-control" readonly> <!-- ইমেইল পরিবর্তন করা যাবে না -->
+                        <input type="email" id="edit-user-email" class="form-control" readonly>
                     </div>
                 </div>
                 
@@ -158,7 +157,6 @@
                      <input type="number" id="edit-user-referrals" class="form-control">
                 </div>
                 
-                <!-- পাসওয়ার্ড সম্পর্কিত নোট -->
                 <p style="color:var(--text-secondary); font-size: 0.9em; border: 1px dashed var(--border-color); padding: 10px; border-radius: 6px;">
                     <strong>Security Note:</strong> User passwords cannot be viewed or changed directly from this panel for security reasons. Users can reset their own password using the 'Forgot Password' feature in the app.
                 </p>
@@ -171,7 +169,7 @@
     </div>
     
     <script>
-        // UI navigation script remains unchanged
+        // UI navigation script
         document.addEventListener('DOMContentLoaded', () => {
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.querySelector('.sidebar');
@@ -200,6 +198,7 @@
         import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getDatabase, ref, onValue, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
+        // IMPORTANT: Replace with your actual Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA2HUBFhHEWg4MwkJB4BVdJxUun0Gy07Ts",
             authDomain: "daily-earne-aea89.firebaseapp.com",
@@ -214,7 +213,7 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // ======================= Login Logic =======================
+        // Login Logic
         document.getElementById('login-btn').addEventListener('click', () => {
             const email = document.getElementById('admin-email').value;
             const password = document.getElementById('admin-password').value;
@@ -223,17 +222,16 @@
                     document.getElementById('login-overlay').style.display = 'none';
                     document.querySelector('.main-content').style.display = 'block';
                     document.getElementById('menu-toggle').style.display = 'flex';
-                    // Open sidebar on desktop after login
                     if (window.innerWidth >= 768) {
                          document.querySelector('.sidebar').classList.add('open');
                          document.body.classList.add('sidebar-open');
                     }
-                    loadPageData('dashboard'); // Load initial data
+                    loadPageData('dashboard');
                 })
                 .catch((error) => alert('Login Failed: ' + error.message));
         });
 
-        // ======================= Page Data Loading =======================
+        // Page Data Loading
         function loadPageData(page) {
             if (page === 'dashboard') loadDashboardData();
             if (page === 'users') loadUsers();
@@ -247,7 +245,7 @@
             onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); });
         }
         
-        // ======================= Users Management (Updated & Improved) =======================
+        // Users Management
         let allUsersData = {};
         function loadUsers() {
             onValue(ref(db, 'users'), snapshot => {
@@ -262,14 +260,12 @@
                 tBody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>';
                 return;
             }
-            // ডেটাবেস থেকে ইউজারদের একটি অ্যারেতে রূপান্তর করুন এবং জয়েন করার তারিখ অনুযায়ী সাজান
             const usersArray = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
-            usersArray.sort((a, b) => new Date(b.joinDate || 0) - new Date(a.joinDate || 0)); // নতুন ইউজাররা উপরে থাকবে
+            usersArray.sort((a, b) => new Date(b.joinDate || 0) - new Date(a.joinDate || 0));
 
             for (const user of usersArray) {
                 const u = user;
                 const uid = user.uid;
-                // সার্চ করার জন্য সব ডেটা একত্রিত করা
                 const searchableString = `${u.name||''} ${u.email||''} ${u.mobile||''}`.toLowerCase();
                 
                 tBody.innerHTML += `
@@ -290,7 +286,7 @@
             });
         });
 
-        // --- Edit/Delete User Modal Logic (Updated & Improved) ---
+        // Edit/Delete User Modal Logic
         const modal = document.getElementById('edit-user-modal');
         document.getElementById('users-table-body').addEventListener('click', e => {
             if (e.target.classList.contains('edit-user-btn')) {
@@ -314,7 +310,6 @@
             const uid = document.getElementById('edit-user-id').value;
             const updates = {
                 name: document.getElementById('edit-user-name').value.trim(),
-                // email: document.getElementById('edit-user-email').value, // ইমেইল পরিবর্তন করা যাবে না
                 mobile: document.getElementById('edit-user-mobile').value.trim(),
                 balance: parseFloat(document.getElementById('edit-user-balance').value),
                 referrals: parseInt(document.getElementById('edit-user-referrals').value)
@@ -329,8 +324,6 @@
             const uid = document.getElementById('edit-user-id').value;
             const userName = document.getElementById('edit-user-name').value;
             if (confirm(`Are you sure you want to permanently delete user "${userName}"? This will remove their data from the database. This action cannot be undone.`)) {
-                // Note: This only removes the user from the Realtime Database.
-                // For full deletion, you would need a backend function to remove the user from Firebase Authentication.
                 remove(ref(db, `users/${uid}`)).then(() => {
                     alert('User data deleted successfully from the database.');
                     modal.style.display = 'none';
@@ -338,18 +331,15 @@
             }
         });
         
-        // ======================= Withdrawals Management =======================
-        // This section remains unchanged and functional
+        // Withdrawals Management
         function loadWithdrawals() { onValue(ref(db, 'withdrawals/pending'), s => { const t = document.getElementById('pending-withdrawals-table'); t.innerHTML = ''; if (s.exists()) { for (const id in s.val()) { const r = s.val()[id]; t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="5">No pending requests.</td></tr>'; } }); onValue(ref(db, 'withdrawals/completed'), s => { const t = document.getElementById('completed-withdrawals-table'); t.innerHTML = ''; if(s.exists()){ const history = Object.values(s.val()).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0)); history.forEach(r => { t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td style="color:${r.status==='approved'?'var(--success-color)':'var(--error-color)'}; text-transform: capitalize;">${r.status}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="5">No history found.</td></tr>'; } }); }
         window.handleWithdrawal = async (id, status) => { const reqRef = ref(db, `withdrawals/pending/${id}`); const s = await get(reqRef); if (!s.exists()) { alert('Request already processed.'); return; } const d = s.val(); d.status = status; d.timestamp = Date.now(); if (status === 'rejected') { const userBalRef = ref(db, `users/${d.userId}/balance`); const userBal = (await get(userBalRef)).val() || 0; await set(userBalRef, userBal + d.amount); } await set(ref(db, `withdrawals/completed/${id}`), d); await remove(reqRef); alert(`Request has been ${status}.`); }
 
-        // ======================= Settings Management =======================
-        // This section remains unchanged and functional
+        // Settings Management
         function loadSettings() { get(ref(db, 'settings')).then(snapshot => { if(snapshot.exists()) { const data = snapshot.val(); for (const key in data) { const element = document.getElementById(key); if (element) { element.value = data[key]; } } } }); }
         document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const settings = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0, minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0, adReward: parseFloat(document.getElementById('adReward').value) || 0, referralReward: parseFloat(document.getElementById('referralReward').value) || 0, homeTaskCountdown: parseInt(document.getElementById('homeTaskCountdown').value) || 30, authImageUrl: document.getElementById('authImageUrl').value.trim(), marqueeText: document.getElementById('marqueeText').value.trim(), welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, tutorialLink: document.getElementById('tutorialLink').value.trim(), adminChatLink: document.getElementById('adminChatLink').value.trim(), adminCallLink: document.getElementById('adminCallLink').value.trim(), telegramChannelLink: document.getElementById('telegramChannelLink').value.trim(), youtubeChannelLink: document.getElementById('youtubeChannelLink').value.trim(), monetagZoneId: document.getElementById('monetagZoneId').value.trim(), gigaPubId: document.getElementById('gigaPubId').value.trim() }; set(ref(db, 'settings'), settings).then(() => { alert('Settings saved successfully!'); }).catch(err => alert('Error saving settings: ' + err.message)); });
 
-        // ======================= Broadcast Management =======================
-        // This section remains unchanged and functional
+        // Broadcast Management
         document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const message = { text: document.getElementById('broadcast-message').value, imageUrl: document.getElementById('broadcast-image-url').value.trim() || null, timestamp: Date.now() }; if (!message.text) { alert('Message cannot be empty.'); return; } set(ref(db, 'broadcast/latestMessage'), message).then(() => { alert('Broadcast message sent to all users!'); document.getElementById('broadcast-form').reset(); }).catch(err => alert('Error: ' + err.message)); });
     </script>
 </body>
