@@ -1,3 +1,5 @@
+--- START OF FILE index.html ---
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -52,6 +54,25 @@
         .settings-section { background-color: var(--card-color); padding: 20px; border-radius: 8px; margin-bottom: 25px; }
         .settings-section h3 { margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
         .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        
+        /* [ADDED] New Styles for Admin Info and Logout */
+        .admin-info {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+        }
+        #admin-email-display {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin: 0 0 15px 0;
+            word-break: break-all;
+        }
+        #logout-btn {
+            background-color: var(--error-color);
+            color: white;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -59,21 +80,28 @@
     <div id="login-overlay">
         <div id="login-box">
             <h2>Admin Login</h2>
-            <div class="form-group"><input type="email" id="admin-email" class="form-control" placeholder="Enter Admin Email"></div>
+            <div class="form-group"><input type="email" id="admin-email-input" class="form-control" placeholder="Enter Admin Email"></div>
             <div class="form-group"><input type="password" id="admin-password" class="form-control" placeholder="Enter Password"></div>
             <button id="login-btn" class="btn btn-primary">Login</button>
         </div>
     </div>
 
     <aside class="sidebar">
-        <h1>Admin Panel</h1>
-        <nav>
-            <a href="#" class="nav-item active" data-page="dashboard">Dashboard</a>
-            <a href="#" class="nav-item" data-page="users">Users</a>
-            <a href="#" class="nav-item" data-page="withdrawals">Withdrawals</a>
-            <a href="#" class="nav-item" data-page="settings">Settings</a>
-            <a href="#" class="nav-item" data-page="broadcast">Broadcast</a>
-        </nav>
+        <div>
+            <h1>Admin Panel</h1>
+            <nav>
+                <a href="#" class="nav-item active" data-page="dashboard">Dashboard</a>
+                <a href="#" class="nav-item" data-page="users">Users</a>
+                <a href="#" class="nav-item" data-page="withdrawals">Withdrawals</a>
+                <a href="#" class="nav-item" data-page="settings">Settings</a>
+                <a href="#" class="nav-item" data-page="broadcast">Broadcast</a>
+            </nav>
+        </div>
+        <!-- [ADDED] Admin Info Display Area -->
+        <div class="admin-info">
+            <p id="admin-email-display">Not logged in</p>
+            <button id="logout-btn" class="btn">Logout</button>
+        </div>
     </aside>
 
     <div id="sidebar-overlay"></div>
@@ -129,38 +157,18 @@
             </div>
             <form id="edit-user-form">
                 <input type="hidden" id="edit-user-id">
-                
                 <div class="grid-2">
-                    <div class="form-group">
-                        <label for="edit-user-name">Full Name</label>
-                        <input type="text" id="edit-user-name" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-email">Email Address</label>
-                        <input type="email" id="edit-user-email" class="form-control" readonly>
-                    </div>
+                    <div class="form-group"><label for="edit-user-name">Full Name</label><input type="text" id="edit-user-name" class="form-control"></div>
+                    <div class="form-group"><label for="edit-user-email">Email Address</label><input type="email" id="edit-user-email" class="form-control" readonly></div>
                 </div>
-                
                 <div class="grid-2">
-                    <div class="form-group">
-                        <label for="edit-user-mobile">Phone Number</label>
-                        <input type="tel" id="edit-user-mobile" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-balance">Balance</label>
-                        <input type="number" id="edit-user-balance" class="form-control" step="0.01">
-                    </div>
+                    <div class="form-group"><label for="edit-user-mobile">Phone Number</label><input type="tel" id="edit-user-mobile" class="form-control"></div>
+                    <div class="form-group"><label for="edit-user-balance">Balance</label><input type="number" id="edit-user-balance" class="form-control" step="0.01"></div>
                 </div>
-
-                <div class="form-group">
-                     <label for="edit-user-referrals">Referrals</label>
-                     <input type="number" id="edit-user-referrals" class="form-control">
-                </div>
-                
+                <div class="form-group"><label for="edit-user-referrals">Referrals</label><input type="number" id="edit-user-referrals" class="form-control"></div>
                 <p style="color:var(--text-secondary); font-size: 0.9em; border: 1px dashed var(--border-color); padding: 10px; border-radius: 6px;">
                     <strong>Security Note:</strong> User passwords cannot be viewed or changed directly from this panel for security reasons. Users can reset their own password using the 'Forgot Password' feature in the app.
                 </p>
-                
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </form>
             <hr style="border-color: var(--border-color); margin: 25px 0;">
@@ -169,7 +177,7 @@
     </div>
     
     <script>
-        // UI navigation script
+        // UI navigation script - No changes here
         document.addEventListener('DOMContentLoaded', () => {
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.querySelector('.sidebar');
@@ -195,10 +203,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
         import { getDatabase, ref, onValue, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
-        // IMPORTANT: Replace with your actual Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA2HUBFhHEWg4MwkJB4BVdJxUun0Gy07Ts",
             authDomain: "daily-earne-aea89.firebaseapp.com",
@@ -213,25 +220,61 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Login Logic
+        // --- [MODIFIED] Login and Auth State Handling ---
+
+        // Function to update UI when logged in
+        function showAdminPanel(user) {
+            document.getElementById('login-overlay').style.display = 'none';
+            document.querySelector('.main-content').style.display = 'block';
+            document.getElementById('menu-toggle').style.display = 'flex';
+            document.getElementById('admin-email-display').innerText = user.email; // Show admin email
+            if (window.innerWidth >= 768) {
+                document.querySelector('.sidebar').classList.add('open');
+                document.body.classList.add('sidebar-open');
+            }
+            loadPageData('dashboard');
+        }
+
+        // Function to show login screen
+        function showLoginScreen() {
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.querySelector('.main-content').style.display = 'none';
+            document.getElementById('menu-toggle').style.display = 'none';
+            document.body.classList.remove('sidebar-open');
+            document.querySelector('.sidebar').classList.remove('open');
+        }
+
+        // Check auth state when the page loads
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in, show the admin panel.
+                showAdminPanel(user);
+            } else {
+                // User is signed out, show the login screen.
+                showLoginScreen();
+            }
+        });
+
+        // Login Button Click Event
         document.getElementById('login-btn').addEventListener('click', () => {
-            const email = document.getElementById('admin-email').value;
+            const email = document.getElementById('admin-email-input').value;
             const password = document.getElementById('admin-password').value;
             signInWithEmailAndPassword(auth, email, password)
-                .then(() => {
-                    document.getElementById('login-overlay').style.display = 'none';
-                    document.querySelector('.main-content').style.display = 'block';
-                    document.getElementById('menu-toggle').style.display = 'flex';
-                    if (window.innerWidth >= 768) {
-                         document.querySelector('.sidebar').classList.add('open');
-                         document.body.classList.add('sidebar-open');
-                    }
-                    loadPageData('dashboard');
+                .then((userCredential) => {
+                    // showAdminPanel function will be called by onAuthStateChanged
                 })
                 .catch((error) => alert('Login Failed: ' + error.message));
         });
 
-        // Page Data Loading
+        // Logout Button Click Event
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            signOut(auth).catch((error) => {
+                alert('Logout failed: ' + error.message);
+            });
+        });
+
+
+        // Page Data Loading - No changes here
         function loadPageData(page) {
             if (page === 'dashboard') loadDashboardData();
             if (page === 'users') loadUsers();
@@ -245,7 +288,7 @@
             onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); });
         }
         
-        // Users Management
+        // Users Management - No changes here
         let allUsersData = {};
         function loadUsers() {
             onValue(ref(db, 'users'), snapshot => {
@@ -286,7 +329,7 @@
             });
         });
 
-        // Edit/Delete User Modal Logic
+        // Edit/Delete User Modal Logic - No changes here
         const modal = document.getElementById('edit-user-modal');
         document.getElementById('users-table-body').addEventListener('click', e => {
             if (e.target.classList.contains('edit-user-btn')) {
@@ -331,15 +374,15 @@
             }
         });
         
-        // Withdrawals Management
+        // Withdrawals Management - No changes here
         function loadWithdrawals() { onValue(ref(db, 'withdrawals/pending'), s => { const t = document.getElementById('pending-withdrawals-table'); t.innerHTML = ''; if (s.exists()) { for (const id in s.val()) { const r = s.val()[id]; t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="5">No pending requests.</td></tr>'; } }); onValue(ref(db, 'withdrawals/completed'), s => { const t = document.getElementById('completed-withdrawals-table'); t.innerHTML = ''; if(s.exists()){ const history = Object.values(s.val()).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0)); history.forEach(r => { t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td style="color:${r.status==='approved'?'var(--success-color)':'var(--error-color)'}; text-transform: capitalize;">${r.status}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="5">No history found.</td></tr>'; } }); }
         window.handleWithdrawal = async (id, status) => { const reqRef = ref(db, `withdrawals/pending/${id}`); const s = await get(reqRef); if (!s.exists()) { alert('Request already processed.'); return; } const d = s.val(); d.status = status; d.timestamp = Date.now(); if (status === 'rejected') { const userBalRef = ref(db, `users/${d.userId}/balance`); const userBal = (await get(userBalRef)).val() || 0; await set(userBalRef, userBal + d.amount); } await set(ref(db, `withdrawals/completed/${id}`), d); await remove(reqRef); alert(`Request has been ${status}.`); }
 
-        // Settings Management
+        // Settings Management - No changes here
         function loadSettings() { get(ref(db, 'settings')).then(snapshot => { if(snapshot.exists()) { const data = snapshot.val(); for (const key in data) { const element = document.getElementById(key); if (element) { element.value = data[key]; } } } }); }
         document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const settings = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0, minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0, adReward: parseFloat(document.getElementById('adReward').value) || 0, referralReward: parseFloat(document.getElementById('referralReward').value) || 0, homeTaskCountdown: parseInt(document.getElementById('homeTaskCountdown').value) || 30, authImageUrl: document.getElementById('authImageUrl').value.trim(), marqueeText: document.getElementById('marqueeText').value.trim(), welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, tutorialLink: document.getElementById('tutorialLink').value.trim(), adminChatLink: document.getElementById('adminChatLink').value.trim(), adminCallLink: document.getElementById('adminCallLink').value.trim(), telegramChannelLink: document.getElementById('telegramChannelLink').value.trim(), youtubeChannelLink: document.getElementById('youtubeChannelLink').value.trim(), monetagZoneId: document.getElementById('monetagZoneId').value.trim(), gigaPubId: document.getElementById('gigaPubId').value.trim() }; set(ref(db, 'settings'), settings).then(() => { alert('Settings saved successfully!'); }).catch(err => alert('Error saving settings: ' + err.message)); });
 
-        // Broadcast Management
+        // Broadcast Management - No changes here
         document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const message = { text: document.getElementById('broadcast-message').value, imageUrl: document.getElementById('broadcast-image-url').value.trim() || null, timestamp: Date.now() }; if (!message.text) { alert('Message cannot be empty.'); return; } set(ref(db, 'broadcast/latestMessage'), message).then(() => { alert('Broadcast message sent to all users!'); document.getElementById('broadcast-form').reset(); }).catch(err => alert('Error: ' + err.message)); });
     </script>
 </body>
