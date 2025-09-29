@@ -1,5 +1,3 @@
---- START OF FILE index.html ---
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,7 +95,6 @@
                 <a href="#" class="nav-item" data-page="broadcast">Broadcast</a>
             </nav>
         </div>
-        <!-- [ADDED] Admin Info Display Area -->
         <div class="admin-info">
             <p id="admin-email-display">Not logged in</p>
             <button id="logout-btn" class="btn">Logout</button>
@@ -151,10 +148,7 @@
     <!-- Edit User Modal -->
     <div id="edit-user-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit User Details</h3>
-                <span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span>
-            </div>
+            <div class="modal-header"><h3>Edit User Details</h3><span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span></div>
             <form id="edit-user-form">
                 <input type="hidden" id="edit-user-id">
                 <div class="grid-2">
@@ -167,7 +161,7 @@
                 </div>
                 <div class="form-group"><label for="edit-user-referrals">Referrals</label><input type="number" id="edit-user-referrals" class="form-control"></div>
                 <p style="color:var(--text-secondary); font-size: 0.9em; border: 1px dashed var(--border-color); padding: 10px; border-radius: 6px;">
-                    <strong>Security Note:</strong> User passwords cannot be viewed or changed directly from this panel for security reasons. Users can reset their own password using the 'Forgot Password' feature in the app.
+                    <strong>Security Note:</strong> User passwords cannot be viewed or changed directly. Users can reset their own password via the app.
                 </p>
                 <button type="submit" class="btn btn-primary">Save Changes</button>
             </form>
@@ -177,7 +171,7 @@
     </div>
     
     <script>
-        // UI navigation script - No changes here
+        // UI navigation script
         document.addEventListener('DOMContentLoaded', () => {
             const menuToggle = document.getElementById('menu-toggle');
             const sidebar = document.querySelector('.sidebar');
@@ -204,7 +198,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, get, set, update, remove, push } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+        import { getDatabase, ref, onValue, get, set, update, remove } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2HUBFhHEWg4MwkJB4BVdJxUun0Gy07Ts",
@@ -220,14 +214,12 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // --- [MODIFIED] Login and Auth State Handling ---
-
-        // Function to update UI when logged in
+        // --- Auth State Handling ---
         function showAdminPanel(user) {
             document.getElementById('login-overlay').style.display = 'none';
             document.querySelector('.main-content').style.display = 'block';
             document.getElementById('menu-toggle').style.display = 'flex';
-            document.getElementById('admin-email-display').innerText = user.email; // Show admin email
+            document.getElementById('admin-email-display').innerText = user.email;
             if (window.innerWidth >= 768) {
                 document.querySelector('.sidebar').classList.add('open');
                 document.body.classList.add('sidebar-open');
@@ -235,7 +227,6 @@
             loadPageData('dashboard');
         }
 
-        // Function to show login screen
         function showLoginScreen() {
             document.getElementById('login-overlay').style.display = 'flex';
             document.querySelector('.main-content').style.display = 'none';
@@ -244,37 +235,23 @@
             document.querySelector('.sidebar').classList.remove('open');
         }
 
-        // Check auth state when the page loads
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // User is signed in, show the admin panel.
-                showAdminPanel(user);
-            } else {
-                // User is signed out, show the login screen.
-                showLoginScreen();
-            }
+            if (user) { showAdminPanel(user); } 
+            else { showLoginScreen(); }
         });
 
-        // Login Button Click Event
         document.getElementById('login-btn').addEventListener('click', () => {
             const email = document.getElementById('admin-email-input').value;
             const password = document.getElementById('admin-password').value;
             signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    // showAdminPanel function will be called by onAuthStateChanged
-                })
                 .catch((error) => alert('Login Failed: ' + error.message));
         });
 
-        // Logout Button Click Event
         document.getElementById('logout-btn').addEventListener('click', () => {
-            signOut(auth).catch((error) => {
-                alert('Logout failed: ' + error.message);
-            });
+            signOut(auth).catch((error) => alert('Logout failed: ' + error.message));
         });
 
-
-        // Page Data Loading - No changes here
+        // --- Page Data Loading ---
         function loadPageData(page) {
             if (page === 'dashboard') loadDashboardData();
             if (page === 'users') loadUsers();
@@ -288,19 +265,24 @@
             onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); });
         }
         
-        // Users Management - No changes here
+        // --- Users Management ---
         let allUsersData = {};
         function loadUsers() {
-            onValue(ref(db, 'users'), snapshot => {
+            const usersRef = ref(db, 'users');
+            onValue(usersRef, (snapshot) => {
                 allUsersData = snapshot.exists() ? snapshot.val() : {};
                 renderUsersTable(allUsersData);
+            }, (error) => {
+                // [ADDED] Error handling for database reads
+                console.error("Firebase Read Error on /users:", error);
+                alert("Could not load user data. Check console for errors and verify your database security rules.");
             });
         }
         function renderUsersTable(users) {
             const tBody = document.getElementById('users-table-body');
             tBody.innerHTML = '';
-            if (Object.keys(users).length === 0) {
-                tBody.innerHTML = '<tr><td colspan="6">No users found.</td></tr>';
+            if (!users || Object.keys(users).length === 0) {
+                tBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users found in the database.</td></tr>';
                 return;
             }
             const usersArray = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
@@ -329,7 +311,7 @@
             });
         });
 
-        // Edit/Delete User Modal Logic - No changes here
+        // --- Edit/Delete User Modal Logic ---
         const modal = document.getElementById('edit-user-modal');
         document.getElementById('users-table-body').addEventListener('click', e => {
             if (e.target.classList.contains('edit-user-btn')) {
@@ -374,15 +356,15 @@
             }
         });
         
-        // Withdrawals Management - No changes here
+        // --- Withdrawals Management ---
         function loadWithdrawals() { onValue(ref(db, 'withdrawals/pending'), s => { const t = document.getElementById('pending-withdrawals-table'); t.innerHTML = ''; if (s.exists()) { for (const id in s.val()) { const r = s.val()[id]; t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="5">No pending requests.</td></tr>'; } }); onValue(ref(db, 'withdrawals/completed'), s => { const t = document.getElementById('completed-withdrawals-table'); t.innerHTML = ''; if(s.exists()){ const history = Object.values(s.val()).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0)); history.forEach(r => { t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td style="color:${r.status==='approved'?'var(--success-color)':'var(--error-color)'}; text-transform: capitalize;">${r.status}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="5">No history found.</td></tr>'; } }); }
         window.handleWithdrawal = async (id, status) => { const reqRef = ref(db, `withdrawals/pending/${id}`); const s = await get(reqRef); if (!s.exists()) { alert('Request already processed.'); return; } const d = s.val(); d.status = status; d.timestamp = Date.now(); if (status === 'rejected') { const userBalRef = ref(db, `users/${d.userId}/balance`); const userBal = (await get(userBalRef)).val() || 0; await set(userBalRef, userBal + d.amount); } await set(ref(db, `withdrawals/completed/${id}`), d); await remove(reqRef); alert(`Request has been ${status}.`); }
 
-        // Settings Management - No changes here
+        // --- Settings Management ---
         function loadSettings() { get(ref(db, 'settings')).then(snapshot => { if(snapshot.exists()) { const data = snapshot.val(); for (const key in data) { const element = document.getElementById(key); if (element) { element.value = data[key]; } } } }); }
         document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const settings = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0, minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0, adReward: parseFloat(document.getElementById('adReward').value) || 0, referralReward: parseFloat(document.getElementById('referralReward').value) || 0, homeTaskCountdown: parseInt(document.getElementById('homeTaskCountdown').value) || 30, authImageUrl: document.getElementById('authImageUrl').value.trim(), marqueeText: document.getElementById('marqueeText').value.trim(), welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, tutorialLink: document.getElementById('tutorialLink').value.trim(), adminChatLink: document.getElementById('adminChatLink').value.trim(), adminCallLink: document.getElementById('adminCallLink').value.trim(), telegramChannelLink: document.getElementById('telegramChannelLink').value.trim(), youtubeChannelLink: document.getElementById('youtubeChannelLink').value.trim(), monetagZoneId: document.getElementById('monetagZoneId').value.trim(), gigaPubId: document.getElementById('gigaPubId').value.trim() }; set(ref(db, 'settings'), settings).then(() => { alert('Settings saved successfully!'); }).catch(err => alert('Error saving settings: ' + err.message)); });
 
-        // Broadcast Management - No changes here
+        // --- Broadcast Management ---
         document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const message = { text: document.getElementById('broadcast-message').value, imageUrl: document.getElementById('broadcast-image-url').value.trim() || null, timestamp: Date.now() }; if (!message.text) { alert('Message cannot be empty.'); return; } set(ref(db, 'broadcast/latestMessage'), message).then(() => { alert('Broadcast message sent to all users!'); document.getElementById('broadcast-form').reset(); }).catch(err => alert('Error: ' + err.message)); });
     </script>
 </body>
