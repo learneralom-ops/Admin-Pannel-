@@ -53,7 +53,6 @@
         .settings-section h3 { margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
         .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
         
-        /* [ADDED] New Styles for Admin Info and Logout */
         .admin-info {
             margin-top: auto;
             padding-top: 20px;
@@ -145,7 +144,7 @@
         <div id="page-broadcast" class="page"><h2>Send Broadcast Message</h2><form id="broadcast-form"><div class="form-group"><label for="broadcast-message">Message</label><textarea id="broadcast-message" class="form-control" rows="4" required></textarea></div><div class="form-group"><label for="broadcast-image-url">Image URL (Optional)</label><input type="url" id="broadcast-image-url" class="form-control"></div><button type="submit" class="btn btn-primary">Send to All App Users</button></form></div>
     </main>
 
-    <!-- [নতুন] Edit User Modal -->
+    <!-- Edit User Modal -->
     <div id="edit-user-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>Edit User Details</h3><span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span></div>
@@ -260,16 +259,21 @@
         }
 
         function loadDashboardData() {
-            onValue(ref(db, 'users'), s => { const d = s.val(); document.getElementById('total-users').innerText = d ? Object.keys(d).length : 0; document.getElementById('total-balance').innerText = d ? Object.values(d).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2) : '0.00'; });
+            onValue(ref(db, 'users'), s => {
+                const d = s.val();
+                document.getElementById('total-users').innerText = d ? Object.keys(d).length : 0;
+                document.getElementById('total-balance').innerText = d ? Object.values(d).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2) : '0.00';
+            });
             onValue(ref(db, 'withdrawals/pending'), s => { document.getElementById('pending-withdrawals').innerText = s.exists() ? Object.keys(s.val()).length : 0; });
             onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); });
         }
         
-        // --- [আপডেট] Users Management ---
+        // --- Users Management ---
         let allUsersData = {};
         function loadUsers() {
             const usersRef = ref(db, 'users');
             onValue(usersRef, (snapshot) => {
+                console.log("Users data fetched from Firebase:", snapshot.val()); // ডিবাগিং: ডেটা আসছে কিনা দেখুন
                 allUsersData = snapshot.exists() ? snapshot.val() : {};
                 renderUsersTable(allUsersData);
             }, (error) => {
@@ -277,43 +281,75 @@
                 alert("Could not load user data. Check console for errors and verify your database security rules.");
             });
         }
-
+        
+        // --- [গুরুত্বপূর্ণ পরিবর্তন] Users Table Rendering Function ---
         function renderUsersTable(users) {
             const tBody = document.getElementById('users-table-body');
-            tBody.innerHTML = '';
-            if (!users || Object.keys(users).length === 0) {
+            if (!tBody) {
+                console.error("Table body with id 'users-table-body' not found!");
+                return;
+            }
+            tBody.innerHTML = ''; // টেবিল খালি করা হচ্ছে
+
+            if (!users || typeof users !== 'object' || Object.keys(users).length === 0) {
+                console.log("No users found or users data is not a valid object."); // ডিবাগিং
                 tBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users found in the database.</td></tr>';
                 return;
             }
-            // Sort users by join date (newest first) if available
-            const usersArray = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
-            usersArray.sort((a, b) => new Date(b.joinDate || 0) - new Date(a.joinDate || 0));
 
-            for (const user of usersArray) {
-                const u = user;
-                const uid = user.uid;
-                const searchableString = `${u.name||''} ${u.email||''} ${u.mobile||''}`.toLowerCase();
-                
-                tBody.innerHTML += `
-                    <tr data-uid="${uid}" data-search="${searchableString}">
-                        <td>${u.name || 'N/A'}</td>
-                        <td>${u.email || 'N/A'}</td>
-                        <td>${u.mobile || 'N/A'}</td>
-                        <td>${(u.balance || 0).toFixed(2)}</td>
-                        <td>${u.referrals || 0}</td>
-                        <td><button class="btn btn-primary edit-user-btn" data-id="${uid}">Edit</button></td>
-                    </tr>`;
+            console.log(`Preparing to render ${Object.keys(users).length} users.`); // ডিবাগিং
+
+            // ডেটাকে অ্যারে-তে রূপান্তর করা
+            const usersArray = Object.keys(users).map(uid => {
+                // নিশ্চিত করুন যে প্রতিটি ইউজার একটি অবজেক্ট
+                if (typeof users[uid] === 'object' && users[uid] !== null) {
+                    return { uid, ...users[uid] };
+                }
+                return { uid, name: 'Invalid Data', email: '', mobile: '', balance: 0, referrals: 0 }; // ত্রুটিপূর্ণ ডেটার জন্য ফলব্যাক
+            });
+
+            // joinDate অনুযায়ী সর্ট করা
+            try {
+                usersArray.sort((a, b) => new Date(b.joinDate || 0) - new Date(a.joinDate || 0));
+            } catch (e) {
+                console.error("Error sorting users by joinDate:", e);
             }
+
+            let tableHTML = '';
+            for (const user of usersArray) {
+                try {
+                    const u = user;
+                    const uid = user.uid;
+                    // সার্চ করার জন্য একটি স্ট্রিং তৈরি করা
+                    const searchableString = `${u.name||''} ${u.email||''} ${u.mobile||''}`.toLowerCase();
+                    
+                    // টেবিলের সারি তৈরি
+                    tableHTML += `
+                        <tr data-uid="${uid}" data-search="${searchableString}">
+                            <td>${u.name || 'N/A'}</td>
+                            <td>${u.email || 'N/A'}</td>
+                            <td>${u.mobile || 'N/A'}</td>
+                            <td>${(Number(u.balance) || 0).toFixed(2)}</td>
+                            <td>${Number(u.referrals) || 0}</td>
+                            <td><button class="btn btn-primary edit-user-btn" data-id="${uid}">Edit</button></td>
+                        </tr>`;
+                } catch (error) {
+                    console.error("Error rendering a user row:", user, error); // কোনো নির্দিষ্ট ইউজারের ডেটায় সমস্যা হলে তা দেখাবে
+                }
+            }
+            tBody.innerHTML = tableHTML; // একবারে সম্পূর্ণ টেবিল আপডেট করা
+            console.log("User table rendered successfully."); // ডিবাগিং
         }
 
         document.getElementById('user-search').addEventListener('keyup', e => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('#users-table-body tr').forEach(r => {
-                r.style.display = r.dataset.search.includes(term) ? '' : 'none';
+                const searchableData = r.dataset.search || '';
+                r.style.display = searchableData.includes(term) ? '' : 'none';
             });
         });
 
-        // --- [নতুন] Edit/Delete User Modal Logic ---
+        // --- Edit/Delete User Modal Logic ---
         const modal = document.getElementById('edit-user-modal');
         document.getElementById('users-table-body').addEventListener('click', e => {
             if (e.target.classList.contains('edit-user-btn')) {
