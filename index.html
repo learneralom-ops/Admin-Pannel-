@@ -145,7 +145,7 @@
         <div id="page-broadcast" class="page"><h2>Send Broadcast Message</h2><form id="broadcast-form"><div class="form-group"><label for="broadcast-message">Message</label><textarea id="broadcast-message" class="form-control" rows="4" required></textarea></div><div class="form-group"><label for="broadcast-image-url">Image URL (Optional)</label><input type="url" id="broadcast-image-url" class="form-control"></div><button type="submit" class="btn btn-primary">Send to All App Users</button></form></div>
     </main>
 
-    <!-- Edit User Modal -->
+    <!-- [নতুন] Edit User Modal -->
     <div id="edit-user-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header"><h3>Edit User Details</h3><span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span></div>
@@ -265,7 +265,7 @@
             onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); });
         }
         
-        // --- Users Management ---
+        // --- [আপডেট] Users Management ---
         let allUsersData = {};
         function loadUsers() {
             const usersRef = ref(db, 'users');
@@ -273,11 +273,11 @@
                 allUsersData = snapshot.exists() ? snapshot.val() : {};
                 renderUsersTable(allUsersData);
             }, (error) => {
-                // [ADDED] Error handling for database reads
                 console.error("Firebase Read Error on /users:", error);
                 alert("Could not load user data. Check console for errors and verify your database security rules.");
             });
         }
+
         function renderUsersTable(users) {
             const tBody = document.getElementById('users-table-body');
             tBody.innerHTML = '';
@@ -285,6 +285,7 @@
                 tBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users found in the database.</td></tr>';
                 return;
             }
+            // Sort users by join date (newest first) if available
             const usersArray = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
             usersArray.sort((a, b) => new Date(b.joinDate || 0) - new Date(a.joinDate || 0));
 
@@ -304,6 +305,7 @@
                     </tr>`;
             }
         }
+
         document.getElementById('user-search').addEventListener('keyup', e => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('#users-table-body tr').forEach(r => {
@@ -311,7 +313,7 @@
             });
         });
 
-        // --- Edit/Delete User Modal Logic ---
+        // --- [নতুন] Edit/Delete User Modal Logic ---
         const modal = document.getElementById('edit-user-modal');
         document.getElementById('users-table-body').addEventListener('click', e => {
             if (e.target.classList.contains('edit-user-btn')) {
@@ -328,6 +330,7 @@
                 }
             }
         });
+
         document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
         
         document.getElementById('edit-user-form').addEventListener('submit', e => {
