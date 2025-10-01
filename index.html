@@ -250,21 +250,18 @@
             document.querySelector('.sidebar').classList.remove('open');
         }
 
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const adminsRef = ref(db, 'admins/' + user.uid);
-                get(adminsRef).then(snapshot => {
-                    if (snapshot.exists()) {
-                        showAdminPanel(user);
-                    } else {
-                        alert('Access Denied. You are not an authorized admin.');
-                        signOut(auth);
-                    }
-                });
-            } else {
-                showLoginScreen();
-            }
-        });
+        // --- নতুন এবং সংশোধিত Auth State Handling ---
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // অ্যাডমিন চেক ছাড়াই সরাসরি প্যানেল দেখানোর অনুমতি দেওয়া হচ্ছে
+        console.log("User is logged in, attempting to show admin panel.");
+        showAdminPanel(user);
+    } else {
+        // ইউজার লগইন করা না থাকলে লগইন স্ক্রিন দেখানো হচ্ছে
+        console.log("No user logged in, showing login screen.");
+        showLoginScreen();
+    }
+});
 
         document.getElementById('login-btn').addEventListener('click', () => {
             const email = document.getElementById('admin-email-input').value;
