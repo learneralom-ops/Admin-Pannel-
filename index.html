@@ -34,7 +34,8 @@
         th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
         th { background-color: var(--primary-color); }
         tr:hover { background-color: rgba(255, 255, 255, 0.05); }
-        .btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+        .btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background-color 0.2s; }
+        .btn:hover { opacity: 0.9; }
         .btn-success { background-color: var(--success-color); color: white; }
         .btn-danger { background-color: var(--error-color); color: white; }
         .btn-primary { background-color: var(--accent-color); color: white; }
@@ -44,32 +45,21 @@
         .form-control:focus { outline: none; border-color: var(--accent-color); }
         textarea.form-control { min-height: 100px; resize: vertical; }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1050; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: var(--card-color); padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        .modal-content { background: var(--card-color); padding: 30px; border-radius: 12px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; justify-content: center; align-items: center; }
         #login-box { background: var(--card-color); padding: 40px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; }
         #login-box h2 { margin-top: 0; }
         .settings-section { background-color: var(--card-color); padding: 20px; border-radius: 8px; margin-bottom: 25px; }
         .settings-section h3 { margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        
-        .admin-info {
-            margin-top: auto;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-            text-align: center;
-        }
-        #admin-email-display {
-            font-size: 0.9em;
-            color: var(--text-secondary);
-            margin: 0 0 15px 0;
-            word-break: break-all;
-        }
-        #logout-btn {
-            background-color: var(--error-color);
-            color: white;
-            width: 100%;
-        }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .admin-info { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; }
+        #admin-email-display { font-size: 0.9em; color: var(--text-secondary); margin: 0 0 15px 0; word-break: break-all; }
+        #logout-btn { background-color: var(--error-color); color: white; width: 100%; }
+        .adjustment-group { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+        .adjustment-group .form-control { width: 80px; text-align: center; }
+        .adjustment-group .btn { padding: 5px 10px; font-size: 1.2rem; line-height: 1; }
+        .user-meta-info { background-color: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; color: var(--text-secondary); }
     </style>
 </head>
 <body>
@@ -109,16 +99,17 @@
         
         <div id="page-users" class="page">
             <h2>Users Management</h2>
-            <div class="form-group"><input type="text" id="user-search" class="form-control" placeholder="Search by Name, Email, or Phone..."></div>
+            <div class="form-group"><input type="text" id="user-search" class="form-control" placeholder="Search by Name or Telegram ID..."></div>
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th>Email</th>
-                            <th>Phone</th>
+                            <th>Telegram ID</th>
                             <th>Balance (TK)</th>
                             <th>Referrals</th>
+                            <th>Total Clicks</th>
+                            <th>Join Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -130,13 +121,12 @@
         <div id="page-withdrawals" class="page"><h2>Withdrawal Requests</h2><div class="table-container"><h3>Pending Requests</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Actions</th></tr></thead><tbody id="pending-withdrawals-table"></tbody></table></div><div class="table-container" style="margin-top:30px;"><h3>Completed/Rejected History</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Status</th></tr></thead><tbody id="completed-withdrawals-table"></tbody></table></div></div>
         
         <div id="page-settings" class="page">
-             <h2>App Settings</h2>
+            <h2>App Settings</h2>
             <form id="settings-form">
                 <div class="settings-section"><h3>General Settings</h3><div class="form-group"><label for="minWithdrawAmount">Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div><div class="form-group"><label for="minWithdrawReferrals">Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div></div>
-                <div class="settings-section"><h3>Reward & Task Settings</h3><div class="form-group"><label for="adReward">Reward per Task (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div><div class="form-group"><label for="referralReward">Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control" step="0.01"></div><div class="form-group"><label for="homeTaskCountdown">Home Page Task Countdown (Seconds)</label><input type="number" id="homeTaskCountdown" class="form-control" placeholder="e.g., 30"></div></div>
-                <div class="settings-section"><h3>Content & UI Settings</h3><div class="form-group"><label for="authImageUrl">Sign Up Page Image URL</label><input type="url" id="authImageUrl" class="form-control" placeholder="https://i.ibb.co/hR5z06w/auth-logo.png"></div><div class="form-group"><label for="marqueeText">Scrolling Offer Text (Marquee)</label><input type="text" id="marqueeText" class="form-control"></div><div class="form-group"><label for="welcomeMessageTitle">Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div><div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control" rows="4"></textarea></div><div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control" rows="4"></textarea></div></div>
+                <div class="settings-section"><h3>Reward & Task Settings</h3><div class="form-group"><label for="adReward">Reward per Task (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div><div class="form-group"><label for="referralReward">Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control" step="0.01"></div></div>
+                <div class="settings-section"><h3>Content & UI Settings</h3><div class="form-group"><label for="marqueeText">Scrolling Offer Text (Marquee)</label><input type="text" id="marqueeText" class="form-control"></div><div class="form-group"><label for="welcomeMessageTitle">Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div><div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control" rows="4"></textarea></div><div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control" rows="4"></textarea></div></div>
                 <div class="settings-section"><h3>Link Settings</h3><div class="form-group"><label for="tutorialLink">Tutorial Video Link</label><input type="text" id="tutorialLink" class="form-control"></div><div class="form-group"><label for="adminChatLink">Admin Chat Link</label><input type="text" id="adminChatLink" class="form-control"></div><div class="form-group"><label for="adminCallLink">Admin Call Link (e.g., tel:+8801...)</label><input type="text" id="adminCallLink" class="form-control"></div><div class="form-group"><label for="telegramChannelLink">Telegram Channel Link (for Task)</label><input type="text" id="telegramChannelLink" class="form-control"></div><div class="form-group"><label for="youtubeChannelLink">YouTube Channel Link (for Task)</label><input type="text" id="youtubeChannelLink" class="form-control"></div></div>
-                <div class="settings-section"><h3>Advanced: Ad Network Codes</h3><div class="form-group"><label for="monetagZoneId">Monetag Zone ID</label><input type="text" id="monetagZoneId" class="form-control" placeholder="e.g., 8954258"></div><div class="form-group"><label for="gigaPubId">Giga Pub Script ID</label><input type="text" id="gigaPubId" class="form-control" placeholder="e.g., 3247"></div></div>
                 <button type="submit" class="btn btn-primary" style="width:100%; padding: 15px; font-size: 1.1rem;">Save All Settings</button>
             </form>
         </div>
@@ -150,19 +140,45 @@
             <div class="modal-header"><h3>Edit User Details</h3><span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span></div>
             <form id="edit-user-form">
                 <input type="hidden" id="edit-user-id">
+                <div class="user-meta-info">
+                    <p style="margin: 0;"><strong>Telegram ID:</strong> <span id="display-telegram-id"></span></p>
+                    <p style="margin: 5px 0 0 0;"><strong>Joined on:</strong> <span id="display-join-date"></span></p>
+                </div>
+
                 <div class="grid-2">
                     <div class="form-group"><label for="edit-user-name">Full Name</label><input type="text" id="edit-user-name" class="form-control"></div>
-                    <div class="form-group"><label for="edit-user-email">Email Address</label><input type="email" id="edit-user-email" class="form-control" readonly></div>
-                </div>
-                <div class="grid-2">
                     <div class="form-group"><label for="edit-user-mobile">Phone Number</label><input type="tel" id="edit-user-mobile" class="form-control"></div>
-                    <div class="form-group"><label for="edit-user-balance">Balance</label><input type="number" id="edit-user-balance" class="form-control" step="0.01"></div>
                 </div>
-                <div class="form-group"><label for="edit-user-referrals">Referrals</label><input type="number" id="edit-user-referrals" class="form-control"></div>
-                <p style="color:var(--text-secondary); font-size: 0.9em; border: 1px dashed var(--border-color); padding: 10px; border-radius: 6px;">
-                    <strong>Security Note:</strong> User passwords cannot be viewed or changed directly. Users can reset their own password via the app.
-                </p>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="edit-user-balance">Balance</label>
+                        <input type="number" id="edit-user-balance" class="form-control" step="0.01">
+                        <div class="adjustment-group">
+                            <input type="number" id="balance-adjustment-amount" class="form-control" placeholder="Amt" value="10">
+                            <button type="button" id="add-balance-btn" class="btn btn-success">+</button>
+                            <button type="button" id="subtract-balance-btn" class="btn btn-danger">-</button>
+                            <span>Add / Subtract Amount</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-user-referrals">Referrals</label>
+                        <input type="number" id="edit-user-referrals" class="form-control">
+                         <div class="adjustment-group">
+                            <input type="number" id="referral-adjustment-amount" class="form-control" placeholder="Amt" value="1">
+                            <button type="button" id="add-referral-btn" class="btn btn-success">+</button>
+                            <button type="button" id="subtract-referral-btn" class="btn btn-danger">-</button>
+                            <span>Add / Subtract Amount</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group"><label for="edit-total-clicks">Total Clicks</label><input type="number" id="edit-total-clicks" class="form-control"></div>
+                    <div class="form-group"><label for="edit-ads-watched">Ads Watched (Daily)</label><input type="number" id="edit-ads-watched" class="form-control"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">Save Changes</button>
             </form>
             <hr style="border-color: var(--border-color); margin: 25px 0;">
             <button id="delete-user-btn" class="btn btn-danger" style="width: 100%;">Delete This User Permanently</button>
@@ -197,7 +213,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, get, set, update, remove } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+        import { getDatabase, ref, onValue, get, set, update, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA2HUBFhHEWg4MwkJB4BVdJxUun0Gy07Ts",
@@ -235,8 +251,19 @@
         }
 
         onAuthStateChanged(auth, (user) => {
-            if (user) { showAdminPanel(user); } 
-            else { showLoginScreen(); }
+            if (user) {
+                const adminsRef = ref(db, 'admins/' + user.uid);
+                get(adminsRef).then(snapshot => {
+                    if (snapshot.exists()) {
+                        showAdminPanel(user);
+                    } else {
+                        alert('Access Denied. You are not an authorized admin.');
+                        signOut(auth);
+                    }
+                });
+            } else {
+                showLoginScreen();
+            }
         });
 
         document.getElementById('login-btn').addEventListener('click', () => {
@@ -259,93 +286,52 @@
         }
 
         function loadDashboardData() {
-            onValue(ref(db, 'users'), s => {
-                const d = s.val();
-                document.getElementById('total-users').innerText = d ? Object.keys(d).length : 0;
-                document.getElementById('total-balance').innerText = d ? Object.values(d).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2) : '0.00';
-            });
+            onValue(ref(db, 'users'), s => { const d = s.val(); document.getElementById('total-users').innerText = d ? Object.keys(d).length : 0; document.getElementById('total-balance').innerText = d ? Object.values(d).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2) : '0.00'; });
             onValue(ref(db, 'withdrawals/pending'), s => { document.getElementById('pending-withdrawals').innerText = s.exists() ? Object.keys(s.val()).length : 0; });
             onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); });
         }
         
-        // --- Users Management ---
         let allUsersData = {};
         function loadUsers() {
-            const usersRef = ref(db, 'users');
-            onValue(usersRef, (snapshot) => {
-                console.log("Users data fetched from Firebase:", snapshot.val()); // ডিবাগিং: ডেটা আসছে কিনা দেখুন
+            onValue(ref(db, 'users'), (snapshot) => {
                 allUsersData = snapshot.exists() ? snapshot.val() : {};
                 renderUsersTable(allUsersData);
-            }, (error) => {
-                console.error("Firebase Read Error on /users:", error);
-                alert("Could not load user data. Check console for errors and verify your database security rules.");
             });
         }
         
-        // --- [গুরুত্বপূর্ণ পরিবর্তন] Users Table Rendering Function ---
         function renderUsersTable(users) {
             const tBody = document.getElementById('users-table-body');
-            if (!tBody) {
-                console.error("Table body with id 'users-table-body' not found!");
+            tBody.innerHTML = '';
+            if (!users || Object.keys(users).length === 0) {
+                tBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
                 return;
             }
-            tBody.innerHTML = ''; // টেবিল খালি করা হচ্ছে
-
-            if (!users || typeof users !== 'object' || Object.keys(users).length === 0) {
-                console.log("No users found or users data is not a valid object."); // ডিবাগিং
-                tBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">No users found in the database.</td></tr>';
-                return;
-            }
-
-            console.log(`Preparing to render ${Object.keys(users).length} users.`); // ডিবাগিং
-
-            // ডেটাকে অ্যারে-তে রূপান্তর করা
-            const usersArray = Object.keys(users).map(uid => {
-                // নিশ্চিত করুন যে প্রতিটি ইউজার একটি অবজেক্ট
-                if (typeof users[uid] === 'object' && users[uid] !== null) {
-                    return { uid, ...users[uid] };
-                }
-                return { uid, name: 'Invalid Data', email: '', mobile: '', balance: 0, referrals: 0 }; // ত্রুটিপূর্ণ ডেটার জন্য ফলব্যাক
-            });
-
-            // joinDate অনুযায়ী সর্ট করা
-            try {
-                usersArray.sort((a, b) => new Date(b.joinDate || 0) - new Date(a.joinDate || 0));
-            } catch (e) {
-                console.error("Error sorting users by joinDate:", e);
-            }
-
+            const usersArray = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
+            usersArray.sort((a, b) => new Date(b.joinDate || 0) - new Date(a.joinDate || 0));
+            
             let tableHTML = '';
-            for (const user of usersArray) {
-                try {
-                    const u = user;
-                    const uid = user.uid;
-                    // সার্চ করার জন্য একটি স্ট্রিং তৈরি করা
-                    const searchableString = `${u.name||''} ${u.email||''} ${u.mobile||''}`.toLowerCase();
-                    
-                    // টেবিলের সারি তৈরি
-                    tableHTML += `
-                        <tr data-uid="${uid}" data-search="${searchableString}">
-                            <td>${u.name || 'N/A'}</td>
-                            <td>${u.email || 'N/A'}</td>
-                            <td>${u.mobile || 'N/A'}</td>
-                            <td>${(Number(u.balance) || 0).toFixed(2)}</td>
-                            <td>${Number(u.referrals) || 0}</td>
-                            <td><button class="btn btn-primary edit-user-btn" data-id="${uid}">Edit</button></td>
-                        </tr>`;
-                } catch (error) {
-                    console.error("Error rendering a user row:", user, error); // কোনো নির্দিষ্ট ইউজারের ডেটায় সমস্যা হলে তা দেখাবে
-                }
-            }
-            tBody.innerHTML = tableHTML; // একবারে সম্পূর্ণ টেবিল আপডেট করা
-            console.log("User table rendered successfully."); // ডিবাগিং
+            usersArray.forEach(user => {
+                const u = user;
+                const uid = user.uid;
+                const searchableString = `${u.name||''} ${u.telegramId||uid}`.toLowerCase();
+                tableHTML += `
+                    <tr data-uid="${uid}" data-search="${searchableString}">
+                        <td>${u.name || 'N/A'}</td>
+                        <td>${u.telegramId || uid}</td>
+                        <td>${(Number(u.balance) || 0).toFixed(2)}</td>
+                        <td>${u.referrals || 0}</td>
+                        <td>${u.totalClicks || 0}</td>
+                        <td>${u.joinDate ? new Date(u.joinDate).toLocaleDateString() : 'N/A'}</td>
+                        <td><button class="btn btn-primary edit-user-btn" data-id="${uid}">Edit</button></td>
+                    </tr>`;
+            });
+            tBody.innerHTML = tableHTML;
         }
 
         document.getElementById('user-search').addEventListener('keyup', e => {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('#users-table-body tr').forEach(r => {
-                const searchableData = r.dataset.search || '';
-                r.style.display = searchableData.includes(term) ? '' : 'none';
+                r.style.display = r.dataset.search.includes(term) ? '' : 'none';
             });
         });
 
@@ -357,11 +343,14 @@
                 const u = allUsersData[uid];
                 if(u){
                     document.getElementById('edit-user-id').value = uid;
+                    document.getElementById('display-telegram-id').innerText = u.telegramId || uid;
+                    document.getElementById('display-join-date').innerText = u.joinDate ? new Date(u.joinDate).toLocaleString() : 'N/A';
                     document.getElementById('edit-user-name').value = u.name || '';
-                    document.getElementById('edit-user-email').value = u.email || '';
                     document.getElementById('edit-user-mobile').value = u.mobile || '';
                     document.getElementById('edit-user-balance').value = u.balance || 0;
                     document.getElementById('edit-user-referrals').value = u.referrals || 0;
+                    document.getElementById('edit-total-clicks').value = u.totalClicks || 0;
+                    document.getElementById('edit-ads-watched').value = u.adsWatched || 0;
                     modal.style.display = 'flex';
                 }
             }
@@ -376,35 +365,53 @@
                 name: document.getElementById('edit-user-name').value.trim(),
                 mobile: document.getElementById('edit-user-mobile').value.trim(),
                 balance: parseFloat(document.getElementById('edit-user-balance').value),
-                referrals: parseInt(document.getElementById('edit-user-referrals').value)
+                referrals: parseInt(document.getElementById('edit-user-referrals').value),
+                totalClicks: parseInt(document.getElementById('edit-total-clicks').value),
+                adsWatched: parseInt(document.getElementById('edit-ads-watched').value),
             };
             update(ref(db, `users/${uid}`), updates).then(() => {
                 alert('User updated successfully!');
                 modal.style.display = 'none';
             }).catch(err => alert('Error updating user: ' + err.message));
         });
+        
+        // --- Adjustment buttons logic ---
+        function setupAdjustmentButtons(type, addBtnId, subtractBtnId, amountInputId, mainInputId, isFloat = false) {
+            document.getElementById(addBtnId).addEventListener('click', () => {
+                const amount = (isFloat ? parseFloat : parseInt)(document.getElementById(amountInputId).value) || 0;
+                const mainInput = document.getElementById(mainInputId);
+                let currentValue = (isFloat ? parseFloat : parseInt)(mainInput.value) || 0;
+                mainInput.value = isFloat ? (currentValue + amount).toFixed(2) : currentValue + amount;
+            });
+            document.getElementById(subtractBtnId).addEventListener('click', () => {
+                const amount = (isFloat ? parseFloat : parseInt)(document.getElementById(amountInputId).value) || 0;
+                const mainInput = document.getElementById(mainInputId);
+                let currentValue = (isFloat ? parseFloat : parseInt)(mainInput.value) || 0;
+                mainInput.value = isFloat ? (currentValue - amount).toFixed(2) : currentValue - amount;
+            });
+        }
+        setupAdjustmentButtons('balance', 'add-balance-btn', 'subtract-balance-btn', 'balance-adjustment-amount', 'edit-user-balance', true);
+        setupAdjustmentButtons('referral', 'add-referral-btn', 'subtract-referral-btn', 'referral-adjustment-amount', 'edit-user-referrals', false);
+
 
         document.getElementById('delete-user-btn').addEventListener('click', () => {
             const uid = document.getElementById('edit-user-id').value;
             const userName = document.getElementById('edit-user-name').value;
-            if (confirm(`Are you sure you want to permanently delete user "${userName}"? This will remove their data from the database. This action cannot be undone.`)) {
+            if (confirm(`Are you sure you want to permanently delete user "${userName}"? This action cannot be undone.`)) {
                 remove(ref(db, `users/${uid}`)).then(() => {
-                    alert('User data deleted successfully from the database.');
+                    alert('User deleted successfully.');
                     modal.style.display = 'none';
                 }).catch(err => alert('Error deleting user: ' + err.message));
             }
         });
         
-        // --- Withdrawals Management ---
         function loadWithdrawals() { onValue(ref(db, 'withdrawals/pending'), s => { const t = document.getElementById('pending-withdrawals-table'); t.innerHTML = ''; if (s.exists()) { for (const id in s.val()) { const r = s.val()[id]; t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="5">No pending requests.</td></tr>'; } }); onValue(ref(db, 'withdrawals/completed'), s => { const t = document.getElementById('completed-withdrawals-table'); t.innerHTML = ''; if(s.exists()){ const history = Object.values(s.val()).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0)); history.forEach(r => { t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td style="color:${r.status==='approved'?'var(--success-color)':'var(--error-color)'}; text-transform: capitalize;">${r.status}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="5">No history found.</td></tr>'; } }); }
-        window.handleWithdrawal = async (id, status) => { const reqRef = ref(db, `withdrawals/pending/${id}`); const s = await get(reqRef); if (!s.exists()) { alert('Request already processed.'); return; } const d = s.val(); d.status = status; d.timestamp = Date.now(); if (status === 'rejected') { const userBalRef = ref(db, `users/${d.userId}/balance`); const userBal = (await get(userBalRef)).val() || 0; await set(userBalRef, userBal + d.amount); } await set(ref(db, `withdrawals/completed/${id}`), d); await remove(reqRef); alert(`Request has been ${status}.`); }
+        window.handleWithdrawal = async (id, status) => { const reqRef = ref(db, `withdrawals/pending/${id}`); const s = await get(reqRef); if (!s.exists()) { alert('Request already processed.'); return; } const d = s.val(); d.status = status; d.timestamp = serverTimestamp(); await set(ref(db, `withdrawals/completed/${id}`), d); await remove(reqRef); if (status === 'rejected') { const userBalRef = ref(db, `users/${d.userId}/balance`); const userBal = (await get(userBalRef)).val() || 0; await set(userBalRef, userBal + d.amount); alert(`Request rejected. Amount ${d.amount} has been refunded to the user.`); } else { alert(`Request has been approved.`); } }
 
-        // --- Settings Management ---
-        function loadSettings() { get(ref(db, 'settings')).then(snapshot => { if(snapshot.exists()) { const data = snapshot.val(); for (const key in data) { const element = document.getElementById(key); if (element) { element.value = data[key]; } } } }); }
-        document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const settings = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value) || 0, minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value) || 0, adReward: parseFloat(document.getElementById('adReward').value) || 0, referralReward: parseFloat(document.getElementById('referralReward').value) || 0, homeTaskCountdown: parseInt(document.getElementById('homeTaskCountdown').value) || 30, authImageUrl: document.getElementById('authImageUrl').value.trim(), marqueeText: document.getElementById('marqueeText').value.trim(), welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, tutorialLink: document.getElementById('tutorialLink').value.trim(), adminChatLink: document.getElementById('adminChatLink').value.trim(), adminCallLink: document.getElementById('adminCallLink').value.trim(), telegramChannelLink: document.getElementById('telegramChannelLink').value.trim(), youtubeChannelLink: document.getElementById('youtubeChannelLink').value.trim(), monetagZoneId: document.getElementById('monetagZoneId').value.trim(), gigaPubId: document.getElementById('gigaPubId').value.trim() }; set(ref(db, 'settings'), settings).then(() => { alert('Settings saved successfully!'); }).catch(err => alert('Error saving settings: ' + err.message)); });
+        function loadSettings() { get(ref(db, 'settings')).then(s => { if(s.exists()) { const d = s.val(); for (const k in d) { if (document.getElementById(k)) document.getElementById(k).value = d[k]; } } }); }
+        document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const settings = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value), minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value), adReward: parseFloat(document.getElementById('adReward').value), referralReward: parseFloat(document.getElementById('referralReward').value), marqueeText: document.getElementById('marqueeText').value, welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, tutorialLink: document.getElementById('tutorialLink').value, adminChatLink: document.getElementById('adminChatLink').value, adminCallLink: document.getElementById('adminCallLink').value, telegramChannelLink: document.getElementById('telegramChannelLink').value, youtubeChannelLink: document.getElementById('youtubeChannelLink').value, }; set(ref(db, 'settings'), settings).then(() => alert('Settings saved!')).catch(err => alert('Error: ' + err.message)); });
 
-        // --- Broadcast Management ---
-        document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const message = { text: document.getElementById('broadcast-message').value, imageUrl: document.getElementById('broadcast-image-url').value.trim() || null, timestamp: Date.now() }; if (!message.text) { alert('Message cannot be empty.'); return; } set(ref(db, 'broadcast/latestMessage'), message).then(() => { alert('Broadcast message sent to all users!'); document.getElementById('broadcast-form').reset(); }).catch(err => alert('Error: ' + err.message)); });
+        document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const message = { text: document.getElementById('broadcast-message').value, imageUrl: document.getElementById('broadcast-image-url').value.trim() || null, timestamp: serverTimestamp() }; set(ref(db, 'broadcast/latestMessage'), message).then(() => { alert('Broadcast sent!'); e.target.reset(); }).catch(err => alert('Error: ' + err.message)); });
     </script>
 </body>
 </html>
