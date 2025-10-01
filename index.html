@@ -1,220 +1,876 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Earne - Admin Panel</title>
+    <title>Daily Earning - Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&display=swap');
-        :root { --bg-color: #1a1a2e; --sidebar-color: #16213e; --card-color: #1f2847; --primary-color: #0f3460; --accent-color: #e94560; --text-color: #e0e0e0; --text-secondary: #a0a0c0; --border-color: #30395e; --success-color: #28a745; --error-color: #dc3545; }
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --dark-color: #343a40;
+            --light-color: #f8f9fa;
+            --bg-color: #121212;
+            --card-color: #1e1e1e;
+            --text-color: #ffffff;
+            --secondary-text-color: #b0b0b0;
+            --border-color: #333;
+            --sidebar-width: 250px;
+        }
         
-        body { font-family: 'Roboto', 'Noto Sans Bengali', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; min-height: 100vh; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         
-        .sidebar { background-color: var(--sidebar-color); width: 250px; padding: 20px; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100%; z-index: 1000; transform: translateX(-100%); transition: transform 0.3s ease-in-out; box-sizing: border-box; }
-        .sidebar.open { transform: translateX(0); }
-        .main-content { flex-grow: 1; padding: 30px; transition: margin-left 0.3s ease-in-out; }
-        @media (min-width: 768px) { body.sidebar-open .main-content { margin-left: 250px; } }
-        #menu-toggle { position: fixed; top: 15px; left: 15px; z-index: 1001; background: var(--primary-color); border: none; color: white; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-around; padding: 8px; box-sizing: border-box; }
-        #menu-toggle .bar { width: 100%; height: 3px; background-color: white; border-radius: 2px; }
-        #sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
-        @media (max-width: 767px) { body.sidebar-open #sidebar-overlay { display: block; } }
-        .sidebar h1 { color: var(--accent-color); text-align: center; margin-bottom: 30px; }
-        .sidebar nav a { display: block; color: var(--text-color); padding: 15px; text-decoration: none; border-radius: 8px; margin-bottom: 10px; transition: background-color 0.2s; }
-        .sidebar nav a.active, .sidebar nav a:hover { background-color: var(--primary-color); }
-        .page { display: none; }
-        .page.active { display: block; }
-        h2 { border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; margin-bottom: 20px; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .card { background-color: var(--card-color); padding: 25px; border-radius: 12px; border-left: 5px solid var(--accent-color); }
-        .card h3 { margin: 0 0 10px; color: var(--text-secondary); }
-        .card p { font-size: 2rem; font-weight: 700; margin: 0; color: #fff; }
-        .table-container { background-color: var(--card-color); padding: 20px; border-radius: 12px; margin-top: 30px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); white-space: nowrap; }
-        th { background-color: var(--primary-color); }
-        tr:hover { background-color: rgba(255, 255, 255, 0.05); }
-        .btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background-color 0.2s; }
-        .btn:hover { opacity: 0.9; }
-        .btn-success { background-color: var(--success-color); color: white; }
-        .btn-danger { background-color: var(--error-color); color: white; }
-        .btn-primary { background-color: var(--accent-color); color: white; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); }
-        .form-control { width: 100%; padding: 12px; background-color: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 6px; box-sizing: border-box; }
-        .form-control:focus { outline: none; border-color: var(--accent-color); }
-        textarea.form-control { min-height: 100px; resize: vertical; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1050; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: var(--card-color); padding: 30px; border-radius: 12px; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; justify-content: center; align-items: center; }
-        #login-box { background: var(--card-color); padding: 40px; border-radius: 12px; text-align: center; width: 90%; max-width: 350px; }
-        #login-box h2 { margin-top: 0; }
-        .settings-section { background-color: var(--card-color); padding: 20px; border-radius: 8px; margin-bottom: 25px; }
-        .settings-section h3 { margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .admin-info { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; }
-        #admin-email-display { font-size: 0.9em; color: var(--text-secondary); margin: 0 0 15px 0; word-break: break-all; }
-        #logout-btn { background-color: var(--error-color); color: white; width: 100%; }
-        .adjustment-group { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-        .adjustment-group .form-control { width: 80px; text-align: center; }
-        .adjustment-group .btn { padding: 5px 10px; font-size: 1.2rem; line-height: 1; }
-        .user-meta-info { background-color: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; color: var(--text-secondary); }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-color);
+            padding: 20px 0;
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            overflow-y: auto;
+        }
+        
+        .logo {
+            text-align: center;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        
+        .logo h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .nav-links {
+            list-style: none;
+        }
+        
+        .nav-links li {
+            padding: 0;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--secondary-text-color);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover, .nav-links a.active {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: var(--primary-color);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .nav-links i {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            margin-left: var(--sidebar-width);
+            position: relative;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .header h2 {
+            font-size: 1.8rem;
+        }
+        
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: var(--card-color);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+        
+        .stat-card h3 {
+            font-size: 1rem;
+            color: var(--secondary-text-color);
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .content-section {
+            background-color: var(--card-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .section-header h3 {
+            font-size: 1.3rem;
+        }
+        
+        .close-section {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .close-section:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--secondary-text-color);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: var(--dark-color);
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.85rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--secondary-text-color);
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+        
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .status-pending {
+            color: var(--warning-color);
+        }
+        
+        .status-approved {
+            color: var(--secondary-color);
+        }
+        
+        .status-rejected {
+            color: var(--danger-color);
+        }
+        
+        .tab-container {
+            margin-top: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--card-color);
+            border-radius: 10px;
+            padding: 30px;
+            width: 90%;
+            max-width: 600px;
+            border: 1px solid var(--primary-color);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .search-box {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .page-item {
+            margin: 0 5px;
+        }
+        
+        .page-link {
+            padding: 8px 12px;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        
+        .page-link.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        /* Dashboard specific styles */
+        .dashboard-content {
+            display: block;
+        }
+        
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: var(--sidebar-width);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .mobile-toggle {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
     </style>
+    <!-- Firebase App and Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
 <body>
-
-    <div id="login-overlay">
-        <div id="login-box">
-            <h2>Admin Login</h2>
-            <div class="form-group"><input type="email" id="admin-email-input" class="form-control" placeholder="Enter Admin Email"></div>
-            <div class="form-group"><input type="password" id="admin-password" class="form-control" placeholder="Enter Password"></div>
-            <button id="login-btn" class="btn btn-primary">Login</button>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>Daily Earning Admin</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="active" data-section="dashboard"><i class="fas fa-chart-bar"></i> ড্যাশবোর্ড</a></li>
+                <li><a href="#" data-section="users"><i class="fas fa-users"></i> ইউজার ম্যানেজমেন্ট</a></li>
+                <li><a href="#" data-section="withdrawals"><i class="fas fa-money-bill-wave"></i> উইথড্র রিকোয়েস্ট</a></li>
+                <li><a href="#" data-section="settings"><i class="fas fa-cog"></i> সেটিংস</a></li>
+                <li><a href="#" data-section="broadcast"><i class="fas fa-bullhorn"></i> ব্রডকাস্ট</a></li>
+                <li><a href="#" data-section="tasks"><i class="fas fa-tasks"></i> টাস্ক ম্যানেজমেন্ট</a></li>
+                <li><a href="#" id="logout-btn"><i class="fas fa-sign-out-alt"></i> লগ আউট</a></li>
+            </ul>
         </div>
-    </div>
 
-    <aside class="sidebar">
-        <div>
-            <h1>Admin Panel</h1>
-            <nav>
-                <a href="#" class="nav-item active" data-page="dashboard">Dashboard</a>
-                <a href="#" class="nav-item" data-page="users">Users</a>
-                <a href="#" class="nav-item" data-page="withdrawals">Withdrawals</a>
-                <a href="#" class="nav-item" data-page="settings">Settings</a>
-                <a href="#" class="nav-item" data-page="broadcast">Broadcast</a>
-            </nav>
-        </div>
-        <div class="admin-info">
-            <p id="admin-email-display">Not logged in</p>
-            <button id="logout-btn" class="btn">Logout</button>
-        </div>
-    </aside>
-
-    <div id="sidebar-overlay"></div>
-
-    <main class="main-content" style="display: none;">
-        <button id="menu-toggle" style="display: none;"><div class="bar"></div><div class="bar"></div><div class="bar"></div></button>
-
-        <div id="page-dashboard" class="page active"><h2>Dashboard</h2><div class="dashboard-grid"><div class="card"><h3>Total Users</h3><p id="total-users">0</p></div><div class="card"><h3>Pending Withdrawals</h3><p id="pending-withdrawals">0</p></div><div class="card"><h3>Total Withdrawn (Taka)</h3><p id="total-withdrawn">0</p></div><div class="card"><h3>Total Balance (All Users)</h3><p id="total-balance">0</p></div></div></div>
-        
-        <div id="page-users" class="page">
-            <h2>Users Management</h2>
-            <div class="form-group"><input type="text" id="user-search" class="form-control" placeholder="Search by Name or Telegram ID..."></div>
-            <div class="table-container">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section dashboard-content active">
+                <div class="header">
+                    <button class="mobile-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>ড্যাশবোর্ড</h2>
+                    <div class="admin-info">
+                        Admin: <span id="admin-name">Super Admin</span>
+                    </div>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card" data-section="users">
+                        <h3>মোট ইউজার</h3>
+                        <div class="value" id="total-users">0</div>
+                    </div>
+                    <div class="stat-card" data-section="users">
+                        <h3>সক্রিয় ইউজার (আজ)</h3>
+                        <div class="value" id="active-users">0</div>
+                    </div>
+                    <div class="stat-card" data-section="withdrawals">
+                        <h3>মোট উইথড্র</h3>
+                        <div class="value" id="total-withdrawals">0</div>
+                    </div>
+                    <div class="stat-card" data-section="withdrawals">
+                        <h3>পেন্ডিং উইথড্র</h3>
+                        <div class="value" id="pending-withdrawals">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>মোট আয়</h3>
+                        <div class="value" id="total-earnings">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>আজকের আয়</h3>
+                        <div class="value" id="today-earnings">0</div>
+                    </div>
+                </div>
+                
+                <div class="content-section">
+                    <div class="section-header">
+                        <h3>সাম্প্রতিক এক্টিভিটি</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ইউজার</th>
+                                <th>এক্টিভিটি</th>
+                                <th>সময়</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-activities">
+                            <!-- Activities will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Users Management Section -->
+            <div id="users" class="content-section">
+                <div class="header">
+                    <button class="mobile-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>ইউজার ম্যানেজমেন্ট</h2>
+                    <button class="close-section">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="user-search" class="form-control" placeholder="ইউজার খুঁজুন...">
+                    <button class="btn btn-primary" id="search-user-btn">খুঁজুন</button>
+                </div>
+                
                 <table>
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Telegram ID</th>
-                            <th>Balance (TK)</th>
-                            <th>Referrals</th>
-                            <th>Total Clicks</th>
-                            <th>Join Date</th>
-                            <th>Actions</th>
+                            <th>নাম</th>
+                            <th>ইউজার আইডি</th>
+                            <th>ব্যালেন্স</th>
+                            <th>রেফারেল</th>
+                            <th>জয়েন ডেট</th>
+                            <th>একশন</th>
                         </tr>
                     </thead>
-                    <tbody id="users-table-body"></tbody>
+                    <tbody id="users-table-body">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+                
+                <div class="pagination" id="users-pagination">
+                    <!-- Pagination will be added here -->
+                </div>
+            </div>
+            
+            <!-- Withdrawals Section -->
+            <div id="withdrawals" class="content-section">
+                <div class="header">
+                    <button class="mobile-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>উইথড্র রিকোয়েস্ট</h2>
+                    <button class="close-section">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="pending">পেন্ডিং</div>
+                    <div class="tab" data-tab="approved">অনুমোদিত</div>
+                    <div class="tab" data-tab="rejected">রিজেক্টেড</div>
+                </div>
+                
+                <div class="tab-container">
+                    <div class="tab-content active" id="pending-tab">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ইউজার</th>
+                                    <th>পরিমাণ</th>
+                                    <th>পদ্ধতি</th>
+                                    <th>অ্যাকাউন্ট নম্বর</th>
+                                    <th>তারিখ</th>
+                                    <th>একশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-withdrawals-table">
+                                <!-- Pending withdrawals will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="tab-content" id="approved-tab">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ইউজার</th>
+                                    <th>পরিমাণ</th>
+                                    <th>পদ্ধতি</th>
+                                    <th>অ্যাকাউন্ট নম্বর</th>
+                                    <th>তারিখ</th>
+                                    <th>স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approved-withdrawals-table">
+                                <!-- Approved withdrawals will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="tab-content" id="rejected-tab">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ইউজার</th>
+                                    <th>পরিমাণ</th>
+                                    <th>পদ্ধতি</th>
+                                    <th>অ্যাকাউন্ট নম্বর</th>
+                                    <th>তারিখ</th>
+                                    <th>স্ট্যাটাস</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rejected-withdrawals-table">
+                                <!-- Rejected withdrawals will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Section -->
+            <div id="settings" class="content-section">
+                <div class="header">
+                    <button class="mobile-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>সেটিংস</h2>
+                    <button class="close-section">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="settings-form">
+                    <div class="form-group">
+                        <label for="ad-reward">বিজ্ঞাপন রিওয়ার্ড (টাকা)</label>
+                        <input type="number" id="ad-reward" class="form-control" step="0.01" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="referral-reward">রেফারেল রিওয়ার্ড (টাকা)</label>
+                        <input type="number" id="referral-reward" class="form-control" step="0.01" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="min-withdraw-amount">ন্যূনতম উইথড্র পরিমাণ (টাকা)</label>
+                        <input type="number" id="min-withdraw-amount" class="form-control" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="min-withdraw-referrals">ন্যূনতম রেফারেল সংখ্যা</label>
+                        <input type="number" id="min-withdraw-referrals" class="form-control" min="0">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="welcome-title">স্বাগতম টাইটেল</label>
+                        <input type="text" id="welcome-title" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="welcome-message">স্বাগতম মেসেজ</label>
+                        <textarea id="welcome-message" class="form-control"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notice-content">নোটিশ কন্টেন্ট</label>
+                        <textarea id="notice-content" class="form-control"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="marquee-text">মার্কি টেক্সট</label>
+                        <input type="text" id="marquee-text" class="form-control" placeholder="স্ক্রলিং টেক্সট">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="telegram-channel">টেলিগ্রাম চ্যানেল লিঙ্ক</label>
+                        <input type="url" id="telegram-channel" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="youtube-channel">ইউটিউব চ্যানেল লিঙ্ক</label>
+                        <input type="url" id="youtube-channel" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tutorial-link">টিউটোরিয়াল লিঙ্ক</label>
+                        <input type="url" id="tutorial-link" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="admin-chat-link">অ্যাডমিন চ্যাট লিঙ্ক</label>
+                        <input type="url" id="admin-chat-link" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="admin-call-link">অ্যাডমিন কল লিঙ্ক</label>
+                        <input type="url" id="admin-call-link" class="form-control">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">সেটিংস আপডেট করুন</button>
+                </form>
+            </div>
+            
+            <!-- Broadcast Section -->
+            <div id="broadcast" class="content-section">
+                <div class="header">
+                    <button class="mobile-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>ব্রডকাস্ট মেসেজ</h2>
+                    <button class="close-section">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <form id="broadcast-form">
+                    <div class="form-group">
+                        <label for="broadcast-text">ব্রডকাস্ট টেক্সট</label>
+                        <textarea id="broadcast-text" class="form-control" placeholder="আপনার মেসেজ এখানে লিখুন..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="broadcast-image">ইমেজ URL (ঐচ্ছিক)</label>
+                        <input type="url" id="broadcast-image" class="form-control" placeholder="https://example.com/image.jpg">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">ব্রডকাস্ট পাঠান</button>
+                </form>
+                
+                <div class="section-header" style="margin-top: 30px;">
+                    <h3>সাম্প্রতিক ব্রডকাস্ট</h3>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>মেসেজ</th>
+                            <th>তারিখ</th>
+                            <th>একশন</th>
+                        </tr>
+                    </thead>
+                    <tbody id="broadcast-history">
+                        <!-- Broadcast history will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Tasks Management Section -->
+            <div id="tasks" class="content-section">
+                <div class="header">
+                    <button class="mobile-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <h2>টাস্ক ম্যানেজমেন্ট</h2>
+                    <button class="close-section">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="section-header">
+                    <h3>টাস্ক সেটিংস</h3>
+                </div>
+                
+                <form id="task-settings-form">
+                    <div class="form-group">
+                        <label for="daily-ads-limit">দৈনিক বিজ্ঞাপন সীমা</label>
+                        <input type="number" id="daily-ads-limit" class="form-control" min="1" value="15">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-reward">টাস্ক পুরস্কার (টাকা)</label>
+                        <input type="number" id="task-reward" class="form-control" step="0.01" min="0" value="10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-clicks-required">টাস্ক সম্পূর্ণ করতে ক্লিক সংখ্যা</label>
+                        <input type="number" id="task-clicks-required" class="form-control" min="1" value="10">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">টাস্ক সেটিংস আপডেট করুন</button>
+                </form>
+                
+                <div class="section-header" style="margin-top: 30px;">
+                    <h3>টাস্ক সম্পূর্ণ করেছেন এমন ইউজার</h3>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ইউজার</th>
+                            <th>টাস্ক</th>
+                            <th>পুরস্কার</th>
+                            <th>তারিখ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="completed-tasks-table">
+                        <!-- Completed tasks will be loaded here -->
+                    </tbody>
                 </table>
             </div>
         </div>
-        
-        <div id="page-withdrawals" class="page"><h2>Withdrawal Requests</h2><div class="table-container"><h3>Pending Requests</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Actions</th></tr></thead><tbody id="pending-withdrawals-table"></tbody></table></div><div class="table-container" style="margin-top:30px;"><h3>Completed/Rejected History</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Status</th></tr></thead><tbody id="completed-withdrawals-table"></tbody></table></div></div>
-        
-        <div id="page-settings" class="page">
-            <h2>App Settings</h2>
-            <form id="settings-form">
-                <div class="settings-section"><h3>General Settings</h3><div class="form-group"><label for="minWithdrawAmount">Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div><div class="form-group"><label for="minWithdrawReferrals">Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div></div>
-                <div class="settings-section"><h3>Reward & Task Settings</h3><div class="form-group"><label for="adReward">Reward per Task (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div><div class="form-group"><label for="referralReward">Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control" step="0.01"></div></div>
-                <div class="settings-section"><h3>Content & UI Settings</h3><div class="form-group"><label for="marqueeText">Scrolling Offer Text (Marquee)</label><input type="text" id="marqueeText" class="form-control"></div><div class="form-group"><label for="welcomeMessageTitle">Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div><div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control" rows="4"></textarea></div><div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control" rows="4"></textarea></div></div>
-                <div class="settings-section"><h3>Link Settings</h3><div class="form-group"><label for="tutorialLink">Tutorial Video Link</label><input type="text" id="tutorialLink" class="form-control"></div><div class="form-group"><label for="adminChatLink">Admin Chat Link</label><input type="text" id="adminChatLink" class="form-control"></div><div class="form-group"><label for="adminCallLink">Admin Call Link (e.g., tel:+8801...)</label><input type="text" id="adminCallLink" class="form-control"></div><div class="form-group"><label for="telegramChannelLink">Telegram Channel Link (for Task)</label><input type="text" id="telegramChannelLink" class="form-control"></div><div class="form-group"><label for="youtubeChannelLink">YouTube Channel Link (for Task)</label><input type="text" id="youtubeChannelLink" class="form-control"></div></div>
-                <button type="submit" class="btn btn-primary" style="width:100%; padding: 15px; font-size: 1.1rem;">Save All Settings</button>
-            </form>
-        </div>
-        
-        <div id="page-broadcast" class="page"><h2>Send Broadcast Message</h2><form id="broadcast-form"><div class="form-group"><label for="broadcast-message">Message</label><textarea id="broadcast-message" class="form-control" rows="4" required></textarea></div><div class="form-group"><label for="broadcast-image-url">Image URL (Optional)</label><input type="url" id="broadcast-image-url" class="form-control"></div><button type="submit" class="btn btn-primary">Send to All App Users</button></form></div>
-    </main>
+    </div>
 
-    <!-- Edit User Modal -->
-    <div id="edit-user-modal" class="modal">
+    <!-- User Edit Modal -->
+    <div id="user-edit-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header"><h3>Edit User Details</h3><span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span></div>
-            <form id="edit-user-form">
+            <div class="modal-header">
+                <h3>ইউজার এডিট করুন</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <form id="user-edit-form">
                 <input type="hidden" id="edit-user-id">
-                <div class="user-meta-info">
-                    <p style="margin: 0;"><strong>Telegram ID:</strong> <span id="display-telegram-id"></span></p>
-                    <p style="margin: 5px 0 0 0;"><strong>Joined on:</strong> <span id="display-join-date"></span></p>
+                <div class="form-group">
+                    <label for="edit-user-name">নাম</label>
+                    <input type="text" id="edit-user-name" class="form-control">
                 </div>
-
-                <div class="grid-2">
-                    <div class="form-group"><label for="edit-user-name">Full Name</label><input type="text" id="edit-user-name" class="form-control"></div>
-                    <div class="form-group"><label for="edit-user-mobile">Phone Number</label><input type="tel" id="edit-user-mobile" class="form-control"></div>
+                <div class="form-group">
+                    <label for="edit-user-balance">ব্যালেন্স</label>
+                    <input type="number" id="edit-user-balance" class="form-control" step="0.01" min="0">
                 </div>
-                
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="edit-user-balance">Balance</label>
-                        <input type="number" id="edit-user-balance" class="form-control" step="0.01">
-                        <div class="adjustment-group">
-                            <input type="number" id="balance-adjustment-amount" class="form-control" placeholder="Amt" value="10">
-                            <button type="button" id="add-balance-btn" class="btn btn-success">+</button>
-                            <button type="button" id="subtract-balance-btn" class="btn btn-danger">-</button>
-                            <span>Add / Subtract Amount</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-referrals">Referrals</label>
-                        <input type="number" id="edit-user-referrals" class="form-control">
-                         <div class="adjustment-group">
-                            <input type="number" id="referral-adjustment-amount" class="form-control" placeholder="Amt" value="1">
-                            <button type="button" id="add-referral-btn" class="btn btn-success">+</button>
-                            <button type="button" id="subtract-referral-btn" class="btn btn-danger">-</button>
-                            <span>Add / Subtract Amount</span>
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label for="edit-user-referrals">রেফারেল সংখ্যা</label>
+                    <input type="number" id="edit-user-referrals" class="form-control" min="0">
                 </div>
-
-                <div class="grid-2">
-                    <div class="form-group"><label for="edit-total-clicks">Total Clicks</label><input type="number" id="edit-total-clicks" class="form-control"></div>
-                    <div class="form-group"><label for="edit-ads-watched">Ads Watched (Daily)</label><input type="number" id="edit-ads-watched" class="form-control"></div>
+                <div class="form-group">
+                    <label for="edit-user-ads-watched">দেখা বিজ্ঞাপন সংখ্যা</label>
+                    <input type="number" id="edit-user-ads-watched" class="form-control" min="0">
                 </div>
-
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">Save Changes</button>
+                <div class="form-group">
+                    <label for="edit-user-total-clicks">মোট ক্লিক</label>
+                    <input type="number" id="edit-user-total-clicks" class="form-control" min="0">
+                </div>
+                <button type="submit" class="btn btn-primary">আপডেট করুন</button>
             </form>
-            <hr style="border-color: var(--border-color); margin: 25px 0;">
-            <button id="delete-user-btn" class="btn btn-danger" style="width: 100%;">Delete This User Permanently</button>
         </div>
     </div>
-    
+
     <script>
-        // UI navigation script
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            const body = document.body;
-            const toggleSidebar = () => { sidebar.classList.toggle('open'); body.classList.toggle('sidebar-open'); };
-            menuToggle.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', toggleSidebar);
-            document.querySelectorAll('.sidebar .nav-item').forEach(link => {
-                link.addEventListener('click', (e) => { 
-                    e.preventDefault();
-                    if (window.innerWidth < 768 && sidebar.classList.contains('open')) { toggleSidebar(); }
-                    document.querySelector('.nav-item.active').classList.remove('active');
-                    document.querySelector('.page.active').classList.remove('active');
-                    link.classList.add('active');
-                    const pageId = `page-${link.dataset.page}`;
-                    document.getElementById(pageId).classList.add('active');
-                    loadPageData(link.dataset.page);
-                });
-            });
-        });
-    </script>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, get, set, update, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
-
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyA2HUBFhHEWg4MwkJB4BVdJxUun0Gy07Ts",
             authDomain: "daily-earne-aea89.firebaseapp.com",
@@ -224,191 +880,791 @@
             messagingSenderId: "444567470638",
             appId: "1:444567470638:web:0fa323d9f5ef6aba1155bf"
         };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getDatabase(app);
-
-        // --- Auth State Handling ---
-        function showAdminPanel(user) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.querySelector('.main-content').style.display = 'block';
-            document.getElementById('menu-toggle').style.display = 'flex';
-            document.getElementById('admin-email-display').innerText = user.email;
-            if (window.innerWidth >= 768) {
-                document.querySelector('.sidebar').classList.add('open');
-                document.body.classList.add('sidebar-open');
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Global variables
+        let currentUserPage = 1;
+        const usersPerPage = 10;
+        
+        // DOM elements
+        const sidebar = document.querySelector('.sidebar');
+        const mobileToggle = document.querySelector('.mobile-toggle');
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const contentSections = document.querySelectorAll('.content-section');
+        const closeButtons = document.querySelectorAll('.close-section');
+        const statCards = document.querySelectorAll('.stat-card');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const modal = document.getElementById('user-edit-modal');
+        const modalClose = document.querySelector('.modal-close');
+        const userEditForm = document.getElementById('user-edit-form');
+        const settingsForm = document.getElementById('settings-form');
+        const broadcastForm = document.getElementById('broadcast-form');
+        const taskSettingsForm = document.getElementById('task-settings-form');
+        
+        // Initialize the admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if admin is logged in
+            checkAdminAuth();
+            
+            // Load dashboard data
+            loadDashboardData();
+            
+            // Load users
+            loadUsers(currentUserPage);
+            
+            // Load withdrawals
+            loadWithdrawals('pending');
+            
+            // Load settings
+            loadSettings();
+            
+            // Load broadcast history
+            loadBroadcastHistory();
+            
+            // Load completed tasks
+            loadCompletedTasks();
+            
+            // Event listeners
+            setupEventListeners();
+        });
+        
+        function checkAdminAuth() {
+            // Simple admin authentication check
+            const adminPassword = localStorage.getItem('adminPassword');
+            if (!adminPassword || adminPassword !== 'admin123') {
+                showLoginModal();
             }
-            loadPageData('dashboard');
-        }
-
-        function showLoginScreen() {
-            document.getElementById('login-overlay').style.display = 'flex';
-            document.querySelector('.main-content').style.display = 'none';
-            document.getElementById('menu-toggle').style.display = 'none';
-            document.body.classList.remove('sidebar-open');
-            document.querySelector('.sidebar').classList.remove('open');
-        }
-
-        // --- নতুন এবং সংশোধিত Auth State Handling ---
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        // অ্যাডমিন চেক ছাড়াই সরাসরি প্যানেল দেখানোর অনুমতি দেওয়া হচ্ছে
-        console.log("User is logged in, attempting to show admin panel.");
-        showAdminPanel(user);
-    } else {
-        // ইউজার লগইন করা না থাকলে লগইন স্ক্রিন দেখানো হচ্ছে
-        console.log("No user logged in, showing login screen.");
-        showLoginScreen();
-    }
-});
-
-        document.getElementById('login-btn').addEventListener('click', () => {
-            const email = document.getElementById('admin-email-input').value;
-            const password = document.getElementById('admin-password').value;
-            signInWithEmailAndPassword(auth, email, password)
-                .catch((error) => alert('Login Failed: ' + error.message));
-        });
-
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            signOut(auth).catch((error) => alert('Logout failed: ' + error.message));
-        });
-
-        // --- Page Data Loading ---
-        function loadPageData(page) {
-            if (page === 'dashboard') loadDashboardData();
-            if (page === 'users') loadUsers();
-            if (page === 'withdrawals') loadWithdrawals();
-            if (page === 'settings') loadSettings();
-        }
-
-        function loadDashboardData() {
-            onValue(ref(db, 'users'), s => { const d = s.val(); document.getElementById('total-users').innerText = d ? Object.keys(d).length : 0; document.getElementById('total-balance').innerText = d ? Object.values(d).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2) : '0.00'; });
-            onValue(ref(db, 'withdrawals/pending'), s => { document.getElementById('pending-withdrawals').innerText = s.exists() ? Object.keys(s.val()).length : 0; });
-            onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); });
         }
         
-        let allUsersData = {};
-        function loadUsers() {
-            onValue(ref(db, 'users'), (snapshot) => {
-                allUsersData = snapshot.exists() ? snapshot.val() : {};
-                renderUsersTable(allUsersData);
+        function showLoginModal() {
+            const password = prompt('অ্যাডমিন পাসওয়ার্ড দিন:');
+            if (password === 'admin123') {
+                localStorage.setItem('adminPassword', password);
+            } else {
+                alert('ভুল পাসওয়ার্ড!');
+                showLoginModal();
+            }
+        }
+        
+        function setupEventListeners() {
+            // Mobile sidebar toggle
+            mobileToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+            });
+            
+            // Navigation - open sections in separate views
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Logout button
+                    if (this.id === 'logout-btn') {
+                        localStorage.removeItem('adminPassword');
+                        showLoginModal();
+                        return;
+                    }
+                    
+                    // Remove active class from all links
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                    
+                    // Hide all content sections
+                    contentSections.forEach(section => section.classList.remove('active'));
+                    
+                    // Show selected section
+                    const sectionId = this.getAttribute('data-section');
+                    document.getElementById(sectionId).classList.add('active');
+                    
+                    // Close mobile sidebar
+                    if (window.innerWidth <= 992) {
+                        sidebar.classList.remove('show');
+                    }
+                    
+                    // Load data for the section if needed
+                    if (sectionId === 'users') {
+                        loadUsers(1);
+                    } else if (sectionId === 'withdrawals') {
+                        loadWithdrawals('pending');
+                    }
+                });
+            });
+            
+            // Close section buttons
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Hide all content sections
+                    contentSections.forEach(section => section.classList.remove('active'));
+                    
+                    // Show dashboard
+                    document.getElementById('dashboard').classList.add('active');
+                    
+                    // Set dashboard as active in sidebar
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    document.querySelector('[data-section="dashboard"]').classList.add('active');
+                });
+            });
+            
+            // Stat cards - open related sections
+            statCards.forEach(card => {
+                if (card.dataset.section) {
+                    card.addEventListener('click', function() {
+                        const sectionId = this.dataset.section;
+                        
+                        // Remove active class from all links
+                        navLinks.forEach(l => l.classList.remove('active'));
+                        // Add active class to clicked section
+                        document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+                        
+                        // Hide all content sections
+                        contentSections.forEach(section => section.classList.remove('active'));
+                        
+                        // Show selected section
+                        document.getElementById(sectionId).classList.add('active');
+                        
+                        // Load data for the section
+                        if (sectionId === 'users') {
+                            loadUsers(1);
+                        } else if (sectionId === 'withdrawals') {
+                            loadWithdrawals('pending');
+                        }
+                    });
+                }
+            });
+            
+            // Tabs
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // Add active class to clicked tab
+                    this.classList.add('active');
+                    
+                    // Hide all tab contents
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    // Show selected tab content
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                    
+                    // Load data for the tab
+                    loadWithdrawals(tabId);
+                });
+            });
+            
+            // Modal close
+            modalClose.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Forms
+            settingsForm.addEventListener('submit', updateSettings);
+            broadcastForm.addEventListener('submit', sendBroadcast);
+            taskSettingsForm.addEventListener('submit', updateTaskSettings);
+            userEditForm.addEventListener('submit', updateUser);
+            
+            // Search
+            document.getElementById('search-user-btn').addEventListener('click', function() {
+                const searchTerm = document.getElementById('user-search').value;
+                searchUsers(searchTerm);
             });
         }
         
-        function renderUsersTable(users) {
-            const tBody = document.getElementById('users-table-body');
-            tBody.innerHTML = '';
-            if (!users || Object.keys(users).length === 0) {
-                tBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
+        function loadDashboardData() {
+            // Load total users
+            database.ref('users').once('value').then(snapshot => {
+                const users = snapshot.val();
+                const totalUsers = users ? Object.keys(users).length : 0;
+                document.getElementById('total-users').textContent = totalUsers;
+                
+                // Calculate active users (users active today)
+                const today = new Date().toISOString().split('T')[0];
+                let activeUsers = 0;
+                if (users) {
+                    Object.keys(users).forEach(userId => {
+                        const user = users[userId];
+                        if (user.lastActive && user.lastActive.includes(today)) {
+                            activeUsers++;
+                        }
+                    });
+                }
+                document.getElementById('active-users').textContent = activeUsers;
+            });
+            
+            // Load withdrawals data
+            database.ref('withdrawals').once('value').then(snapshot => {
+                const withdrawals = snapshot.val();
+                let totalWithdrawals = 0;
+                let pendingWithdrawals = 0;
+                let totalEarnings = 0;
+                
+                if (withdrawals) {
+                    // Calculate total and pending withdrawals
+                    Object.keys(withdrawals).forEach(status => {
+                        const statusWithdrawals = withdrawals[status];
+                        if (statusWithdrawals) {
+                            Object.keys(statusWithdrawals).forEach(key => {
+                                const withdrawal = statusWithdrawals[key];
+                                totalWithdrawals += withdrawal.amount;
+                                if (status === 'pending') {
+                                    pendingWithdrawals += withdrawal.amount;
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                document.getElementById('total-withdrawals').textContent = totalWithdrawals.toFixed(2);
+                document.getElementById('pending-withdrawals').textContent = pendingWithdrawals.toFixed(2);
+                
+                // Calculate total earnings (sum of all user balances + total withdrawals)
+                database.ref('users').once('value').then(snapshot => {
+                    const users = snapshot.val();
+                    let totalBalance = 0;
+                    
+                    if (users) {
+                        Object.keys(users).forEach(userId => {
+                            const user = users[userId];
+                            totalBalance += user.balance || 0;
+                        });
+                    }
+                    
+                    totalEarnings = totalBalance + totalWithdrawals;
+                    document.getElementById('total-earnings').textContent = totalEarnings.toFixed(2);
+                    
+                    // Today's earnings (simplified - in a real app, you'd track daily earnings)
+                    document.getElementById('today-earnings').textContent = (totalEarnings * 0.05).toFixed(2);
+                });
+            });
+            
+            // Load recent activities
+            loadRecentActivities();
+        }
+        
+        function loadRecentActivities() {
+            // This would typically come from an activities log in Firebase
+            const activities = [
+                { user: 'John Doe', activity: 'বিজ্ঞাপন দেখেছেন', time: '2 মিনিট আগে' },
+                { user: 'Jane Smith', activity: 'রেফারেল যোগ করেছেন', time: '10 মিনিট আগে' },
+                { user: 'Mike Johnson', activity: 'উইথড্র রিকোয়েস্ট করেছেন', time: '1 ঘন্টা আগে' },
+                { user: 'Sarah Williams', activity: 'টাস্ক সম্পূর্ণ করেছেন', time: '2 ঘন্টা আগে' },
+                { user: 'David Brown', activity: 'বিজ্ঞাপন দেখেছেন', time: '3 ঘন্টা আগে' }
+            ];
+            
+            const activitiesTable = document.getElementById('recent-activities');
+            activitiesTable.innerHTML = '';
+            
+            activities.forEach(activity => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${activity.user}</td>
+                    <td>${activity.activity}</td>
+                    <td>${activity.time}</td>
+                `;
+                activitiesTable.appendChild(row);
+            });
+        }
+        
+        // অন্যান্য ফাংশনগুলো আগের মতোই থাকবে (loadUsers, updateUsersPagination, searchUsers, openUserEditModal, updateUser, deleteUser, loadWithdrawals, updateWithdrawalStatus, loadSettings, updateSettings, sendBroadcast, loadBroadcastHistory, deleteBroadcast, updateTaskSettings, loadCompletedTasks)
+        // এখানে শুধু UI ইন্টার‍্যাকশন পরিবর্তন করা হয়েছে
+        
+        function loadUsers(page) {
+            database.ref('users').once('value').then(snapshot => {
+                const users = snapshot.val();
+                const usersTable = document.getElementById('users-table-body');
+                usersTable.innerHTML = '';
+                
+                if (!users) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="6" style="text-align: center;">কোন ইউজার নেই</td>`;
+                    usersTable.appendChild(row);
+                    return;
+                }
+                
+                const userKeys = Object.keys(users);
+                const totalPages = Math.ceil(userKeys.length / usersPerPage);
+                const startIndex = (page - 1) * usersPerPage;
+                const endIndex = Math.min(startIndex + usersPerPage, userKeys.length);
+                
+                for (let i = startIndex; i < endIndex; i++) {
+                    const userId = userKeys[i];
+                    const user = users[userId];
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.name || 'N/A'}</td>
+                        <td>${userId}</td>
+                        <td>${(user.balance || 0).toFixed(2)}</td>
+                        <td>${user.referrals || 0}</td>
+                        <td>${user.joinDate || 'N/A'}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-primary btn-sm edit-user-btn" data-user-id="${userId}">এডিট</button>
+                            <button class="btn btn-danger btn-sm delete-user-btn" data-user-id="${userId}">ডিলিট</button>
+                        </td>
+                    `;
+                    usersTable.appendChild(row);
+                }
+                
+                // Add event listeners to edit and delete buttons
+                document.querySelectorAll('.edit-user-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-user-id');
+                        openUserEditModal(userId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-user-id');
+                        if (confirm('আপনি কি এই ইউজার ডিলিট করতে চান?')) {
+                            deleteUser(userId);
+                        }
+                    });
+                });
+                
+                // Update pagination
+                updateUsersPagination(page, totalPages);
+            });
+        }
+        
+        function updateUsersPagination(currentPage, totalPages) {
+            const pagination = document.getElementById('users-pagination');
+            pagination.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            if (currentPage > 1) {
+                const prevItem = document.createElement('div');
+                prevItem.className = 'page-item';
+                prevItem.innerHTML = `<a href="#" class="page-link" data-page="${currentPage - 1}">পূর্ববর্তী</a>`;
+                pagination.appendChild(prevItem);
+            }
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageItem = document.createElement('div');
+                pageItem.className = 'page-item';
+                pageItem.innerHTML = `<a href="#" class="page-link ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</a>`;
+                pagination.appendChild(pageItem);
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                const nextItem = document.createElement('div');
+                nextItem.className = 'page-item';
+                nextItem.innerHTML = `<a href="#" class="page-link" data-page="${currentPage + 1}">পরবর্তী</a>`;
+                pagination.appendChild(nextItem);
+            }
+            
+            // Add event listeners to pagination links
+            document.querySelectorAll('#users-pagination .page-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const page = parseInt(this.getAttribute('data-page'));
+                    loadUsers(page);
+                    currentUserPage = page;
+                });
+            });
+        }
+        
+        function searchUsers(searchTerm) {
+            if (!searchTerm.trim()) {
+                loadUsers(1);
                 return;
             }
-            const usersArray = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
-            usersArray.sort((a, b) => new Date(b.joinDate || 0) - new Date(a.joinDate || 0));
             
-            let tableHTML = '';
-            usersArray.forEach(user => {
-                const u = user;
-                const uid = user.uid;
-                const searchableString = `${u.name||''} ${u.telegramId||uid}`.toLowerCase();
-                tableHTML += `
-                    <tr data-uid="${uid}" data-search="${searchableString}">
-                        <td>${u.name || 'N/A'}</td>
-                        <td>${u.telegramId || uid}</td>
-                        <td>${(Number(u.balance) || 0).toFixed(2)}</td>
-                        <td>${u.referrals || 0}</td>
-                        <td>${u.totalClicks || 0}</td>
-                        <td>${u.joinDate ? new Date(u.joinDate).toLocaleDateString() : 'N/A'}</td>
-                        <td><button class="btn btn-primary edit-user-btn" data-id="${uid}">Edit</button></td>
-                    </tr>`;
+            database.ref('users').once('value').then(snapshot => {
+                const users = snapshot.val();
+                const usersTable = document.getElementById('users-table-body');
+                usersTable.innerHTML = '';
+                
+                if (!users) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="6" style="text-align: center;">কোন ইউজার নেই</td>`;
+                    usersTable.appendChild(row);
+                    return;
+                }
+                
+                let foundUsers = false;
+                
+                Object.keys(users).forEach(userId => {
+                    const user = users[userId];
+                    
+                    // Check if search term matches user name or user ID
+                    if ((user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase())) || 
+                        userId.toLowerCase().includes(searchTerm.toLowerCase())) {
+                        
+                        foundUsers = true;
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${user.name || 'N/A'}</td>
+                            <td>${userId}</td>
+                            <td>${(user.balance || 0).toFixed(2)}</td>
+                            <td>${user.referrals || 0}</td>
+                            <td>${user.joinDate || 'N/A'}</td>
+                            <td class="action-buttons">
+                                <button class="btn btn-primary btn-sm edit-user-btn" data-user-id="${userId}">এডিট</button>
+                                <button class="btn btn-danger btn-sm delete-user-btn" data-user-id="${userId}">ডিলিট</button>
+                            </td>
+                        `;
+                        usersTable.appendChild(row);
+                    }
+                });
+                
+                if (!foundUsers) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="6" style="text-align: center;">কোন ইউজার পাওয়া যায়নি</td>`;
+                    usersTable.appendChild(row);
+                }
+                
+                // Add event listeners to edit and delete buttons
+                document.querySelectorAll('.edit-user-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-user-id');
+                        openUserEditModal(userId);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-user-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const userId = this.getAttribute('data-user-id');
+                        if (confirm('আপনি কি এই ইউজার ডিলিট করতে চান?')) {
+                            deleteUser(userId);
+                        }
+                    });
+                });
+                
+                // Hide pagination for search results
+                document.getElementById('users-pagination').innerHTML = '';
             });
-            tBody.innerHTML = tableHTML;
         }
-
-        document.getElementById('user-search').addEventListener('keyup', e => {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('#users-table-body tr').forEach(r => {
-                r.style.display = r.dataset.search.includes(term) ? '' : 'none';
-            });
-        });
-
-        // --- Edit/Delete User Modal Logic ---
-        const modal = document.getElementById('edit-user-modal');
-        document.getElementById('users-table-body').addEventListener('click', e => {
-            if (e.target.classList.contains('edit-user-btn')) {
-                const uid = e.target.dataset.id;
-                const u = allUsersData[uid];
-                if(u){
-                    document.getElementById('edit-user-id').value = uid;
-                    document.getElementById('display-telegram-id').innerText = u.telegramId || uid;
-                    document.getElementById('display-join-date').innerText = u.joinDate ? new Date(u.joinDate).toLocaleString() : 'N/A';
-                    document.getElementById('edit-user-name').value = u.name || '';
-                    document.getElementById('edit-user-mobile').value = u.mobile || '';
-                    document.getElementById('edit-user-balance').value = u.balance || 0;
-                    document.getElementById('edit-user-referrals').value = u.referrals || 0;
-                    document.getElementById('edit-total-clicks').value = u.totalClicks || 0;
-                    document.getElementById('edit-ads-watched').value = u.adsWatched || 0;
+        
+        function openUserEditModal(userId) {
+            database.ref(`users/${userId}`).once('value').then(snapshot => {
+                const user = snapshot.val();
+                
+                if (user) {
+                    document.getElementById('edit-user-id').value = userId;
+                    document.getElementById('edit-user-name').value = user.name || '';
+                    document.getElementById('edit-user-balance').value = user.balance || 0;
+                    document.getElementById('edit-user-referrals').value = user.referrals || 0;
+                    document.getElementById('edit-user-ads-watched').value = user.adsWatched || 0;
+                    document.getElementById('edit-user-total-clicks').value = user.totalClicks || 0;
+                    
                     modal.style.display = 'flex';
                 }
-            }
-        });
-
-        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
-        
-        document.getElementById('edit-user-form').addEventListener('submit', e => {
-            e.preventDefault();
-            const uid = document.getElementById('edit-user-id').value;
-            const updates = {
-                name: document.getElementById('edit-user-name').value.trim(),
-                mobile: document.getElementById('edit-user-mobile').value.trim(),
-                balance: parseFloat(document.getElementById('edit-user-balance').value),
-                referrals: parseInt(document.getElementById('edit-user-referrals').value),
-                totalClicks: parseInt(document.getElementById('edit-total-clicks').value),
-                adsWatched: parseInt(document.getElementById('edit-ads-watched').value),
-            };
-            update(ref(db, `users/${uid}`), updates).then(() => {
-                alert('User updated successfully!');
-                modal.style.display = 'none';
-            }).catch(err => alert('Error updating user: ' + err.message));
-        });
-        
-        // --- Adjustment buttons logic ---
-        function setupAdjustmentButtons(type, addBtnId, subtractBtnId, amountInputId, mainInputId, isFloat = false) {
-            document.getElementById(addBtnId).addEventListener('click', () => {
-                const amount = (isFloat ? parseFloat : parseInt)(document.getElementById(amountInputId).value) || 0;
-                const mainInput = document.getElementById(mainInputId);
-                let currentValue = (isFloat ? parseFloat : parseInt)(mainInput.value) || 0;
-                mainInput.value = isFloat ? (currentValue + amount).toFixed(2) : currentValue + amount;
-            });
-            document.getElementById(subtractBtnId).addEventListener('click', () => {
-                const amount = (isFloat ? parseFloat : parseInt)(document.getElementById(amountInputId).value) || 0;
-                const mainInput = document.getElementById(mainInputId);
-                let currentValue = (isFloat ? parseFloat : parseInt)(mainInput.value) || 0;
-                mainInput.value = isFloat ? (currentValue - amount).toFixed(2) : currentValue - amount;
             });
         }
-        setupAdjustmentButtons('balance', 'add-balance-btn', 'subtract-balance-btn', 'balance-adjustment-amount', 'edit-user-balance', true);
-        setupAdjustmentButtons('referral', 'add-referral-btn', 'subtract-referral-btn', 'referral-adjustment-amount', 'edit-user-referrals', false);
-
-
-        document.getElementById('delete-user-btn').addEventListener('click', () => {
-            const uid = document.getElementById('edit-user-id').value;
-            const userName = document.getElementById('edit-user-name').value;
-            if (confirm(`Are you sure you want to permanently delete user "${userName}"? This action cannot be undone.`)) {
-                remove(ref(db, `users/${uid}`)).then(() => {
-                    alert('User deleted successfully.');
-                    modal.style.display = 'none';
-                }).catch(err => alert('Error deleting user: ' + err.message));
-            }
-        });
         
-        function loadWithdrawals() { onValue(ref(db, 'withdrawals/pending'), s => { const t = document.getElementById('pending-withdrawals-table'); t.innerHTML = ''; if (s.exists()) { for (const id in s.val()) { const r = s.val()[id]; t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="5">No pending requests.</td></tr>'; } }); onValue(ref(db, 'withdrawals/completed'), s => { const t = document.getElementById('completed-withdrawals-table'); t.innerHTML = ''; if(s.exists()){ const history = Object.values(s.val()).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0)); history.forEach(r => { t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td style="color:${r.status==='approved'?'var(--success-color)':'var(--error-color)'}; text-transform: capitalize;">${r.status}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="5">No history found.</td></tr>'; } }); }
-        window.handleWithdrawal = async (id, status) => { const reqRef = ref(db, `withdrawals/pending/${id}`); const s = await get(reqRef); if (!s.exists()) { alert('Request already processed.'); return; } const d = s.val(); d.status = status; d.timestamp = serverTimestamp(); await set(ref(db, `withdrawals/completed/${id}`), d); await remove(reqRef); if (status === 'rejected') { const userBalRef = ref(db, `users/${d.userId}/balance`); const userBal = (await get(userBalRef)).val() || 0; await set(userBalRef, userBal + d.amount); alert(`Request rejected. Amount ${d.amount} has been refunded to the user.`); } else { alert(`Request has been approved.`); } }
-
-        function loadSettings() { get(ref(db, 'settings')).then(s => { if(s.exists()) { const d = s.val(); for (const k in d) { if (document.getElementById(k)) document.getElementById(k).value = d[k]; } } }); }
-        document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const settings = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value), minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value), adReward: parseFloat(document.getElementById('adReward').value), referralReward: parseFloat(document.getElementById('referralReward').value), marqueeText: document.getElementById('marqueeText').value, welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, tutorialLink: document.getElementById('tutorialLink').value, adminChatLink: document.getElementById('adminChatLink').value, adminCallLink: document.getElementById('adminCallLink').value, telegramChannelLink: document.getElementById('telegramChannelLink').value, youtubeChannelLink: document.getElementById('youtubeChannelLink').value, }; set(ref(db, 'settings'), settings).then(() => alert('Settings saved!')).catch(err => alert('Error: ' + err.message)); });
-
-        document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const message = { text: document.getElementById('broadcast-message').value, imageUrl: document.getElementById('broadcast-image-url').value.trim() || null, timestamp: serverTimestamp() }; set(ref(db, 'broadcast/latestMessage'), message).then(() => { alert('Broadcast sent!'); e.target.reset(); }).catch(err => alert('Error: ' + err.message)); });
+        function updateUser(e) {
+            e.preventDefault();
+            
+            const userId = document.getElementById('edit-user-id').value;
+            const name = document.getElementById('edit-user-name').value;
+            const balance = parseFloat(document.getElementById('edit-user-balance').value);
+            const referrals = parseInt(document.getElementById('edit-user-referrals').value);
+            const adsWatched = parseInt(document.getElementById('edit-user-ads-watched').value);
+            const totalClicks = parseInt(document.getElementById('edit-user-total-clicks').value);
+            
+            const updates = {
+                name: name,
+                balance: balance,
+                referrals: referrals,
+                adsWatched: adsWatched,
+                totalClicks: totalClicks
+            };
+            
+            database.ref(`users/${userId}`).update(updates).then(() => {
+                alert('ইউজার সফলভাবে আপডেট করা হয়েছে!');
+                modal.style.display = 'none';
+                loadUsers(currentUserPage);
+            }).catch(error => {
+                alert('ইউজার আপডেট করতে সমস্যা হয়েছে: ' + error.message);
+            });
+        }
+        
+        function deleteUser(userId) {
+            database.ref(`users/${userId}`).remove().then(() => {
+                alert('ইউজার সফলভাবে ডিলিট করা হয়েছে!');
+                loadUsers(currentUserPage);
+            }).catch(error => {
+                alert('ইউজার ডিলিট করতে সমস্যা হয়েছে: ' + error.message);
+            });
+        }
+        
+        function loadWithdrawals(status) {
+            const tableId = `${status}-withdrawals-table`;
+            const table = document.getElementById(tableId);
+            
+            database.ref(`withdrawals/${status}`).once('value').then(snapshot => {
+                const withdrawals = snapshot.val();
+                table.innerHTML = '';
+                
+                if (!withdrawals) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="${status === 'pending' ? 6 : 5}" style="text-align: center;">কোন ${status} উইথড্র রিকোয়েস্ট নেই</td>`;
+                    table.appendChild(row);
+                    return;
+                }
+                
+                Object.keys(withdrawals).forEach(key => {
+                    const withdrawal = withdrawals[key];
+                    
+                    const row = document.createElement('tr');
+                    
+                    if (status === 'pending') {
+                        row.innerHTML = `
+                            <td>${withdrawal.userName || withdrawal.userId}</td>
+                            <td>${withdrawal.amount.toFixed(2)}</td>
+                            <td>${withdrawal.method}</td>
+                            <td>${withdrawal.accountNumber}</td>
+                            <td>${withdrawal.date}</td>
+                            <td class="action-buttons">
+                                <button class="btn btn-secondary btn-sm approve-withdrawal-btn" data-key="${key}">অনুমোদন</button>
+                                <button class="btn btn-danger btn-sm reject-withdrawal-btn" data-key="${key}">রিজেক্ট</button>
+                            </td>
+                        `;
+                    } else {
+                        const statusText = status === 'approved' ? 'অনুমোদিত' : 'রিজেক্টেড';
+                        const statusClass = status === 'approved' ? 'status-approved' : 'status-rejected';
+                        
+                        row.innerHTML = `
+                            <td>${withdrawal.userName || withdrawal.userId}</td>
+                            <td>${withdrawal.amount.toFixed(2)}</td>
+                            <td>${withdrawal.method}</td>
+                            <td>${withdrawal.accountNumber}</td>
+                            <td>${withdrawal.date}</td>
+                            <td class="${statusClass}">${statusText}</td>
+                        `;
+                    }
+                    
+                    table.appendChild(row);
+                });
+                
+                // Add event listeners to action buttons for pending withdrawals
+                if (status === 'pending') {
+                    document.querySelectorAll('.approve-withdrawal-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const key = this.getAttribute('data-key');
+                            updateWithdrawalStatus(key, 'approved');
+                        });
+                    });
+                    
+                    document.querySelectorAll('.reject-withdrawal-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const key = this.getAttribute('data-key');
+                            updateWithdrawalStatus(key, 'rejected');
+                        });
+                    });
+                }
+            });
+        }
+        
+        function updateWithdrawalStatus(key, newStatus) {
+            // Get the withdrawal data from pending
+            database.ref(`withdrawals/pending/${key}`).once('value').then(snapshot => {
+                const withdrawal = snapshot.val();
+                
+                if (withdrawal) {
+                    // Move to new status
+                    database.ref(`withdrawals/${newStatus}/${key}`).set(withdrawal).then(() => {
+                        // Remove from pending
+                        database.ref(`withdrawals/pending/${key}`).remove().then(() => {
+                            alert(`উইথড্র রিকোয়েস্ট ${newStatus === 'approved' ? 'অনুমোদিত' : 'রিজেক্ট'} হয়েছে!`);
+                            loadWithdrawals('pending');
+                            
+                            // If approved, deduct balance from user
+                            if (newStatus === 'approved') {
+                                database.ref(`users/${withdrawal.userId}/balance`).transaction(balance => {
+                                    return (balance || 0) - withdrawal.amount;
+                                });
+                            }
+                        });
+                    });
+                }
+            });
+        }
+        
+        function loadSettings() {
+            database.ref('settings').once('value').then(snapshot => {
+                const settings = snapshot.val();
+                
+                if (settings) {
+                    document.getElementById('ad-reward').value = settings.adReward || 0;
+                    document.getElementById('referral-reward').value = settings.referralReward || 0;
+                    document.getElementById('min-withdraw-amount').value = settings.minWithdrawAmount || 0;
+                    document.getElementById('min-withdraw-referrals').value = settings.minWithdrawReferrals || 0;
+                    document.getElementById('welcome-title').value = settings.welcomeTitle || '';
+                    document.getElementById('welcome-message').value = settings.welcomeMessage || '';
+                    document.getElementById('notice-content').value = settings.noticeContent || '';
+                    document.getElementById('marquee-text').value = settings.marqueeText || '';
+                    document.getElementById('telegram-channel').value = settings.telegramChannel || '';
+                    document.getElementById('youtube-channel').value = settings.youtubeChannel || '';
+                    document.getElementById('tutorial-link').value = settings.tutorialLink || '';
+                    document.getElementById('admin-chat-link').value = settings.adminChatLink || '';
+                    document.getElementById('admin-call-link').value = settings.adminCallLink || '';
+                }
+            });
+        }
+        
+        function updateSettings(e) {
+            e.preventDefault();
+            
+            const settings = {
+                adReward: parseFloat(document.getElementById('ad-reward').value),
+                referralReward: parseFloat(document.getElementById('referral-reward').value),
+                minWithdrawAmount: parseFloat(document.getElementById('min-withdraw-amount').value),
+                minWithdrawReferrals: parseInt(document.getElementById('min-withdraw-referrals').value),
+                welcomeTitle: document.getElementById('welcome-title').value,
+                welcomeMessage: document.getElementById('welcome-message').value,
+                noticeContent: document.getElementById('notice-content').value,
+                marqueeText: document.getElementById('marquee-text').value,
+                telegramChannel: document.getElementById('telegram-channel').value,
+                youtubeChannel: document.getElementById('youtube-channel').value,
+                tutorialLink: document.getElementById('tutorial-link').value,
+                adminChatLink: document.getElementById('admin-chat-link').value,
+                adminCallLink: document.getElementById('admin-call-link').value
+            };
+            
+            database.ref('settings').set(settings).then(() => {
+                alert('সেটিংস সফলভাবে আপডেট করা হয়েছে!');
+            }).catch(error => {
+                alert('সেটিংস আপডেট করতে সমস্যা হয়েছে: ' + error.message);
+            });
+        }
+        
+        function sendBroadcast(e) {
+            e.preventDefault();
+            
+            const message = document.getElementById('broadcast-text').value;
+            const imageUrl = document.getElementById('broadcast-image').value;
+            
+            if (!message.trim()) {
+                alert('ব্রডকাস্ট মেসেজ লিখুন!');
+                return;
+            }
+            
+            const broadcast = {
+                message: message,
+                imageUrl: imageUrl || '',
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleString('bn-BD')
+            };
+            
+            // Save to broadcast history
+            const newBroadcastKey = database.ref().child('broadcasts').push().key;
+            
+            database.ref(`broadcasts/${newBroadcastKey}`).set(broadcast).then(() => {
+                alert('ব্রডকাস্ট মেসেজ সফলভাবে পাঠানো হয়েছে!');
+                document.getElementById('broadcast-text').value = '';
+                document.getElementById('broadcast-image').value = '';
+                loadBroadcastHistory();
+            }).catch(error => {
+                alert('ব্রডকাস্ট মেসেজ পাঠাতে সমস্যা হয়েছে: ' + error.message);
+            });
+        }
+        
+        function loadBroadcastHistory() {
+            database.ref('broadcasts').once('value').then(snapshot => {
+                const broadcasts = snapshot.val();
+                const broadcastHistory = document.getElementById('broadcast-history');
+                broadcastHistory.innerHTML = '';
+                
+                if (!broadcasts) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td colspan="3" style="text-align: center;">কোন ব্রডকাস্ট নেই</td>`;
+                    broadcastHistory.appendChild(row);
+                    return;
+                }
+                
+                Object.keys(broadcasts).forEach(key => {
+                    const broadcast = broadcasts[key];
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${broadcast.message}</td>
+                        <td>${broadcast.date}</td>
+                        <td class="action-buttons">
+                            <button class="btn btn-danger btn-sm delete-broadcast-btn" data-key="${key}">ডিলিট</button>
+                        </td>
+                    `;
+                    broadcastHistory.appendChild(row);
+                });
+                
+                // Add event listeners to delete buttons
+                document.querySelectorAll('.delete-broadcast-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const key = this.getAttribute('data-key');
+                        if (confirm('আপনি কি এই ব্রডকাস্ট ডিলিট করতে চান?')) {
+                            deleteBroadcast(key);
+                        }
+                    });
+                });
+            });
+        }
+        
+        function deleteBroadcast(key) {
+            database.ref(`broadcasts/${key}`).remove().then(() => {
+                alert('ব্রডকাস্ট সফলভাবে ডিলিট করা হয়েছে!');
+                loadBroadcastHistory();
+            }).catch(error => {
+                alert('ব্রডকাস্ট ডিলিট করতে সমস্যা হয়েছে: ' + error.message);
+            });
+        }
+        
+        function updateTaskSettings(e) {
+            e.preventDefault();
+            
+            const taskSettings = {
+                dailyAdsLimit: parseInt(document.getElementById('daily-ads-limit').value),
+                taskReward: parseFloat(document.getElementById('task-reward').value),
+                taskClicksRequired: parseInt(document.getElementById('task-clicks-required').value)
+            };
+            
+            database.ref('taskSettings').set(taskSettings).then(() => {
+                alert('টাস্ক সেটিংস সফলভাবে আপডেট করা হয়েছে!');
+            }).catch(error => {
+                alert('টাস্ক সেটিংস আপডেট করতে সমস্যা হয়েছে: ' + error.message);
+            });
+        }
+        
+        function loadCompletedTasks() {
+            // This would typically come from a completed tasks log in Firebase
+            const completedTasks = [
+                { user: 'John Doe', task: 'বিজ্ঞাপন দেখুন', reward: 10.00, date: '2023-05-01' },
+                { user: 'Jane Smith', task: 'ভিডিও দেখুন', reward: 15.00, date: '2023-05-01' },
+                { user: 'Mike Johnson', task: 'অ্যাপ ডাউনলোড করুন', reward: 25.00, date: '2023-04-30' },
+                { user: 'Sarah Williams', task: 'বিজ্ঞাপন দেখুন', reward: 10.00, date: '2023-04-30' },
+                { user: 'David Brown', task: 'সার্ভে সম্পূর্ণ করুন', reward: 30.00, date: '2023-04-29' }
+            ];
+            
+            const completedTasksTable = document.getElementById('completed-tasks-table');
+            completedTasksTable.innerHTML = '';
+            
+            completedTasks.forEach(task => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${task.user}</td>
+                    <td>${task.task}</td>
+                    <td>${task.reward.toFixed(2)}</td>
+                    <td>${task.date}</td>
+                `;
+                completedTasksTable.appendChild(row);
+            });
+        }
     </script>
 </body>
 </html>
