@@ -1665,6 +1665,16 @@
                 completedTasksTable.appendChild(row);
             });
         }
+        // Admin Panel-এ এই ফাংশন যোগ করুন
+function setupAdminUser() {
+    const adminId = "5812860406"; // আপনার Telegram User ID
+    database.ref('admins/' + adminId).set(true).then(() => {
+        console.log('Admin user setup successfully');
+    });
+}
+
+// পেজ লোড হওয়ার পর কল করুন
+setupAdminUser();
     </script>
 </body>
 </html>
