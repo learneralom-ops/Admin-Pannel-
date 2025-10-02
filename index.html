@@ -35,7 +35,7 @@
         th { background-color: var(--primary-color); }
         tr:hover { background-color: rgba(255, 255, 255, 0.05); }
         .btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; transition: background-color 0.2s; }
-        .btn:hover { opacity: 0.9; }
+        .btn:hover { opacity: 0.9; } .btn:disabled { background-color: #555; cursor: not-allowed; }
         .btn-success { background-color: var(--success-color); color: white; }
         .btn-danger { background-color: var(--error-color); color: white; }
         .btn-primary { background-color: var(--accent-color); color: white; }
@@ -52,13 +52,10 @@
         #login-box h2 { margin-top: 0; }
         .settings-section { background-color: var(--card-color); padding: 20px; border-radius: 8px; margin-bottom: 25px; }
         .settings-section h3 { margin-top: 0; color: var(--accent-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
         .admin-info { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center; }
         #admin-email-display { font-size: 0.9em; color: var(--text-secondary); margin: 0 0 15px 0; word-break: break-all; }
         #logout-btn { background-color: var(--error-color); color: white; width: 100%; }
         .adjustment-group { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-        .adjustment-group .form-control { width: 80px; text-align: center; }
-        .adjustment-group .btn { padding: 5px 10px; font-size: 1.2rem; line-height: 1; }
         .user-meta-info { background-color: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; color: var(--text-secondary); }
     </style>
 </head>
@@ -67,9 +64,11 @@
     <div id="login-overlay">
         <div id="login-box">
             <h2>Admin Login</h2>
-            <div class="form-group"><input type="email" id="admin-email-input" class="form-control" placeholder="Enter Admin Email"></div>
-            <div class="form-group"><input type="password" id="admin-password" class="form-control" placeholder="Enter Password"></div>
-            <button id="login-btn" class="btn btn-primary">Login</button>
+            <form id="login-form">
+                <div class="form-group"><input type="email" id="admin-email-input" class="form-control" placeholder="Enter Admin Email" required></div>
+                <div class="form-group"><input type="password" id="admin-password" class="form-control" placeholder="Enter Password" required></div>
+                <button type="submit" id="login-btn" class="btn btn-primary">Login</button>
+            </form>
         </div>
     </div>
 
@@ -94,122 +93,15 @@
 
     <main class="main-content" style="display: none;">
         <button id="menu-toggle" style="display: none;"><div class="bar"></div><div class="bar"></div><div class="bar"></div></button>
-
         <div id="page-dashboard" class="page active"><h2>Dashboard</h2><div class="dashboard-grid"><div class="card"><h3>Total Users</h3><p id="total-users">0</p></div><div class="card"><h3>Pending Withdrawals</h3><p id="pending-withdrawals">0</p></div><div class="card"><h3>Total Withdrawn (Taka)</h3><p id="total-withdrawn">0</p></div><div class="card"><h3>Total Balance (All Users)</h3><p id="total-balance">0</p></div></div></div>
-        
-        <div id="page-users" class="page">
-            <h2>Users Management</h2>
-            <div class="form-group"><input type="text" id="user-search" class="form-control" placeholder="Search by Name or Telegram ID..."></div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Telegram ID</th>
-                            <th>Balance (TK)</th>
-                            <th>Referrals</th>
-                            <th>Total Clicks</th>
-                            <th>Join Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table-body"></tbody>
-                </table>
-            </div>
-        </div>
-        
+        <div id="page-users" class="page"><div class="table-container"><input type="text" id="user-search" class="form-control" placeholder="Search by Name or User ID..." style="margin-bottom: 20px;"><table><thead><tr><th>Name</th><th>User ID</th><th>Balance (TK)</th><th>Referrals</th><th>Actions</th></tr></thead><tbody id="users-table-body"></tbody></table></div></div>
         <div id="page-withdrawals" class="page"><h2>Withdrawal Requests</h2><div class="table-container"><h3>Pending Requests</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Actions</th></tr></thead><tbody id="pending-withdrawals-table"></tbody></table></div><div class="table-container" style="margin-top:30px;"><h3>Completed/Rejected History</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Status</th></tr></thead><tbody id="completed-withdrawals-table"></tbody></table></div></div>
-        
-        <div id="page-settings" class="page">
-            <h2>App Settings</h2>
-            <form id="settings-form">
-                <div class="settings-section"><h3>General Settings</h3><div class="form-group"><label for="minWithdrawAmount">Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div><div class="form-group"><label for="minWithdrawReferrals">Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div></div>
-                <div class="settings-section"><h3>Reward & Task Settings</h3><div class="form-group"><label for="adReward">Reward per Task (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div><div class="form-group"><label for="referralReward">Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control" step="0.01"></div></div>
-                <div class="settings-section"><h3>Content & UI Settings</h3><div class="form-group"><label for="marqueeText">Scrolling Offer Text (Marquee)</label><input type="text" id="marqueeText" class="form-control"></div><div class="form-group"><label for="welcomeMessageTitle">Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div><div class="form-group"><label for="welcomeMessageBody">Welcome Popup Body (HTML Allowed)</label><textarea id="welcomeMessageBody" class="form-control" rows="4"></textarea></div><div class="form-group"><label for="noticeContent">Notice Popup Content (HTML Allowed)</label><textarea id="noticeContent" class="form-control" rows="4"></textarea></div></div>
-                <div class="settings-section"><h3>Link Settings</h3><div class="form-group"><label for="tutorialLink">Tutorial Video Link</label><input type="text" id="tutorialLink" class="form-control"></div><div class="form-group"><label for="adminChatLink">Admin Chat Link</label><input type="text" id="adminChatLink" class="form-control"></div><div class="form-group"><label for="adminCallLink">Admin Call Link (e.g., tel:+8801...)</label><input type="text" id="adminCallLink" class="form-control"></div><div class="form-group"><label for="telegramChannelLink">Telegram Channel Link (for Task)</label><input type="text" id="telegramChannelLink" class="form-control"></div><div class="form-group"><label for="youtubeChannelLink">YouTube Channel Link (for Task)</label><input type="text" id="youtubeChannelLink" class="form-control"></div></div>
-                <button type="submit" class="btn btn-primary" style="width:100%; padding: 15px; font-size: 1.1rem;">Save All Settings</button>
-            </form>
-        </div>
-        
+        <div id="page-settings" class="page"><h2>App Settings</h2><form id="settings-form"><div class="settings-section"><h3>Rewards & Limits</h3><div class="form-group"><label>Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div><div class="form-group"><label>Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div><div class="form-group"><label>Reward per Ad Task (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div><div class="form-group"><label>Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control" step="0.01"></div></div><div class="settings-section"><h3>Content & UI</h3><div class="form-group"><label>Scrolling Offer Text</label><input type="text" id="marqueeText" class="form-control"></div><div class="form-group"><label>Welcome Popup Title</label><input type="text" id="welcomeMessageTitle" class="form-control"></div><div class="form-group"><label>Welcome Popup Body (HTML)</label><textarea id="welcomeMessageBody" class="form-control" rows="4"></textarea></div><div class="form-group"><label>Notice Popup Content (HTML)</label><textarea id="noticeContent" class="form-control" rows="4"></textarea></div></div><div class="settings-section"><h3>Links</h3><div class="form-group"><label>Tutorial Video Link</label><input type="url" id="tutorialLink" class="form-control"></div><div class="form-group"><label>Admin Chat Link</label><input type="url" id="adminChatLink" class="form-control"></div><div class="form-group"><label>Admin Call Link</label><input type="text" id="adminCallLink" class="form-control"></div><div class="form-group"><label>Telegram Channel Link (Task)</label><input type="url" id="telegramChannelLink" class="form-control"></div><div class="form-group"><label>YouTube Channel Link (Task)</label><input type="url" id="youtubeChannelLink" class="form-control"></div></div><button type="submit" class="btn btn-primary" style="width:100%; padding: 15px; font-size: 1.1rem;">Save All Settings</button></form></div>
         <div id="page-broadcast" class="page"><h2>Send Broadcast Message</h2><form id="broadcast-form"><div class="form-group"><label for="broadcast-message">Message</label><textarea id="broadcast-message" class="form-control" rows="4" required></textarea></div><div class="form-group"><label for="broadcast-image-url">Image URL (Optional)</label><input type="url" id="broadcast-image-url" class="form-control"></div><button type="submit" class="btn btn-primary">Send to All App Users</button></form></div>
     </main>
 
-    <!-- Edit User Modal -->
-    <div id="edit-user-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h3>Edit User Details</h3><span style="cursor:pointer; font-size: 24px;" id="close-modal">&times;</span></div>
-            <form id="edit-user-form">
-                <input type="hidden" id="edit-user-id">
-                <div class="user-meta-info">
-                    <p style="margin: 0;"><strong>Telegram ID:</strong> <span id="display-telegram-id"></span></p>
-                    <p style="margin: 5px 0 0 0;"><strong>Joined on:</strong> <span id="display-join-date"></span></p>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group"><label for="edit-user-name">Full Name</label><input type="text" id="edit-user-name" class="form-control"></div>
-                    <div class="form-group"><label for="edit-user-mobile">Phone Number</label><input type="tel" id="edit-user-mobile" class="form-control"></div>
-                </div>
-                
-                <div class="grid-2">
-                    <div class="form-group">
-                        <label for="edit-user-balance">Balance</label>
-                        <input type="number" id="edit-user-balance" class="form-control" step="0.01">
-                        <div class="adjustment-group">
-                            <input type="number" id="balance-adjustment-amount" class="form-control" placeholder="Amt" value="10">
-                            <button type="button" id="add-balance-btn" class="btn btn-success">+</button>
-                            <button type="button" id="subtract-balance-btn" class="btn btn-danger">-</button>
-                            <span>Add / Subtract Amount</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-user-referrals">Referrals</label>
-                        <input type="number" id="edit-user-referrals" class="form-control">
-                         <div class="adjustment-group">
-                            <input type="number" id="referral-adjustment-amount" class="form-control" placeholder="Amt" value="1">
-                            <button type="button" id="add-referral-btn" class="btn btn-success">+</button>
-                            <button type="button" id="subtract-referral-btn" class="btn btn-danger">-</button>
-                            <span>Add / Subtract Amount</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid-2">
-                    <div class="form-group"><label for="edit-total-clicks">Total Clicks</label><input type="number" id="edit-total-clicks" class="form-control"></div>
-                    <div class="form-group"><label for="edit-ads-watched">Ads Watched (Daily)</label><input type="number" id="edit-ads-watched" class="form-control"></div>
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">Save Changes</button>
-            </form>
-            <hr style="border-color: var(--border-color); margin: 25px 0;">
-            <button id="delete-user-btn" class="btn btn-danger" style="width: 100%;">Delete This User Permanently</button>
-        </div>
-    </div>
+    <div id="edit-user-modal" class="modal"><div class="modal-content"><div class="modal-header"><h3>Edit User Details</h3><span style="cursor:pointer; font-size: 24px;" class="close-modal">&times;</span></div><form id="edit-user-form"><input type="hidden" id="edit-user-id"><div class="user-meta-info"><p><strong>User ID:</strong> <span id="display-user-id"></span></p><p><strong>Joined:</strong> <span id="display-join-date"></span></p></div><div class="form-group"><label>Full Name</label><input type="text" id="edit-user-name" class="form-control"></div><div class="form-group"><label>Balance</label><div class="adjustment-group"><input type="number" id="edit-user-balance" class="form-control" step="0.01"><button type="button" class="btn btn-success adjust-btn" data-field="edit-user-balance" data-amount="10">+</button><button type="button" class="btn btn-danger adjust-btn" data-field="edit-user-balance" data-amount="-10">-</button></div></div><div class="form-group"><label>Referrals</label><div class="adjustment-group"><input type="number" id="edit-user-referrals" class="form-control"><button type="button" class="btn btn-success adjust-btn" data-field="edit-user-referrals" data-amount="1">+</button><button type="button" class="btn btn-danger adjust-btn" data-field="edit-user-referrals" data-amount="-1">-</button></div></div><button type="submit" class="btn btn-primary" style="width: 100%;">Save Changes</button></form><hr style="border-color: var(--border-color); margin: 25px 0;"><button id="delete-user-btn" class="btn btn-danger" style="width: 100%;">Delete This User</button></div></div>
     
-    <script>
-        // UI navigation script
-        document.addEventListener('DOMContentLoaded', () => {
-            const menuToggle = document.getElementById('menu-toggle');
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            const body = document.body;
-            const toggleSidebar = () => { sidebar.classList.toggle('open'); body.classList.toggle('sidebar-open'); };
-            menuToggle.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', toggleSidebar);
-            document.querySelectorAll('.sidebar .nav-item').forEach(link => {
-                link.addEventListener('click', (e) => { 
-                    e.preventDefault();
-                    if (window.innerWidth < 768 && sidebar.classList.contains('open')) { toggleSidebar(); }
-                    document.querySelector('.nav-item.active').classList.remove('active');
-                    document.querySelector('.page.active').classList.remove('active');
-                    link.classList.add('active');
-                    const pageId = `page-${link.dataset.page}`;
-                    document.getElementById(pageId).classList.add('active');
-                    loadPageData(link.dataset.page);
-                });
-            });
-        });
-    </script>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
@@ -229,103 +121,125 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // --- Auth State Handling ---
-        function showAdminPanel(user) {
-            document.getElementById('login-overlay').style.display = 'none';
-            document.querySelector('.main-content').style.display = 'block';
-            document.getElementById('menu-toggle').style.display = 'flex';
-            document.getElementById('admin-email-display').innerText = user.email;
-            if (window.innerWidth >= 768) {
-                document.querySelector('.sidebar').classList.add('open');
-                document.body.classList.add('sidebar-open');
-            }
-            loadPageData('dashboard');
-        }
+        // --- UI & Navigation ---
+        const ui = {
+            loginOverlay: document.getElementById('login-overlay'),
+            mainContent: document.querySelector('.main-content'),
+            menuToggle: document.getElementById('menu-toggle'),
+            sidebar: document.querySelector('.sidebar'),
+            sidebarOverlay: document.getElementById('sidebar-overlay'),
+            navItems: document.querySelectorAll('.nav-item'),
+            pages: document.querySelectorAll('.page'),
+            userModal: document.getElementById('edit-user-modal'),
+            closeModalBtns: document.querySelectorAll('.close-modal'),
+            adminEmailDisplay: document.getElementById('admin-email-display')
+        };
+        
+        const toggleSidebar = () => { ui.sidebar.classList.toggle('open'); document.body.classList.toggle('sidebar-open'); };
+        ui.menuToggle.addEventListener('click', toggleSidebar);
+        ui.sidebarOverlay.addEventListener('click', toggleSidebar);
+        ui.navItems.forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                if (window.innerWidth < 768 && ui.sidebar.classList.contains('open')) toggleSidebar();
+                ui.navItems.forEach(item => item.classList.remove('active'));
+                ui.pages.forEach(page => page.classList.remove('active'));
+                link.classList.add('active');
+                document.getElementById(`page-${link.dataset.page}`).classList.add('active');
+                loadPageData(link.dataset.page);
+            });
+        });
+        ui.closeModalBtns.forEach(btn => btn.onclick = () => ui.userModal.style.display = 'none');
 
-        function showLoginScreen() {
-            document.getElementById('login-overlay').style.display = 'flex';
-            document.querySelector('.main-content').style.display = 'none';
-            document.getElementById('menu-toggle').style.display = 'none';
-            document.body.classList.remove('sidebar-open');
-            document.querySelector('.sidebar').classList.remove('open');
-        }
-
-        onAuthStateChanged(auth, (user) => {
+        // --- Auth State ---
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
-                const adminsRef = ref(db, 'admins/' + user.uid);
-                get(adminsRef).then(snapshot => {
-                    if (snapshot.exists()) {
+                try {
+                    const adminRef = ref(db, 'admins/' + user.uid);
+                    const snapshot = await get(adminRef);
+                    if (snapshot.exists() && snapshot.val() === true) {
                         showAdminPanel(user);
                     } else {
                         alert('Access Denied. You are not an authorized admin.');
-                        signOut(auth);
+                        await signOut(auth);
                     }
-                });
+                } catch (error) {
+                    alert('Error verifying admin status: ' + error.message);
+                    await signOut(auth);
+                }
             } else {
                 showLoginScreen();
             }
         });
 
-        document.getElementById('login-btn').addEventListener('click', () => {
+        function showAdminPanel(user) {
+            ui.loginOverlay.style.display = 'none';
+            ui.mainContent.style.display = 'block';
+            ui.menuToggle.style.display = 'flex';
+            ui.adminEmailDisplay.innerText = user.email;
+            if (window.innerWidth >= 768) { ui.sidebar.classList.add('open'); document.body.classList.add('sidebar-open'); }
+            loadPageData('dashboard');
+        }
+
+        function showLoginScreen() {
+            ui.loginOverlay.style.display = 'flex';
+            ui.mainContent.style.display = 'none';
+            ui.menuToggle.style.display = 'none';
+            document.body.classList.remove('sidebar-open');
+            ui.sidebar.classList.remove('open');
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
             const email = document.getElementById('admin-email-input').value;
             const password = document.getElementById('admin-password').value;
-            signInWithEmailAndPassword(auth, email, password)
-                .catch((error) => alert('Login Failed: ' + error.message));
-        });
-
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            signOut(auth).catch((error) => alert('Logout failed: ' + error.message));
-        });
-
-        // --- Page Data Loading ---
-        function loadPageData(page) {
-            if (page === 'dashboard') loadDashboardData();
-            if (page === 'users') loadUsers();
-            if (page === 'withdrawals') loadWithdrawals();
-            if (page === 'settings') loadSettings();
-        }
-
-        function loadDashboardData() {
-            onValue(ref(db, 'users'), s => { const d = s.val(); document.getElementById('total-users').innerText = d ? Object.keys(d).length : 0; document.getElementById('total-balance').innerText = d ? Object.values(d).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2) : '0.00'; });
-            onValue(ref(db, 'withdrawals/pending'), s => { document.getElementById('pending-withdrawals').innerText = s.exists() ? Object.keys(s.val()).length : 0; });
-            onValue(ref(db, 'withdrawals/completed'), s => { const d = s.val(); const t = d ? Object.values(d).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0) : 0; document.getElementById('total-withdrawn').innerText = t.toFixed(2); });
-        }
-        
-        let allUsersData = {};
-        function loadUsers() {
-            onValue(ref(db, 'users'), (snapshot) => {
-                allUsersData = snapshot.exists() ? snapshot.val() : {};
-                renderUsersTable(allUsersData);
-            });
-        }
-        
-        function renderUsersTable(users) {
-            const tBody = document.getElementById('users-table-body');
-            tBody.innerHTML = '';
-            if (!users || Object.keys(users).length === 0) {
-                tBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">No users found.</td></tr>';
-                return;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                alert('Login Failed: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Login';
             }
-            const usersArray = Object.keys(users).map(uid => ({ uid, ...users[uid] }));
-            usersArray.sort((a, b) => new Date(b.joinDate || 0) - new Date(a.joinDate || 0));
-            
-            let tableHTML = '';
-            usersArray.forEach(user => {
-                const u = user;
-                const uid = user.uid;
-                const searchableString = `${u.name||''} ${u.telegramId||uid}`.toLowerCase();
-                tableHTML += `
-                    <tr data-uid="${uid}" data-search="${searchableString}">
-                        <td>${u.name || 'N/A'}</td>
-                        <td>${u.telegramId || uid}</td>
-                        <td>${(Number(u.balance) || 0).toFixed(2)}</td>
-                        <td>${u.referrals || 0}</td>
-                        <td>${u.totalClicks || 0}</td>
-                        <td>${u.joinDate ? new Date(u.joinDate).toLocaleDateString() : 'N/A'}</td>
-                        <td><button class="btn btn-primary edit-user-btn" data-id="${uid}">Edit</button></td>
-                    </tr>`;
-            });
-            tBody.innerHTML = tableHTML;
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+
+        // --- Page Data Logic ---
+        const pageLoader = {
+            dashboard: () => {
+                onValue(ref(db, 'users'), s => { const d = s.val() || {}; document.getElementById('total-users').innerText = Object.keys(d).length; document.getElementById('total-balance').innerText = Object.values(d).reduce((sum, u) => sum + (u.balance || 0), 0).toFixed(2); });
+                onValue(ref(db, 'withdrawals/pending'), s => document.getElementById('pending-withdrawals').innerText = s.exists() ? Object.keys(s.val()).length : 0);
+                onValue(ref(db, 'withdrawals/completed'), s => { const t = Object.values(s.val()||{}).filter(w => w.status === 'approved').reduce((sum, w) => sum + (w.amount || 0), 0); document.getElementById('total-withdrawn').innerText = t.toFixed(2); });
+            },
+            users: () => onValue(ref(db, 'users'), s => renderUsersTable(s.val() || {})),
+            withdrawals: () => {
+                onValue(ref(db, 'withdrawals/pending'), s => renderWithdrawalsTable('pending-withdrawals-table', s.val() || {}));
+                onValue(ref(db, 'withdrawals/completed'), s => renderWithdrawalsTable('completed-withdrawals-table', s.val() || {}));
+            },
+            settings: async () => {
+                const s = await get(ref(db, 'settings'));
+                if (s.exists()) { Object.entries(s.val()).forEach(([k, v]) => { if (document.getElementById(k)) document.getElementById(k).value = v; }); }
+            }
+        };
+        const loadPageData = (page) => pageLoader[page]?.();
+
+        // --- Users Page ---
+        let allUsersData = {};
+        function renderUsersTable(users) {
+            allUsersData = users;
+            const tBody = document.getElementById('users-table-body');
+            const userArray = Object.entries(users).map(([uid, data]) => ({ uid, ...data }));
+            userArray.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+            tBody.innerHTML = userArray.map(u => `
+                <tr data-uid="${u.uid}" data-search="${(u.name||'').toLowerCase()} ${u.uid.toLowerCase()}">
+                    <td>${u.name || 'N/A'}</td><td>${u.uid}</td>
+                    <td>${(u.balance || 0).toFixed(2)}</td><td>${u.referrals || 0}</td>
+                    <td><button class="btn btn-primary edit-user-btn" data-id="${u.uid}">Edit</button></td>
+                </tr>`).join('') || `<tr><td colspan="5">No users found.</td></tr>`;
         }
 
         document.getElementById('user-search').addEventListener('keyup', e => {
@@ -335,83 +249,131 @@
             });
         });
 
-        // --- Edit/Delete User Modal Logic ---
-        const modal = document.getElementById('edit-user-modal');
         document.getElementById('users-table-body').addEventListener('click', e => {
             if (e.target.classList.contains('edit-user-btn')) {
-                const uid = e.target.dataset.id;
-                const u = allUsersData[uid];
-                if(u){
-                    document.getElementById('edit-user-id').value = uid;
-                    document.getElementById('display-telegram-id').innerText = u.telegramId || uid;
+                const u = allUsersData[e.target.dataset.id];
+                if(u) {
+                    document.getElementById('edit-user-id').value = e.target.dataset.id;
+                    document.getElementById('display-user-id').innerText = e.target.dataset.id;
                     document.getElementById('display-join-date').innerText = u.joinDate ? new Date(u.joinDate).toLocaleString() : 'N/A';
                     document.getElementById('edit-user-name').value = u.name || '';
-                    document.getElementById('edit-user-mobile').value = u.mobile || '';
                     document.getElementById('edit-user-balance').value = u.balance || 0;
                     document.getElementById('edit-user-referrals').value = u.referrals || 0;
-                    document.getElementById('edit-total-clicks').value = u.totalClicks || 0;
-                    document.getElementById('edit-ads-watched').value = u.adsWatched || 0;
-                    modal.style.display = 'flex';
+                    ui.userModal.style.display = 'flex';
                 }
             }
         });
-
-        document.getElementById('close-modal').onclick = () => modal.style.display = 'none';
         
-        document.getElementById('edit-user-form').addEventListener('submit', e => {
+        document.getElementById('edit-user-modal').addEventListener('click', e => {
+            if (e.target.classList.contains('adjust-btn')) {
+                const field = document.getElementById(e.target.dataset.field);
+                const amount = parseFloat(e.target.dataset.amount);
+                field.value = (parseFloat(field.value) + amount).toFixed(field.step === '0.01' ? 2 : 0);
+            }
+        });
+
+        document.getElementById('edit-user-form').addEventListener('submit', async e => {
             e.preventDefault();
             const uid = document.getElementById('edit-user-id').value;
             const updates = {
                 name: document.getElementById('edit-user-name').value.trim(),
-                mobile: document.getElementById('edit-user-mobile').value.trim(),
                 balance: parseFloat(document.getElementById('edit-user-balance').value),
-                referrals: parseInt(document.getElementById('edit-user-referrals').value),
-                totalClicks: parseInt(document.getElementById('edit-total-clicks').value),
-                adsWatched: parseInt(document.getElementById('edit-ads-watched').value),
+                referrals: parseInt(document.getElementById('edit-user-referrals').value)
             };
-            update(ref(db, `users/${uid}`), updates).then(() => {
+            try {
+                await update(ref(db, `users/${uid}`), updates);
                 alert('User updated successfully!');
-                modal.style.display = 'none';
-            }).catch(err => alert('Error updating user: ' + err.message));
+                ui.userModal.style.display = 'none';
+            } catch (err) { alert('Error: ' + err.message); }
         });
-        
-        // --- Adjustment buttons logic ---
-        function setupAdjustmentButtons(type, addBtnId, subtractBtnId, amountInputId, mainInputId, isFloat = false) {
-            document.getElementById(addBtnId).addEventListener('click', () => {
-                const amount = (isFloat ? parseFloat : parseInt)(document.getElementById(amountInputId).value) || 0;
-                const mainInput = document.getElementById(mainInputId);
-                let currentValue = (isFloat ? parseFloat : parseInt)(mainInput.value) || 0;
-                mainInput.value = isFloat ? (currentValue + amount).toFixed(2) : currentValue + amount;
-            });
-            document.getElementById(subtractBtnId).addEventListener('click', () => {
-                const amount = (isFloat ? parseFloat : parseInt)(document.getElementById(amountInputId).value) || 0;
-                const mainInput = document.getElementById(mainInputId);
-                let currentValue = (isFloat ? parseFloat : parseInt)(mainInput.value) || 0;
-                mainInput.value = isFloat ? (currentValue - amount).toFixed(2) : currentValue - amount;
-            });
-        }
-        setupAdjustmentButtons('balance', 'add-balance-btn', 'subtract-balance-btn', 'balance-adjustment-amount', 'edit-user-balance', true);
-        setupAdjustmentButtons('referral', 'add-referral-btn', 'subtract-referral-btn', 'referral-adjustment-amount', 'edit-user-referrals', false);
 
-
-        document.getElementById('delete-user-btn').addEventListener('click', () => {
+        document.getElementById('delete-user-btn').addEventListener('click', async () => {
             const uid = document.getElementById('edit-user-id').value;
-            const userName = document.getElementById('edit-user-name').value;
-            if (confirm(`Are you sure you want to permanently delete user "${userName}"? This action cannot be undone.`)) {
-                remove(ref(db, `users/${uid}`)).then(() => {
-                    alert('User deleted successfully.');
-                    modal.style.display = 'none';
-                }).catch(err => alert('Error deleting user: ' + err.message));
+            if (confirm(`Are you sure you want to permanently delete user ${uid}? This cannot be undone.`)) {
+                try {
+                    await remove(ref(db, `users/${uid}`));
+                    alert('User deleted.');
+                    ui.userModal.style.display = 'none';
+                } catch (err) { alert('Error: ' + err.message); }
             }
         });
-        
-        function loadWithdrawals() { onValue(ref(db, 'withdrawals/pending'), s => { const t = document.getElementById('pending-withdrawals-table'); t.innerHTML = ''; if (s.exists()) { for (const id in s.val()) { const r = s.val()[id]; t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td><button class="btn btn-success" onclick="handleWithdrawal('${id}', 'approved')">Approve</button><button class="btn btn-danger" onclick="handleWithdrawal('${id}', 'rejected')">Reject</button></td></tr>`; } } else { t.innerHTML = '<tr><td colspan="5">No pending requests.</td></tr>'; } }); onValue(ref(db, 'withdrawals/completed'), s => { const t = document.getElementById('completed-withdrawals-table'); t.innerHTML = ''; if(s.exists()){ const history = Object.values(s.val()).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0)); history.forEach(r => { t.innerHTML += `<tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td><td style="color:${r.status==='approved'?'var(--success-color)':'var(--error-color)'}; text-transform: capitalize;">${r.status}</td></tr>`; }); } else { t.innerHTML = '<tr><td colspan="5">No history found.</td></tr>'; } }); }
-        window.handleWithdrawal = async (id, status) => { const reqRef = ref(db, `withdrawals/pending/${id}`); const s = await get(reqRef); if (!s.exists()) { alert('Request already processed.'); return; } const d = s.val(); d.status = status; d.timestamp = serverTimestamp(); await set(ref(db, `withdrawals/completed/${id}`), d); await remove(reqRef); if (status === 'rejected') { const userBalRef = ref(db, `users/${d.userId}/balance`); const userBal = (await get(userBalRef)).val() || 0; await set(userBalRef, userBal + d.amount); alert(`Request rejected. Amount ${d.amount} has been refunded to the user.`); } else { alert(`Request has been approved.`); } }
 
-        function loadSettings() { get(ref(db, 'settings')).then(s => { if(s.exists()) { const d = s.val(); for (const k in d) { if (document.getElementById(k)) document.getElementById(k).value = d[k]; } } }); }
-        document.getElementById('settings-form').addEventListener('submit', e => { e.preventDefault(); const settings = { minWithdrawAmount: parseInt(document.getElementById('minWithdrawAmount').value), minWithdrawReferrals: parseInt(document.getElementById('minWithdrawReferrals').value), adReward: parseFloat(document.getElementById('adReward').value), referralReward: parseFloat(document.getElementById('referralReward').value), marqueeText: document.getElementById('marqueeText').value, welcomeMessageTitle: document.getElementById('welcomeMessageTitle').value, welcomeMessageBody: document.getElementById('welcomeMessageBody').value, noticeContent: document.getElementById('noticeContent').value, tutorialLink: document.getElementById('tutorialLink').value, adminChatLink: document.getElementById('adminChatLink').value, adminCallLink: document.getElementById('adminCallLink').value, telegramChannelLink: document.getElementById('telegramChannelLink').value, youtubeChannelLink: document.getElementById('youtubeChannelLink').value, }; set(ref(db, 'settings'), settings).then(() => alert('Settings saved!')).catch(err => alert('Error: ' + err.message)); });
+        // --- Withdrawals Page ---
+        function renderWithdrawalsTable(tableId, data) {
+            const tBody = document.getElementById(tableId);
+            const isPending = tableId === 'pending-withdrawals-table';
+            const reqs = Object.entries(data).sort(([,a],[,b]) => (b.timestamp||0)-(a.timestamp||0));
+            tBody.innerHTML = reqs.map(([id, r]) => `
+                <tr><td>${r.userName||'N/A'}</td><td>${r.amount}</td><td>${r.method}</td><td>${r.accountNumber}</td>
+                <td>${isPending ? `<button class="btn btn-success" data-id="${id}" data-action="approved">Approve</button>
+                                  <button class="btn btn-danger" data-id="${id}" data-action="rejected">Reject</button>` 
+                                : `<span style="color:${r.status==='approved'?'var(--success-color)':'var(--error-color)'}">${r.status}</span>`}</td>
+                </tr>`).join('') || `<tr><td colspan="5">No requests found.</td></tr>`;
+        }
 
-        document.getElementById('broadcast-form').addEventListener('submit', e => { e.preventDefault(); const message = { text: document.getElementById('broadcast-message').value, imageUrl: document.getElementById('broadcast-image-url').value.trim() || null, timestamp: serverTimestamp() }; set(ref(db, 'broadcast/latestMessage'), message).then(() => { alert('Broadcast sent!'); e.target.reset(); }).catch(err => alert('Error: ' + err.message)); });
+        document.getElementById('pending-withdrawals-table').addEventListener('click', async e => {
+            if (e.target.tagName === 'BUTTON') {
+                const id = e.target.dataset.id;
+                const status = e.target.dataset.action;
+                const confirmation = confirm(`Are you sure you want to ${status} this withdrawal request?`);
+                if (!confirmation) return;
+                
+                const reqRef = ref(db, `withdrawals/pending/${id}`);
+                const snapshot = await get(reqRef);
+
+                if (!snapshot.exists()) {
+                    alert('Request already processed or does not exist.');
+                    return;
+                }
+                const reqData = snapshot.val();
+                reqData.status = status;
+                reqData.processedTimestamp = serverTimestamp();
+
+                try {
+                    await set(ref(db, `withdrawals/completed/${id}`), reqData);
+                    await remove(reqRef);
+
+                    if (status === 'rejected') {
+                        const userBalRef = ref(db, `users/${reqData.userId}/balance`);
+                        const userSnapshot = await get(userBalRef);
+                        const currentBalance = userSnapshot.val() || 0;
+                        await set(userBalRef, currentBalance + reqData.amount);
+                        alert(`Request rejected. Amount ${reqData.amount} refunded to user.`);
+                    } else {
+                        alert(`Request approved successfully.`);
+                    }
+                } catch (error) {
+                    alert('An error occurred: ' + error.message);
+                }
+            }
+        });
+
+        // --- Settings & Broadcast ---
+        document.getElementById('settings-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const settings = {};
+            new FormData(e.target).forEach((value, key) => settings[key] = isNaN(value) || value === '' ? value : Number(value));
+            const allInputs = e.target.querySelectorAll('input, textarea');
+            allInputs.forEach(input => settings[input.id] = isNaN(input.value) || input.value === '' ? input.value : Number(input.value));
+            try {
+                await set(ref(db, 'settings'), settings);
+                alert('Settings saved!');
+            } catch (err) { alert('Error: ' + err.message); }
+        });
+
+        document.getElementById('broadcast-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const message = {
+                text: document.getElementById('broadcast-message').value,
+                imageUrl: document.getElementById('broadcast-image-url').value.trim() || null,
+                timestamp: serverTimestamp()
+            };
+            try {
+                await set(ref(db, 'broadcast/latestMessage'), message);
+                alert('Broadcast sent!');
+                e.target.reset();
+            } catch(err) { alert('Error: ' + err.message); }
+        });
     </script>
 </body>
 </html>
