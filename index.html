@@ -94,7 +94,17 @@
     <main class="main-content" style="display: none;">
         <button id="menu-toggle" style="display: none;"><div class="bar"></div><div class="bar"></div><div class="bar"></div></button>
         <div id="page-dashboard" class="page active"><h2>Dashboard</h2><div class="dashboard-grid"><div class="card"><h3>Total Users</h3><p id="total-users">0</p></div><div class="card"><h3>Pending Withdrawals</h3><p id="pending-withdrawals">0</p></div><div class="card"><h3>Total Withdrawn (Taka)</h3><p id="total-withdrawn">0</p></div><div class="card"><h3>Total Balance (All Users)</h3><p id="total-balance">0</p></div></div></div>
-        <div id="page-users" class="page"><div class="table-container"><input type="text" id="user-search" class="form-control" placeholder="Search by Name or User ID..." style="margin-bottom: 20px;"><table><thead><tr><th>Name</th><th>User ID</th><th>Balance (TK)</th><th>Referrals</th><th>Actions</th></tr></thead><tbody id="users-table-body"></tbody></table></div></div>
+        <div id="page-users" class="page"><div class="table-container"><input type="text" id="user-search" class="form-control" placeholder="Search by Name or User ID..." style="margin-bottom: 20px;"><table>
+            <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Telegram ID</th> <!-- পরিবর্তন এখানে -->
+                            <th>Balance (TK)</th>
+                            <th>Referrals</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+            <tbody id="users-table-body"></tbody></table></div></div>
         <div id="page-withdrawals" class="page"><h2>Withdrawal Requests</h2><div class="table-container"><h3>Pending Requests</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Actions</th></tr></thead><tbody id="pending-withdrawals-table"></tbody></table></div><div class="table-container" style="margin-top:30px;"><h3>Completed/Rejected History</h3><table><thead><tr><th>User Name</th><th>Amount</th><th>Method</th><th>Number</th><th>Status</th></tr></thead><tbody id="completed-withdrawals-table"></tbody></table></div></div>
         <div id="page-settings" class="page"><h2>App Settings</h2><form id="settings-form"><div class="settings-section"><h3>Rewards & Limits</h3><div class="form-group"><label>Minimum Withdraw Amount</label><input type="number" id="minWithdrawAmount" class="form-control"></div><div class="form-group"><label>Minimum Referrals for Withdraw</label><input type="number" id="minWithdrawReferrals" class="form-control"></div><div class="form-group"><label>Reward per Ad Task (Taka)</label><input type="number" id="adReward" class="form-control" step="0.01"></div><div class="form-group"><label>Reward per Referral (Taka)</label><input type="number" id="referralReward" class="form-control" step="0.01"></div></div><div class="settings-section"><h3>Content & UI</h3>
             
@@ -240,14 +250,29 @@
             allUsersData = users;
             const tBody = document.getElementById('users-table-body');
             const userArray = Object.entries(users).map(([uid, data]) => ({ uid, ...data }));
+            
+            // ব্যালেন্স অনুযায়ী ব্যবহারকারীদের সাজানো হয়েছে
             userArray.sort((a, b) => (b.balance || 0) - (a.balance || 0));
-            tBody.innerHTML = userArray.map(u => `
-                <tr data-uid="${u.uid}" data-search="${(u.name||'').toLowerCase()} ${u.uid.toLowerCase()}">
-                    <td>${u.name || 'N/A'}</td><td>${u.uid}</td>
-                    <td>${(u.balance || 0).toFixed(2)}</td><td>${u.referrals || 0}</td>
+            
+            // টেবিলের কন্টেন্ট তৈরি করা হচ্ছে
+            tBody.innerHTML = userArray.map(u => {
+                // সার্চ করার জন্য এখন ইউজারের নাম এবং টেলিগ্রাম আইডি উভয়ই ব্যবহার করা হবে
+                const searchableString = `${(u.name || '').toLowerCase()} ${(u.telegramId || '').toString().toLowerCase()}`;
+                
+                return `
+                <tr data-uid="${u.uid}" data-search="${searchableString}">
+                    <td>${u.name || 'N/A'}</td>
+                    
+                    <!-- পরিবর্তিত লাইন: এখানে u.uid এর পরিবর্তে u.telegramId দেখানো হচ্ছে -->
+                    <td>${u.telegramId || 'N/A'}</td> 
+                    
+                    <td>${(u.balance || 0).toFixed(2)}</td>
+                    <td>${u.referrals || 0}</td>
                     <td><button class="btn btn-primary edit-user-btn" data-id="${u.uid}">Edit</button></td>
-                </tr>`).join('') || `<tr><td colspan="5">No users found.</td></tr>`;
+                </tr>`;
+            }).join('') || `<tr><td colspan="5" style="text-align: center;">No users found.</td></tr>`;
         }
+        
 
         document.getElementById('user-search').addEventListener('keyup', e => {
             const term = e.target.value.toLowerCase();
